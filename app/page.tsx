@@ -4,37 +4,52 @@ import { useEffect, useState } from "react";
 import { Profile, TripWorkspace } from "@/types";
 import WorkspaceView from "@/components/WorkspaceView";
 import ProfileEditor from "@/components/ProfileEditor";
+import AddProfileModal from "@/components/AddProfileModal";
 
 export default function Home() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [workspaces, setWorkspaces] = useState<TripWorkspace[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [showAddProfile, setShowAddProfile] = useState(false);
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [newTravelers, setNewTravelers] = useState<string[]>([]);
+  const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
+  const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
+  const [profilesOpen, setProfilesOpen] = useState(true);
 
   useEffect(() => {
-    fetch("/api/profile").then((r) => r.json()).then(setProfile);
+    fetch("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
+      setProfiles(ps);
+      if (ps.length > 0) setNewTravelers([ps[0].id]);
+    });
     fetch("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
       setWorkspaces(ws);
-      if (ws.length > 0) setActiveId(ws[0].id);
+      if (ws.length > 0) setActiveWorkspaceId(ws[0].id);
     });
   }, []);
 
-  const activeWorkspace = workspaces.find((w) => w.id === activeId) ?? null;
+  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) ?? null;
+  const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;
+
+  // Primary profile for the active workspace
+  const workspaceProfile = activeWorkspace
+    ? (profiles.find((p) => p.id === activeWorkspace.travelers[0]) ?? defaultProfile)
+    : defaultProfile;
 
   async function createWorkspace() {
     if (!newName.trim()) return;
+    const travelers = newTravelers.length > 0 ? newTravelers : [profiles[0]?.id].filter(Boolean);
     const res = await fetch("/api/workspaces", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName, destination: newDest }),
+      body: JSON.stringify({ name: newName, destination: newDest, travelers }),
     });
     const ws: TripWorkspace = await res.json();
     setWorkspaces((prev) => [ws, ...prev]);
-    setActiveId(ws.id);
+    setActiveWorkspaceId(ws.id);
     setShowNewWorkspace(false);
     setNewName("");
     setNewDest("");
@@ -44,15 +59,37 @@ export default function Home() {
     await fetch(`/api/workspaces/${id}`, { method: "DELETE" });
     const updated = workspaces.filter((w) => w.id !== id);
     setWorkspaces(updated);
-    if (activeId === id) setActiveId(updated[0]?.id ?? null);
-    setDeleteConfirmId(null);
+    if (activeWorkspaceId === id) setActiveWorkspaceId(updated[0]?.id ?? null);
+    setDeleteWorkspaceId(null);
+  }
+
+  async function deleteProfile(id: string) {
+    await fetch(`/api/profiles/${id}`, { method: "DELETE" });
+    setProfiles((prev) => prev.filter((p) => p.id !== id));
+    setDeleteProfileId(null);
   }
 
   function handleWorkspaceChange(updated: TripWorkspace) {
     setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
   }
 
-  if (!profile) {
+  function handleProfileSaved(updated: Profile) {
+    setProfiles((prev) => {
+      const idx = prev.findIndex((p) => p.id === updated.id);
+      if (idx >= 0) { const next = [...prev]; next[idx] = updated; return next; }
+      return [...prev, updated];
+    });
+    setEditingProfile(null);
+    setShowAddProfile(false);
+  }
+
+  function toggleTraveler(id: string) {
+    setNewTravelers((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  if (profiles.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-950 text-gray-400">
         Loading...
@@ -64,78 +101,126 @@ export default function Home() {
     <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden">
       {/* Sidebar */}
       <div className="w-56 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+        {/* App header */}
         <div className="px-4 py-4 border-b border-gray-800">
           <h1 className="text-sm font-semibold text-white">WanderWell</h1>
           <p className="text-xs text-gray-500 mt-0.5">Personal Travel Search</p>
         </div>
 
-        <div
-          className="mx-3 mt-3 flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-700 transition-colors"
-          onClick={() => setShowProfileEditor(true)}
-        >
-          <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
-            {profile.name[0]}
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-white truncate">{profile.name}</p>
-            <p className="text-xs text-gray-400">Type {profile.type}</p>
-          </div>
-          <span className="text-gray-500 text-xs ml-auto">⚙</span>
-        </div>
-
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <span className="text-xs text-gray-500 uppercase font-medium tracking-wide">Trips</span>
-          <button
-            className="text-gray-400 hover:text-white text-sm transition-colors"
-            onClick={() => setShowNewWorkspace(true)}
-            title="New Trip"
-          >
-            +
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-auto px-2">
-          {workspaces.length === 0 ? (
-            <p className="text-xs text-gray-600 px-2">No trips yet</p>
-          ) : (
-            workspaces.map((w) => (
-              <div
-                key={w.id}
-                className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
-                  w.id === activeId ? "bg-blue-900/40 text-blue-300" : "text-gray-400 hover:bg-gray-800"
-                }`}
-                onClick={() => setActiveId(w.id)}
-              >
-                <span className="text-sm">📁</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{w.name}</p>
-                  <p className="text-xs text-gray-600 truncate">{w.destination}</p>
-                </div>
-                <button
-                  className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmId(w.id);
-                  }}
+        <div className="flex-1 overflow-auto">
+          {/* Profiles section */}
+          <div className="mt-2">
+            <button
+              className="w-full flex items-center justify-between px-4 py-2 text-xs text-gray-500 uppercase font-medium tracking-wide hover:text-gray-300 transition-colors"
+              onClick={() => setProfilesOpen((o) => !o)}
+            >
+              <span>Travelers</span>
+              <span className="flex items-center gap-1">
+                <span
+                  className="text-gray-400 hover:text-white transition-colors"
+                  onClick={(e) => { e.stopPropagation(); setShowAddProfile(true); }}
+                  title="Add traveler"
                 >
-                  ×
-                </button>
+                  +
+                </span>
+                <span className="text-gray-600">{profilesOpen ? "▴" : "▾"}</span>
+              </span>
+            </button>
+
+            {profilesOpen && (
+              <div className="px-2 pb-2">
+                {profiles.map((p) => (
+                  <div
+                    key={p.id}
+                    className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
+                    onClick={() => setEditingProfile(p)}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                      {p.name[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-300 truncate">{p.name}</p>
+                      <p className="text-xs text-gray-600">Type {p.enneagramType}</p>
+                    </div>
+                    {!p.isDefault && (
+                      <button
+                        className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
+                        onClick={(e) => { e.stopPropagation(); setDeleteProfileId(p.id); }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))
-          )}
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-800 mx-4" />
+
+          {/* Trips section */}
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <span className="text-xs text-gray-500 uppercase font-medium tracking-wide">Trips</span>
+            <button
+              className="text-gray-400 hover:text-white text-sm transition-colors"
+              onClick={() => setShowNewWorkspace(true)}
+              title="New Trip"
+            >
+              +
+            </button>
+          </div>
+
+          <div className="px-2">
+            {workspaces.length === 0 ? (
+              <p className="text-xs text-gray-600 px-2 py-1">No trips yet</p>
+            ) : (
+              workspaces.map((w) => {
+                const primaryProfile = profiles.find((p) => p.id === w.travelers[0]);
+                const extraCount = w.travelers.length - 1;
+                return (
+                  <div
+                    key={w.id}
+                    className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
+                      w.id === activeWorkspaceId
+                        ? "bg-blue-900/40 text-blue-300"
+                        : "text-gray-400 hover:bg-gray-800"
+                    }`}
+                    onClick={() => setActiveWorkspaceId(w.id)}
+                  >
+                    <span className="text-sm">📁</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{w.name}</p>
+                      <p className="text-xs text-gray-600 truncate">
+                        {primaryProfile?.name ?? ""}
+                        {extraCount > 0 ? ` +${extraCount}` : ""}
+                        {w.destination ? ` · ${w.destination}` : ""}
+                      </p>
+                    </div>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 text-xs transition-all"
+                      onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
         <div className="px-4 py-3 border-t border-gray-800">
-          <p className="text-xs text-gray-600">v1.0</p>
+          <p className="text-xs text-gray-600">v1.1</p>
         </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
-        {activeWorkspace ? (
+        {activeWorkspace && workspaceProfile ? (
           <WorkspaceView
             workspace={activeWorkspace}
-            profileWeights={profile.axisWeights}
+            profileWeights={workspaceProfile.axisWeights}
             onChange={handleWorkspaceChange}
           />
         ) : (
@@ -153,6 +238,7 @@ export default function Home() {
         )}
       </div>
 
+      {/* New workspace modal */}
       {showNewWorkspace && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-sm p-6">
@@ -179,6 +265,30 @@ export default function Home() {
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
                 />
               </div>
+              {profiles.length > 1 && (
+                <div>
+                  <label className="text-gray-500 text-xs uppercase block mb-2">Traveling With</label>
+                  <div className="flex flex-wrap gap-2">
+                    {profiles.map((p) => (
+                      <button
+                        key={p.id}
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-colors ${
+                          newTravelers.includes(p.id)
+                            ? "border-blue-500 bg-blue-900/30 text-blue-300"
+                            : "border-gray-700 text-gray-400 hover:border-gray-500"
+                        }`}
+                        onClick={() => toggleTraveler(p.id)}
+                      >
+                        <span className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white">
+                          {p.name[0]}
+                        </span>
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-gray-600 text-xs mt-1">Results scored against first selected traveler</p>
+                </div>
+              )}
             </div>
             <div className="flex gap-2 justify-end mt-4">
               <button
@@ -199,40 +309,52 @@ export default function Home() {
         </div>
       )}
 
-      {deleteConfirmId && (
+      {/* Delete workspace confirm */}
+      {deleteWorkspaceId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-sm p-6">
             <h2 className="text-lg font-semibold text-white mb-2">Delete Trip?</h2>
             <p className="text-gray-400 text-sm mb-4">
-              This will permanently delete &quot;{workspaces.find((w) => w.id === deleteConfirmId)?.name}&quot;
-              and all its searches.
+              This will permanently delete &quot;{workspaces.find((w) => w.id === deleteWorkspaceId)?.name}&quot; and all its searches.
             </p>
             <div className="flex gap-2 justify-end">
-              <button
-                className="px-4 py-2 text-sm rounded bg-gray-700 text-gray-200 hover:bg-gray-600"
-                onClick={() => setDeleteConfirmId(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-500"
-                onClick={() => deleteWorkspace(deleteConfirmId)}
-              >
-                Delete
-              </button>
+              <button className="px-4 py-2 text-sm rounded bg-gray-700 text-gray-200 hover:bg-gray-600" onClick={() => setDeleteWorkspaceId(null)}>Cancel</button>
+              <button className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-500" onClick={() => deleteWorkspace(deleteWorkspaceId)}>Delete</button>
             </div>
           </div>
         </div>
       )}
 
-      {showProfileEditor && (
+      {/* Delete profile confirm */}
+      {deleteProfileId && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold text-white mb-2">Remove Traveler?</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Remove &quot;{profiles.find((p) => p.id === deleteProfileId)?.name}&quot; from your profiles?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button className="px-4 py-2 text-sm rounded bg-gray-700 text-gray-200 hover:bg-gray-600" onClick={() => setDeleteProfileId(null)}>Cancel</button>
+              <button className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-500" onClick={() => deleteProfile(deleteProfileId)}>Remove</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile editor */}
+      {editingProfile && (
         <ProfileEditor
-          profile={profile}
-          onSave={(p) => {
-            setProfile(p);
-            setShowProfileEditor(false);
-          }}
-          onClose={() => setShowProfileEditor(false)}
+          profile={editingProfile}
+          onSave={handleProfileSaved}
+          onClose={() => setEditingProfile(null)}
+        />
+      )}
+
+      {/* Add profile modal */}
+      {showAddProfile && (
+        <AddProfileModal
+          onSave={handleProfileSaved}
+          onClose={() => setShowAddProfile(false)}
         />
       )}
     </div>

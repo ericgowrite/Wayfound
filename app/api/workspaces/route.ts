@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getWorkspaces, saveWorkspace } from "@/lib/storage";
+import { getWorkspaces, saveWorkspace, getProfile } from "@/lib/storage";
 import { TripWorkspace } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       name: body.name,
       destination: body.destination || "",
       dates: body.dates,
-      travelers: ["eric-9w8"],
+      travelers: body.travelers?.length ? body.travelers : [getProfile().id],
       searches: [],
       savedOptions: [],
       notes: "",

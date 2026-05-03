@@ -1,0 +1,191 @@
+[
+  {
+    "type": "1",
+    "description": "The Reformer — principled, purposeful, self-controlled",
+    "axisWeights": { "calm": 0.60, "designSincerity": 0.85, "valueIntegrity": 0.90, "socialPermeability": 0.60, "autonomy": 0.70, "novelty": 0.60, "locationFriction": 0.60 },
+    "thresholds": { "valueIntegrity": 0.65 },
+    "dealbreakers": ["Sloppy or disorganized experiences", "Poor value for money", "Chaotic itineraries with no logic"]
+  },
+  {
+    "type": "1w9",
+    "description": "The Idealist — introverted perfectionist seeking inner peace",
+    "axisWeights": { "calm": 0.70, "designSincerity": 0.85, "valueIntegrity": 0.90, "socialPermeability": 0.70, "autonomy": 0.65, "novelty": 0.60, "locationFriction": 0.60 },
+    "thresholds": { "calm": 0.50, "valueIntegrity": 0.60 },
+    "dealbreakers": ["Chaotic or loud environments", "Performative experiences without substance", "Poor value for money"]
+  },
+  {
+    "type": "1w2",
+    "description": "The Advocate — principled helper driven to serve and improve",
+    "axisWeights": { "calm": 0.60, "designSincerity": 0.80, "valueIntegrity": 0.90, "socialPermeability": 0.45, "autonomy": 0.70, "novelty": 0.60, "locationFriction": 0.70 },
+    "thresholds": { "valueIntegrity": 0.65 },
+    "dealbreakers": ["Experiences that feel wasteful or irresponsible", "Forced social situations", "Hidden costs or poor transparency"]
+  },
+  {
+    "type": "2",
+    "description": "The Helper — caring, interpersonal, people-focused",
+    "axisWeights": { "calm": 0.50, "designSincerity": 0.70, "valueIntegrity": 0.70, "socialPermeability": 0.20, "autonomy": 0.50, "novelty": 0.50, "locationFriction": 0.70 },
+    "thresholds": {},
+    "dealbreakers": ["Isolating or unfriendly environments", "No opportunity for genuine connection"]
+  },
+  {
+    "type": "2w1",
+    "description": "The Servant — principled nurturer with high personal standards",
+    "axisWeights": { "calm": 0.50, "designSincerity": 0.80, "valueIntegrity": 0.80, "socialPermeability": 0.20, "autonomy": 0.60, "novelty": 0.50, "locationFriction": 0.70 },
+    "thresholds": { "valueIntegrity": 0.55 },
+    "dealbreakers": ["Wasteful or unethical travel experiences", "Cold or impersonal service"]
+  },
+  {
+    "type": "2w3",
+    "description": "The Host — ambitious helper who thrives in vibrant social settings",
+    "axisWeights": { "calm": 0.40, "designSincerity": 0.70, "valueIntegrity": 0.70, "socialPermeability": 0.15, "autonomy": 0.50, "novelty": 0.50, "locationFriction": 0.75 },
+    "thresholds": {},
+    "dealbreakers": ["Anti-social or overly quiet destinations", "No opportunities to connect with locals or other travelers"]
+  },
+  {
+    "type": "3",
+    "description": "The Achiever — adaptive, excelling, driven by success and image",
+    "axisWeights": { "calm": 0.30, "designSincerity": 0.60, "valueIntegrity": 0.60, "socialPermeability": 0.30, "autonomy": 0.70, "novelty": 0.40, "locationFriction": 0.80 },
+    "thresholds": { "locationFriction": 0.50 },
+    "dealbreakers": ["Wasting time on inefficient logistics", "Experiences that feel amateur or low-status"]
+  },
+  {
+    "type": "3w2",
+    "description": "The Charmer — driven achiever with natural social charisma",
+    "axisWeights": { "calm": 0.30, "designSincerity": 0.65, "valueIntegrity": 0.60, "socialPermeability": 0.20, "autonomy": 0.70, "novelty": 0.40, "locationFriction": 0.80 },
+    "thresholds": { "locationFriction": 0.50 },
+    "dealbreakers": ["Unfriendly or cold environments", "Inaccessible or time-wasting logistics"]
+  },
+  {
+    "type": "3w4",
+    "description": "The Professional — ambitious individualist with creative depth",
+    "axisWeights": { "calm": 0.40, "designSincerity": 0.75, "valueIntegrity": 0.60, "socialPermeability": 0.40, "autonomy": 0.70, "novelty": 0.40, "locationFriction": 0.80 },
+    "thresholds": { "designSincerity": 0.50 },
+    "dealbreakers": ["Generic tourist experiences", "No opportunity for unique or meaningful moments"]
+  },
+  {
+    "type": "4",
+    "description": "The Individualist — expressive, authentic, in search of identity",
+    "axisWeights": { "calm": 0.70, "designSincerity": 0.95, "valueIntegrity": 0.80, "socialPermeability": 0.80, "autonomy": 0.90, "novelty": 0.20, "locationFriction": 0.30 },
+    "thresholds": { "designSincerity": 0.70 },
+    "dealbreakers": ["Tourist traps or inauthentic experiences", "Forced group dynamics", "Generic chain hotels or restaurants"]
+  },
+  {
+    "type": "4w3",
+    "description": "The Aristocrat — creative achiever with flair and expressive ambition",
+    "axisWeights": { "calm": 0.60, "designSincerity": 0.95, "valueIntegrity": 0.80, "socialPermeability": 0.70, "autonomy": 0.90, "novelty": 0.20, "locationFriction": 0.40 },
+    "thresholds": { "designSincerity": 0.65 },
+    "dealbreakers": ["Mediocre or generic aesthetics", "No opportunity for self-expression"]
+  },
+  {
+    "type": "4w5",
+    "description": "The Bohemian — introspective artist seeking depth and solitude",
+    "axisWeights": { "calm": 0.80, "designSincerity": 0.95, "valueIntegrity": 0.80, "socialPermeability": 0.85, "autonomy": 0.90, "novelty": 0.15, "locationFriction": 0.30 },
+    "thresholds": { "calm": 0.55, "designSincerity": 0.70 },
+    "dealbreakers": ["Crowded or overly social environments", "Touristy or surface-level experiences", "Noise and chaos"]
+  },
+  {
+    "type": "5",
+    "description": "The Investigator — perceptive, analytical, values privacy and knowledge",
+    "axisWeights": { "calm": 0.80, "designSincerity": 0.85, "valueIntegrity": 0.85, "socialPermeability": 0.90, "autonomy": 0.90, "novelty": 0.30, "locationFriction": 0.40 },
+    "thresholds": { "calm": 0.55, "socialPermeability": 0.55 },
+    "dealbreakers": ["Forced social interactions", "Crowded or overstimulating environments", "Group tours with no alone time"]
+  },
+  {
+    "type": "5w4",
+    "description": "The Iconoclast — intellectual with creative and aesthetic sensibility",
+    "axisWeights": { "calm": 0.75, "designSincerity": 0.90, "valueIntegrity": 0.85, "socialPermeability": 0.90, "autonomy": 0.90, "novelty": 0.25, "locationFriction": 0.40 },
+    "thresholds": { "calm": 0.50, "designSincerity": 0.60 },
+    "dealbreakers": ["Mainstream or uncultured destinations", "Overly social environments", "No depth or intellectual stimulation"]
+  },
+  {
+    "type": "5w6",
+    "description": "The Problem Solver — analytical thinker who values security and preparation",
+    "axisWeights": { "calm": 0.80, "designSincerity": 0.85, "valueIntegrity": 0.85, "socialPermeability": 0.90, "autonomy": 0.80, "novelty": 0.40, "locationFriction": 0.55 },
+    "thresholds": { "calm": 0.55, "locationFriction": 0.40 },
+    "dealbreakers": ["Unsafe or unreliable destinations", "Poor planning or logistical chaos", "Forced social interaction"]
+  },
+  {
+    "type": "6",
+    "description": "The Loyalist — responsible, security-oriented, values trust and preparation",
+    "axisWeights": { "calm": 0.75, "designSincerity": 0.75, "valueIntegrity": 0.85, "socialPermeability": 0.50, "autonomy": 0.40, "novelty": 0.70, "locationFriction": 0.80 },
+    "thresholds": { "locationFriction": 0.55, "valueIntegrity": 0.60 },
+    "dealbreakers": ["Unpredictable or unsafe conditions", "Hidden costs", "No fallback options or escape routes"]
+  },
+  {
+    "type": "6w5",
+    "description": "The Defender — cautious intellectual who values privacy and safety",
+    "axisWeights": { "calm": 0.85, "designSincerity": 0.75, "valueIntegrity": 0.85, "socialPermeability": 0.65, "autonomy": 0.50, "novelty": 0.70, "locationFriction": 0.80 },
+    "thresholds": { "calm": 0.55, "locationFriction": 0.55 },
+    "dealbreakers": ["Unsafe or unstable destinations", "Forced social exposure", "Logistical unpredictability"]
+  },
+  {
+    "type": "6w7",
+    "description": "The Buddy — anxious optimist who seeks fun within safe structures",
+    "axisWeights": { "calm": 0.60, "designSincerity": 0.75, "valueIntegrity": 0.85, "socialPermeability": 0.50, "autonomy": 0.40, "novelty": 0.55, "locationFriction": 0.70 },
+    "thresholds": { "locationFriction": 0.50 },
+    "dealbreakers": ["Dangerous or unreliable situations", "Hidden costs", "No flexibility or backup plans"]
+  },
+  {
+    "type": "7",
+    "description": "The Enthusiast — spontaneous, versatile, driven by variety and experience",
+    "axisWeights": { "calm": 0.10, "designSincerity": 0.50, "valueIntegrity": 0.50, "socialPermeability": 0.20, "autonomy": 0.80, "novelty": 0.10, "locationFriction": 0.20 },
+    "thresholds": {},
+    "dealbreakers": ["Boring or repetitive itineraries", "Being stuck in one place too long", "Rigid schedules with no spontaneity"]
+  },
+  {
+    "type": "7w6",
+    "description": "The Entertainer — adventurous optimist with a responsible streak",
+    "axisWeights": { "calm": 0.25, "designSincerity": 0.50, "valueIntegrity": 0.50, "socialPermeability": 0.20, "autonomy": 0.80, "novelty": 0.20, "locationFriction": 0.35 },
+    "thresholds": {},
+    "dealbreakers": ["Boring or predictable plans", "Being locked in with no flexibility"]
+  },
+  {
+    "type": "7w8",
+    "description": "The Realist — bold hedonist who pursues experiences with directness and intensity",
+    "axisWeights": { "calm": 0.10, "designSincerity": 0.65, "valueIntegrity": 0.50, "socialPermeability": 0.30, "autonomy": 0.85, "novelty": 0.10, "locationFriction": 0.20 },
+    "thresholds": {},
+    "dealbreakers": ["Weak or watered-down experiences", "Being told what to do", "Slow or unenergetic environments"]
+  },
+  {
+    "type": "8",
+    "description": "The Challenger — self-confident, decisive, direct, and bold",
+    "axisWeights": { "calm": 0.20, "designSincerity": 0.85, "valueIntegrity": 0.80, "socialPermeability": 0.40, "autonomy": 0.90, "novelty": 0.30, "locationFriction": 0.30 },
+    "thresholds": { "designSincerity": 0.55, "valueIntegrity": 0.55 },
+    "dealbreakers": ["Weak or pretentious experiences", "Being micromanaged or over-guided", "Performative luxury without substance"]
+  },
+  {
+    "type": "8w7",
+    "description": "The Maverick — bold adventurer who lives large and moves fast",
+    "axisWeights": { "calm": 0.15, "designSincerity": 0.85, "valueIntegrity": 0.80, "socialPermeability": 0.30, "autonomy": 0.90, "novelty": 0.20, "locationFriction": 0.30 },
+    "thresholds": { "valueIntegrity": 0.50 },
+    "dealbreakers": ["Boring or slow-paced experiences", "Over-structured itineraries", "Pretentious without substance"]
+  },
+  {
+    "type": "8w9",
+    "description": "The Bear — powerful and protective with unexpected patience",
+    "axisWeights": { "calm": 0.40, "designSincerity": 0.85, "valueIntegrity": 0.80, "socialPermeability": 0.50, "autonomy": 0.90, "novelty": 0.30, "locationFriction": 0.30 },
+    "thresholds": { "designSincerity": 0.55 },
+    "dealbreakers": ["Fake or performative experiences", "Lack of control over the itinerary"]
+  },
+  {
+    "type": "9",
+    "description": "The Peacemaker — receptive, reassuring, harmonious and easy-going",
+    "axisWeights": { "calm": 0.85, "designSincerity": 0.80, "valueIntegrity": 0.85, "socialPermeability": 0.65, "autonomy": 0.65, "novelty": 0.50, "locationFriction": 0.55 },
+    "thresholds": { "calm": 0.50 },
+    "dealbreakers": ["High-conflict or tense environments", "Rushed or overscheduled itineraries", "Forced decision-making under pressure"]
+  },
+  {
+    "type": "9w8",
+    "description": "The Referee — easy-going peacemaker with a direct, assertive inner core",
+    "axisWeights": { "calm": 0.75, "designSincerity": 0.80, "valueIntegrity": 0.85, "socialPermeability": 0.65, "autonomy": 0.75, "novelty": 0.50, "locationFriction": 0.45 },
+    "thresholds": { "calm": 0.50, "valueIntegrity": 0.60 },
+    "dealbreakers": ["Feeling rushed or overscheduled", "Performative luxury that's just expensive", "Nickel-and-diming or hidden costs", "Forced group dynamics with no escape"]
+  },
+  {
+    "type": "9w1",
+    "description": "The Dreamer — peaceful idealist seeking harmony, meaning, and order",
+    "axisWeights": { "calm": 0.85, "designSincerity": 0.85, "valueIntegrity": 0.90, "socialPermeability": 0.65, "autonomy": 0.65, "novelty": 0.60, "locationFriction": 0.55 },
+    "thresholds": { "calm": 0.55, "valueIntegrity": 0.65 },
+    "dealbreakers": ["Chaotic or disorderly environments", "Experiences that feel dishonest or inauthentic", "Poor value for money"]
+  }
+]

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getProfile, saveProfile } from "@/lib/storage";
+import { getProfile, saveProfileToList } from "@/lib/storage";
 
+// Legacy single-profile endpoint — returns the default profile
 export async function GET() {
   try {
-    const profile = getProfile();
-    return NextResponse.json(profile);
+    return NextResponse.json(getProfile());
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
@@ -13,7 +13,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const profile = await request.json();
-    saveProfile(profile);
+    saveProfileToList(profile);
     return NextResponse.json(profile);
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

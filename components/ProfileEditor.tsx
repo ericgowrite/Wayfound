@@ -40,7 +40,7 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
-      const res = await fetch("/api/profile", {
+      const res = await fetch(`/api/profiles/${draft.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
@@ -56,7 +56,7 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-auto">
         <div className="flex justify-between items-center p-4 border-b border-gray-700 sticky top-0 bg-gray-900">
-          <h2 className="text-lg font-semibold text-white">Profile: {draft.name} ({draft.type})</h2>
+          <h2 className="text-lg font-semibold text-white">Profile: {draft.name} ({draft.enneagramType})</h2>
           <button className="text-gray-400 hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
 

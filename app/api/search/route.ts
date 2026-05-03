@@ -8,9 +8,10 @@ export async function POST(request: Request) {
   try {
     const { workspaceId, query, category } = await request.json();
 
-    const profile = getProfile();
     const workspace = getWorkspace(workspaceId);
     if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    // Use primary traveler's profile (first in list), fall back to default
+    const profile = getProfile(workspace.travelers[0]);
 
     const searchId = uuidv4();
     const scoredResults = await searchAndScore(

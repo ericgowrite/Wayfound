@@ -1,8 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { Profile, RawResult, ScoredOption, SearchCategory } from "@/types";
+import { Profile, ScoredOption, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getClient() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 const SEARCH_SYSTEM_PROMPT = `You are a travel recommendation engine that performs two tasks in one call:
 1. Web search: Find real travel options matching the query
@@ -61,7 +63,7 @@ Axis scoring guide:
 Profile thresholds: if calm < ${profile.thresholds.calm ?? "N/A"} or valueIntegrity < ${profile.thresholds.valueIntegrity ?? "N/A"}, list in thresholdViolations.
 Dealbreakers: ${profile.dealbreakers.join("; ")}`;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 8096,
     tools: [
@@ -106,7 +108,7 @@ export async function generateComparison(
   options: ScoredOption[],
   profile: Profile
 ): Promise<string> {
-  const prompt = `Compare these ${options.length} travel options for ${profile.name} (Type ${profile.type}):
+  const prompt = `Compare these ${options.length} travel options for ${profile.name} (Type ${profile.enneagramType}):
 
 ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
 - Alignment: ${o.alignmentScore}%
@@ -117,7 +119,7 @@ ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
 Write a 3-4 sentence comparison summary focusing on which option best fits Eric's profile and why.
 Highlight the key differentiators. Be direct and specific.`;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 512,
     messages: [{ role: "user", content: prompt }],
@@ -130,7 +132,7 @@ export async function generateDeepDive(
   option: ScoredOption,
   profile: Profile
 ): Promise<string> {
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 1024,
     tools: [
@@ -143,12 +145,12 @@ export async function generateDeepDive(
     messages: [
       {
         role: "user",
-        content: `Do a deep dive on "${option.name}" for ${profile.name} (Type ${profile.type}).
+        content: `Do a deep dive on "${option.name}" for ${profile.name} (Type ${profile.enneagramType}).
 
 Search for more detailed information, recent reviews, and specific details.
 Then write a detailed 4-6 sentence analysis of whether this is a good fit, including:
 - What makes it unique
-- Specific pros/cons for a Type ${profile.type} traveler
+- Specific pros/cons for a Type ${profile.enneagramType} traveler
 - Any red flags or standout features
 - Overall recommendation
 

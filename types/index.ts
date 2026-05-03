@@ -8,15 +8,27 @@ export interface AxisWeights {
   locationFriction: number;
 }
 
-export interface Profile {
-  id: string;
-  name: string;
+export interface ProfileTemplate {
   type: string;
   description: string;
   axisWeights: AxisWeights;
   thresholds: Partial<AxisWeights>;
   dealbreakers: string[];
 }
+
+export interface Profile {
+  id: string;
+  name: string;
+  enneagramType: string;
+  description: string;
+  axisWeights: AxisWeights;
+  thresholds: Partial<AxisWeights>;
+  dealbreakers: string[];
+  isDefault?: boolean;
+}
+
+// Legacy alias used in older API call sites
+export type UserProfile = Profile;
 
 export interface TripWorkspace {
   id: string;
