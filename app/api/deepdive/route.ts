@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProfile } from "@/lib/storage";
-import { generateDeepDive } from "@/lib/claude";
+import { generateDeepDive } from "@/lib/gemini";
 import { ScoredOption } from "@/types";
 
 export async function POST(request: Request) {

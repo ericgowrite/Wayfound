@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
-import { searchMoreOptions } from "@/lib/claude";
+import { searchMoreOptions } from "@/lib/gemini";
 import { combineProfiles } from "@/lib/scoring";
 
 export async function POST(request: Request) {

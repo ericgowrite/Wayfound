@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProfile, getWorkspace, saveWorkspace } from "@/lib/storage";
-import { scoreSpecific } from "@/lib/claude";
+import { scoreSpecific } from "@/lib/gemini";
 import { Search, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
