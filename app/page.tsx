@@ -79,6 +79,10 @@ export default function Home() {
     setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
   }
 
+  function handleProfileUpdate(updated: Profile) {
+    setProfiles((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+  }
+
   function handleProfileSaved(updated: Profile) {
     setProfiles((prev) => {
       const idx = prev.findIndex((p) => p.id === updated.id);
@@ -239,6 +243,7 @@ export default function Home() {
             workspace={activeWorkspace}
             travelers={travelerProfiles}
             onChange={handleWorkspaceChange}
+            onProfileUpdate={handleProfileUpdate}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">

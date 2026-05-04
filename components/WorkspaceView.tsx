@@ -10,13 +10,24 @@ import {
   SearchCategory,
 } from "@/types";
 import { sortByAlignment, sortByGroupFit } from "@/lib/scoring";
+import {
+  trackSave,
+  trackReject,
+  shouldTriggerCalibration,
+  markCalibrationShown,
+  analyzeCalibration,
+  logCalibrationEvent,
+  CalibrationSuggestion,
+} from "@/lib/calibration";
 import ResultCard from "./ResultCard";
 import ComparisonView from "./ComparisonView";
+import CalibrationPrompt from "./CalibrationPrompt";
 
 interface Props {
   workspace: TripWorkspace;
   travelers: Profile[];
   onChange: (w: TripWorkspace) => void;
+  onProfileUpdate: (profile: Profile) => void;
 }
 
 const CATEGORIES: SearchCategory[] = [
@@ -29,7 +40,7 @@ const CATEGORIES: SearchCategory[] = [
 
 type SortMode = "fit" | "group";
 
-export default function WorkspaceView({ workspace, travelers, onChange }: Props) {
+export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate }: Props) {
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
 
@@ -48,6 +59,7 @@ export default function WorkspaceView({ workspace, travelers, onChange }: Props)
   const [activeSearchId, setActiveSearchId] = useState<string | null>(
     workspace.searches[0]?.id ?? null
   );
+  const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
 
   const activeSearch = workspace.searches.find((s) => s.id === activeSearchId) ?? null;
 
@@ -162,6 +174,15 @@ export default function WorkspaceView({ workspace, travelers, onChange }: Props)
           ],
         };
     updateWorkspace(updated);
+
+    if (!alreadySaved && primaryProfile) {
+      trackSave(option, primaryProfile.id);
+      if (shouldTriggerCalibration(primaryProfile.id)) {
+        markCalibrationShown(primaryProfile.id);
+        const suggestions = analyzeCalibration(primaryProfile);
+        if (suggestions.length > 0) setPendingCalibration(suggestions);
+      }
+    }
   }
 
   function handleStatusChange(searchId: string, optionId: string, status: ScoredOption["status"]) {
@@ -174,6 +195,13 @@ export default function WorkspaceView({ workspace, travelers, onChange }: Props)
       ),
       savedOptions: workspace.savedOptions.map((o) => (o.id === optionId ? { ...o, status } : o)),
     });
+
+    if (status === "rejected" && primaryProfile) {
+      const option =
+        workspace.searches.find((s) => s.id === searchId)?.scoredResults.find((o) => o.id === optionId) ??
+        workspace.savedOptions.find((o) => o.id === optionId);
+      if (option) trackReject(option, primaryProfile.id);
+    }
   }
 
   function handleNotesChange(searchId: string, optionId: string, notes: string) {
@@ -186,6 +214,41 @@ export default function WorkspaceView({ workspace, travelers, onChange }: Props)
       ),
       savedOptions: workspace.savedOptions.map((o) => (o.id === optionId ? { ...o, notes } : o)),
     });
+  }
+
+  async function handleCalibrationAccept(newWeights: import("@/types").AxisWeights) {
+    if (!primaryProfile || !pendingCalibration) return;
+    const res = await fetch(`/api/profiles/${primaryProfile.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...primaryProfile, axisWeights: newWeights }),
+    });
+    const saved = await res.json();
+    logCalibrationEvent({
+      timestamp: new Date().toISOString(),
+      profileId: primaryProfile.id,
+      savesCount: 0,
+      suggestions: pendingCalibration,
+      accepted: true,
+      previousWeights: primaryProfile.axisWeights,
+      newWeights,
+    });
+    onProfileUpdate(saved);
+    setPendingCalibration(null);
+  }
+
+  function handleCalibrationDismiss() {
+    if (!primaryProfile || !pendingCalibration) return;
+    logCalibrationEvent({
+      timestamp: new Date().toISOString(),
+      profileId: primaryProfile.id,
+      savesCount: 0,
+      suggestions: pendingCalibration,
+      accepted: false,
+      previousWeights: primaryProfile.axisWeights,
+      newWeights: null,
+    });
+    setPendingCalibration(null);
   }
 
   function toggleSelect(id: string) {
@@ -550,6 +613,16 @@ export default function WorkspaceView({ workspace, travelers, onChange }: Props)
           options={selectedOptions}
           profileWeights={profileWeights}
           onClose={() => setShowComparison(false)}
+        />
+      )}
+
+      {pendingCalibration && primaryProfile && (
+        <CalibrationPrompt
+          profile={primaryProfile}
+          suggestions={pendingCalibration}
+          savesCount={pendingCalibration.length}
+          onAccept={handleCalibrationAccept}
+          onDismiss={handleCalibrationDismiss}
         />
       )}
     </div>
