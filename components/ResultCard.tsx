@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights } from "@/types";
+import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights } from "@/types";
 import AxisBar from "./AxisBar";
 
 interface Props {
   option: ScoredOption;
   workspace: TripWorkspace;
-  profileWeights: AxisWeights;
+  travelers: Profile[];
+  profileWeights: AxisWeights | undefined;
   isSelected: boolean;
   onToggleSelect: () => void;
   onSave: () => void;
@@ -16,9 +17,18 @@ interface Props {
   onDeepDive: () => void;
 }
 
+const AVATAR_COLORS = [
+  "bg-blue-600",
+  "bg-violet-600",
+  "bg-emerald-600",
+  "bg-amber-600",
+  "bg-rose-600",
+];
+
 export default function ResultCard({
   option,
   workspace,
+  travelers,
   profileWeights,
   isSelected,
   onToggleSelect,
@@ -46,9 +56,9 @@ export default function ResultCard({
     option.dealbreakersTriggered.length > 0
       ? "border-red-400 dark:border-red-700"
       : score >= 80
-      ? "border-green-500 dark:border-green-800"
+      ? "border-green-400 dark:border-green-800"
       : score >= 60
-      ? "border-yellow-500 dark:border-yellow-800"
+      ? "border-yellow-400 dark:border-yellow-800"
       : "border-gray-300 dark:border-gray-700";
 
   const statusEmoji: Record<ScoredOption["status"], string> = {
@@ -74,69 +84,91 @@ export default function ResultCard({
     onDeepDive();
   }
 
-  function handleNotesBlur() {
-    onNotesChange(notes);
-  }
+  // Group fit summary badge
+  const hasMultipleTravelers = travelers.length > 1;
+  const travelerScoreValues = hasMultipleTravelers
+    ? travelers.map((t) => option.travelerScores?.[t.id]?.alignmentScore ?? option.alignmentScore)
+    : [];
+  const groupMin = hasMultipleTravelers ? Math.min(...travelerScoreValues) : null;
 
   return (
-    <div className={`border rounded-lg bg-white dark:bg-gray-900 ${borderColor} transition-all`}>
-      {/* Header row */}
+    <div className={`border rounded-xl bg-white dark:bg-gray-900 ${borderColor} transition-all`}>
+      {/* Header */}
       <div
-        className="flex items-start gap-3 p-4 cursor-pointer"
+        className="flex items-start gap-3 p-4 cursor-pointer select-none"
         onClick={() => setExpanded(!expanded)}
       >
         <input
           type="checkbox"
-          className="mt-1 accent-blue-500 cursor-pointer"
+          className="mt-1 accent-blue-500 cursor-pointer flex-shrink-0"
           checked={isSelected}
-          onChange={(e) => {
-            e.stopPropagation();
-            onToggleSelect();
-          }}
+          onChange={(e) => { e.stopPropagation(); onToggleSelect(); }}
           onClick={(e) => e.stopPropagation()}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-lg font-semibold ${scoreColor}`}>{score}%</span>
+            <span className={`text-lg font-bold tabular-nums ${scoreColor}`}>{score}%</span>
+            {hasMultipleTravelers && groupMin !== null && (
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded-full border font-medium ${
+                  groupMin >= 65
+                    ? "text-green-600 dark:text-green-400 border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/30"
+                    : "text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
+                }`}
+                title="Lowest score across travelers"
+              >
+                min {groupMin}%
+              </span>
+            )}
             {statusEmoji[option.status] && (
               <span className="text-sm">{statusEmoji[option.status]}</span>
             )}
-            <span className="text-gray-900 dark:text-white font-medium truncate">{option.name}</span>
+            <span className="text-gray-900 dark:text-white font-semibold truncate">{option.name}</span>
             {option.price && (
-              <span className="text-gray-600 dark:text-gray-400 text-sm">{option.price}</span>
+              <span className="text-gray-500 dark:text-gray-400 text-sm">{option.price}</span>
             )}
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5 line-clamp-2">{option.fitExplanation}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">
+            {option.fitExplanation}
+          </p>
           {option.thresholdViolations.length > 0 && (
-            <div className="flex gap-1 mt-1 flex-wrap">
+            <div className="flex gap-1 mt-1.5 flex-wrap">
               {option.thresholdViolations.map((v) => (
-                <span key={v} className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1.5 py-0.5 rounded">
+                <span
+                  key={v}
+                  className="text-xs bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 px-1.5 py-0.5 rounded-full"
+                >
                   ⚠ {v}
                 </span>
               ))}
             </div>
           )}
           {option.dealbreakersTriggered.length > 0 && (
-            <div className="flex gap-1 mt-1 flex-wrap">
+            <div className="flex gap-1 mt-1.5 flex-wrap">
               {option.dealbreakersTriggered.map((d) => (
-                <span key={d} className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded">
+                <span
+                  key={d}
+                  className="text-xs bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 px-1.5 py-0.5 rounded-full"
+                >
                   ✗ {d}
                 </span>
               ))}
             </div>
           )}
         </div>
-        <span className="text-gray-500 text-sm ml-2">{expanded ? "▲" : "▼"}</span>
+        <span className="text-gray-400 text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
       </div>
 
       {/* Expanded details */}
       {expanded && (
-        <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-800 mt-0 pt-4">
+        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-800 pt-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left: axes */}
+            {/* Left: axis bars */}
             <div>
-              <p className="text-gray-500 text-xs uppercase mb-2">Axis Scores</p>
-              {AXIS_KEYS.map((k) => (
+              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-2">
+                Axis Scores{travelers[0] ? ` — ${travelers[0].name}` : ""}
+              </p>
+              {profileWeights && AXIS_KEYS.map((k) => (
                 <AxisBar
                   key={k}
                   axisKey={k}
@@ -147,20 +179,20 @@ export default function ResultCard({
               ))}
             </div>
 
-            {/* Right: details */}
+            {/* Right: description, tradeoffs, source */}
             <div className="space-y-3">
               <div>
-                <p className="text-gray-500 text-xs uppercase mb-1">Description</p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm">{option.description}</p>
+                <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1">Description</p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{option.description}</p>
               </div>
               {option.tradeoffs.length > 0 && (
                 <div>
-                  <p className="text-gray-500 text-xs uppercase mb-1">Tradeoffs</p>
-                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
+                  <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1">Tradeoffs</p>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                     {option.tradeoffs.map((t, i) => (
                       <li key={i} className="flex gap-1.5">
-                        <span className="text-gray-500">•</span>
-                        {t}
+                        <span className="text-gray-400 flex-shrink-0 mt-0.5">•</span>
+                        <span>{t}</span>
                       </li>
                     ))}
                   </ul>
@@ -171,7 +203,7 @@ export default function ResultCard({
                   href={option.source.startsWith("http") ? option.source : `https://${option.source}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm underline block"
+                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm inline-flex items-center gap-1"
                 >
                   View source →
                 </a>
@@ -179,33 +211,82 @@ export default function ResultCard({
             </div>
           </div>
 
-          {/* Deep dive */}
+          {/* Per-traveler scores — only when 2+ travelers */}
+          {hasMultipleTravelers && (
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-3">Traveler Fit</p>
+              <div className="space-y-2.5">
+                {travelers.map((traveler, idx) => {
+                  const ts = option.travelerScores?.[traveler.id];
+                  const tScore = ts?.alignmentScore ?? option.alignmentScore;
+                  const violations = ts?.thresholdViolations ?? [];
+                  const barColor =
+                    tScore >= 80 ? "#16a34a" : tScore >= 60 ? "#ca8a04" : "#dc2626";
+
+                  return (
+                    <div key={traveler.id} className="flex items-center gap-3">
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
+                      >
+                        {traveler.name[0]}
+                      </div>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 w-20 truncate flex-shrink-0">
+                        {traveler.name}
+                      </span>
+                      <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${tScore}%`, backgroundColor: barColor }}
+                        />
+                      </div>
+                      <span
+                        className="text-xs font-mono tabular-nums w-8 text-right flex-shrink-0 font-medium"
+                        style={{ color: barColor }}
+                      >
+                        {tScore}%
+                      </span>
+                      {violations.length > 0 && (
+                        <span
+                          className="text-xs text-amber-600 dark:text-amber-400 flex-shrink-0"
+                          title={`Below threshold: ${violations.join(", ")}`}
+                        >
+                          ⚠ {violations.join(", ")}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Deep dive result */}
           {deepDiveText && (
-            <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded p-3">
-              <p className="text-gray-500 text-xs uppercase mb-1">Deep Dive</p>
-              <p className="text-gray-700 dark:text-gray-300 text-sm">{deepDiveText}</p>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700">
+              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1.5">Deep Dive</p>
+              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{deepDiveText}</p>
             </div>
           )}
 
           {/* Notes */}
-          <div className="mt-4">
-            <p className="text-gray-500 text-xs uppercase mb-1">Notes</p>
+          <div>
+            <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1.5">Notes</p>
             <textarea
-              className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded border border-gray-300 dark:border-gray-700 p-2 resize-none focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded-lg border border-gray-200 dark:border-gray-700 p-2.5 resize-none focus:outline-none focus:border-blue-500 transition-colors"
               rows={2}
-              placeholder="Add notes..."
+              placeholder="Add notes…"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              onBlur={handleNotesBlur}
+              onBlur={() => onNotesChange(notes)}
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 mt-3 flex-wrap">
+          <div className="flex gap-2 flex-wrap">
             <button
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
                 isSaved
-                  ? "bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60"
                   : "bg-blue-600 text-white hover:bg-blue-500"
               }`}
               onClick={onSave}
@@ -215,9 +296,9 @@ export default function ResultCard({
             {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => (
               <button
                 key={s}
-                className={`px-3 py-1.5 text-sm rounded capitalize transition-colors ${
+                className={`px-3 py-1.5 text-sm rounded-lg capitalize transition-colors ${
                   option.status === s
-                    ? "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white"
+                    ? "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white font-medium"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
                 onClick={() => onStatusChange(s)}
@@ -226,11 +307,17 @@ export default function ResultCard({
               </button>
             ))}
             <button
-              className="px-3 py-1.5 text-sm rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto"
+              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto disabled:opacity-50"
               onClick={handleDeepDive}
               disabled={loadingDive}
             >
-              {loadingDive ? "Researching..." : "Deep Dive →"}
+              {loadingDive ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="animate-spin inline-block">⟳</span> Researching…
+                </span>
+              ) : (
+                "Deep Dive →"
+              )}
             </button>
           </div>
         </div>

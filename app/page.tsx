@@ -36,9 +36,14 @@ export default function Home() {
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) ?? null;
   const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;
 
-  const workspaceProfile = activeWorkspace
-    ? (profiles.find((p) => p.id === activeWorkspace.travelers[0]) ?? defaultProfile)
-    : defaultProfile;
+  // Resolve the full Profile objects for the active workspace's travelers
+  const travelerProfiles: Profile[] = activeWorkspace
+    ? activeWorkspace.travelers
+        .map((id) => profiles.find((p) => p.id === id))
+        .filter((p): p is Profile => !!p)
+    : defaultProfile
+    ? [defaultProfile]
+    : [];
 
   async function createWorkspace() {
     if (!newName.trim()) return;
@@ -216,7 +221,7 @@ export default function Home() {
         </div>
 
         <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <p className="text-xs text-gray-400 dark:text-gray-600">v1.1</p>
+          <p className="text-xs text-gray-400 dark:text-gray-600">v2.0</p>
           <button
             className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             onClick={toggle}
@@ -229,10 +234,10 @@ export default function Home() {
 
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
-        {activeWorkspace && workspaceProfile ? (
+        {activeWorkspace && travelerProfiles.length > 0 ? (
           <WorkspaceView
             workspace={activeWorkspace}
-            profileWeights={workspaceProfile.axisWeights}
+            travelers={travelerProfiles}
             onChange={handleWorkspaceChange}
           />
         ) : (

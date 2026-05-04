@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { searchMoreOptions } from "@/lib/gemini";
-import { combineProfiles } from "@/lib/scoring";
+import { attachTravelerScores, combineProfiles } from "@/lib/scoring";
 
 export async function POST(request: Request) {
   try {
@@ -13,28 +13,26 @@ export async function POST(request: Request) {
     const search = workspace.searches.find((s) => s.id === searchId);
     if (!search) return NextResponse.json({ error: "Search not found" }, { status: 404 });
 
-    // Build profile: combine all travelers if more than one
     const allProfiles = getProfiles();
     const travelerProfiles = workspace.travelers
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
-    const profile = travelerProfiles.length > 1
-      ? combineProfiles(travelerProfiles)
-      : (travelerProfiles[0] ?? getProfile());
+    const searchProfile =
+      travelerProfiles.length > 1
+        ? combineProfiles(travelerProfiles)
+        : (travelerProfiles[0] ?? getProfile());
 
-    // Names already seen in this search
     const alreadySeen = search.scoredResults.map((r) => r.name);
-
-    const newResults = await searchMoreOptions(
+    const rawResults = await searchMoreOptions(
       search.query,
       search.category,
       searchId,
-      profile,
+      searchProfile,
       alreadySeen
     );
+    const newResults = attachTravelerScores(rawResults, travelerProfiles);
 
-    // Append to existing search results
     const updatedSearch = {
       ...search,
       scoredResults: [...search.scoredResults, ...newResults],

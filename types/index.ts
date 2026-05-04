@@ -67,6 +67,12 @@ export interface RawResult {
   price?: string;
 }
 
+// Per-traveler score stored inline with each result
+export interface TravelerScore {
+  alignmentScore: number;
+  thresholdViolations: string[];
+}
+
 export interface ScoredOption {
   id: string;
   searchId: string;
@@ -82,6 +88,8 @@ export interface ScoredOption {
   tradeoffs: string[];
   status: "new" | "interested" | "rejected" | "booked";
   notes: string;
+  // Keyed by profile.id — populated for every traveler on the workspace
+  travelerScores?: Record<string, TravelerScore>;
 }
 
 export interface SavedOption extends ScoredOption {

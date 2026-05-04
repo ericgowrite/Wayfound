@@ -1,4 +1,4 @@
-import { AxisWeights, Profile, ScoredOption } from "@/types";
+import { AxisWeights, Profile, ScoredOption, TravelerScore } from "@/types";
 
 export function calculateAlignmentScore(
   axisScores: AxisWeights,
@@ -9,7 +9,6 @@ export function calculateAlignmentScore(
 
   const totalWeight = keys.reduce((sum, k) => sum + weights[k], 0);
   const weightedScore = keys.reduce((sum, k) => {
-    // Distance from ideal: weight * (1 - |score - weight|)
     const fit = 1 - Math.abs(axisScores[k] - weights[k]);
     return sum + weights[k] * fit;
   }, 0);
@@ -35,8 +34,53 @@ export function checkThresholds(
   return violations;
 }
 
+export function scoreForProfile(
+  axisScores: AxisWeights,
+  profile: Profile
+): TravelerScore {
+  return {
+    alignmentScore: calculateAlignmentScore(axisScores, profile),
+    thresholdViolations: checkThresholds(axisScores, profile),
+  };
+}
+
+// Attach per-traveler scores to each option using the intrinsic axisScores.
+// No extra API calls — just applies each profile's weights locally.
+export function attachTravelerScores(
+  options: ScoredOption[],
+  profiles: Profile[]
+): ScoredOption[] {
+  if (profiles.length === 0) return options;
+  return options.map((opt) => ({
+    ...opt,
+    travelerScores: Object.fromEntries(
+      profiles.map((p) => [p.id, scoreForProfile(opt.axisScores, p)])
+    ),
+  }));
+}
+
 export function sortByAlignment(options: ScoredOption[]): ScoredOption[] {
   return [...options].sort((a, b) => b.alignmentScore - a.alignmentScore);
+}
+
+// Group fit score: options where everyone >= GROUP_FLOOR rank above those where someone falls short.
+// Within the "all happy" band, rank by average. Within the "someone unhappy" band, rank by minimum.
+const GROUP_FLOOR = 65;
+
+function groupFitScore(option: ScoredOption, profiles: Profile[]): number {
+  const scores = profiles.map((p) => {
+    const stored = option.travelerScores?.[p.id];
+    return stored ? stored.alignmentScore : calculateAlignmentScore(option.axisScores, p);
+  });
+  const min = Math.min(...scores);
+  const avg = scores.reduce((s, n) => s + n, 0) / scores.length;
+  // Band separation: floor-passing options live in 100–200, violators in 0–100
+  return min >= GROUP_FLOOR ? 100 + avg : min;
+}
+
+export function sortByGroupFit(options: ScoredOption[], profiles: Profile[]): ScoredOption[] {
+  if (profiles.length < 2) return sortByAlignment(options);
+  return [...options].sort((a, b) => groupFitScore(b, profiles) - groupFitScore(a, profiles));
 }
 
 export function combineProfiles(profiles: Profile[]): Profile {
@@ -44,7 +88,6 @@ export function combineProfiles(profiles: Profile[]): Profile {
 
   const keys = Object.keys(profiles[0].axisWeights) as (keyof AxisWeights)[];
 
-  // Average axis weights across all travelers
   const axisWeights = Object.fromEntries(
     keys.map((k) => [
       k,
@@ -52,14 +95,12 @@ export function combineProfiles(profiles: Profile[]): Profile {
     ])
   ) as unknown as AxisWeights;
 
-  // Strictest threshold per axis (highest value = hardest to satisfy)
   const thresholds: Partial<AxisWeights> = {};
   for (const k of keys) {
     const vals = profiles.map((p) => p.thresholds[k]).filter((v): v is number => v !== undefined);
     if (vals.length > 0) thresholds[k] = Math.max(...vals);
   }
 
-  // Union of all dealbreakers (deduplicated)
   const dealbreakers = [...new Set(profiles.flatMap((p) => p.dealbreakers))];
 
   return {

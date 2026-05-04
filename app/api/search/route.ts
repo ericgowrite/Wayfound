@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getProfile, getWorkspace, saveWorkspace } from "@/lib/storage";
+import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { searchAndScore } from "@/lib/gemini";
+import { attachTravelerScores } from "@/lib/scoring";
 import { Search, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,16 +11,17 @@ export async function POST(request: Request) {
 
     const workspace = getWorkspace(workspaceId);
     if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
-    // Use primary traveler's profile (first in list), fall back to default
-    const profile = getProfile(workspace.travelers[0]);
+
+    const allProfiles = getProfiles();
+    const travelerProfiles = workspace.travelers
+      .map((id) => allProfiles.find((p) => p.id === id))
+      .filter((p): p is NonNullable<typeof p> => !!p);
+
+    const primaryProfile = travelerProfiles[0] ?? getProfile();
 
     const searchId = uuidv4();
-    const scoredResults = await searchAndScore(
-      query,
-      category as SearchCategory,
-      searchId,
-      profile
-    );
+    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, primaryProfile);
+    const scoredResults = attachTravelerScores(rawResults, travelerProfiles);
 
     const search: Search = {
       id: searchId,
