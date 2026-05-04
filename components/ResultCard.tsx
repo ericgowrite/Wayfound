@@ -37,19 +37,19 @@ export default function ResultCard({
 
   const scoreColor =
     score >= 80
-      ? "text-green-400"
+      ? "text-green-600 dark:text-green-400"
       : score >= 60
-      ? "text-yellow-400"
-      : "text-red-400";
+      ? "text-yellow-600 dark:text-yellow-400"
+      : "text-red-600 dark:text-red-400";
 
   const borderColor =
     option.dealbreakersTriggered.length > 0
-      ? "border-red-700"
+      ? "border-red-400 dark:border-red-700"
       : score >= 80
-      ? "border-green-800"
+      ? "border-green-500 dark:border-green-800"
       : score >= 60
-      ? "border-yellow-800"
-      : "border-gray-700";
+      ? "border-yellow-500 dark:border-yellow-800"
+      : "border-gray-300 dark:border-gray-700";
 
   const statusEmoji: Record<ScoredOption["status"], string> = {
     new: "",
@@ -79,7 +79,7 @@ export default function ResultCard({
   }
 
   return (
-    <div className={`border rounded-lg bg-gray-900 ${borderColor} transition-all`}>
+    <div className={`border rounded-lg bg-white dark:bg-gray-900 ${borderColor} transition-all`}>
       {/* Header row */}
       <div
         className="flex items-start gap-3 p-4 cursor-pointer"
@@ -101,16 +101,16 @@ export default function ResultCard({
             {statusEmoji[option.status] && (
               <span className="text-sm">{statusEmoji[option.status]}</span>
             )}
-            <span className="text-white font-medium truncate">{option.name}</span>
+            <span className="text-gray-900 dark:text-white font-medium truncate">{option.name}</span>
             {option.price && (
-              <span className="text-gray-400 text-sm">{option.price}</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm">{option.price}</span>
             )}
           </div>
-          <p className="text-gray-400 text-sm mt-0.5 line-clamp-2">{option.fitExplanation}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5 line-clamp-2">{option.fitExplanation}</p>
           {option.thresholdViolations.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
               {option.thresholdViolations.map((v) => (
-                <span key={v} className="text-xs bg-yellow-900 text-yellow-300 px-1.5 py-0.5 rounded">
+                <span key={v} className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1.5 py-0.5 rounded">
                   ⚠ {v}
                 </span>
               ))}
@@ -119,7 +119,7 @@ export default function ResultCard({
           {option.dealbreakersTriggered.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
               {option.dealbreakersTriggered.map((d) => (
-                <span key={d} className="text-xs bg-red-900 text-red-300 px-1.5 py-0.5 rounded">
+                <span key={d} className="text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded">
                   ✗ {d}
                 </span>
               ))}
@@ -131,7 +131,7 @@ export default function ResultCard({
 
       {/* Expanded details */}
       {expanded && (
-        <div className="px-4 pb-4 border-t border-gray-800 mt-0 pt-4">
+        <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-800 mt-0 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: axes */}
             <div>
@@ -151,12 +151,12 @@ export default function ResultCard({
             <div className="space-y-3">
               <div>
                 <p className="text-gray-500 text-xs uppercase mb-1">Description</p>
-                <p className="text-gray-300 text-sm">{option.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">{option.description}</p>
               </div>
               {option.tradeoffs.length > 0 && (
                 <div>
                   <p className="text-gray-500 text-xs uppercase mb-1">Tradeoffs</p>
-                  <ul className="text-sm text-gray-300 space-y-0.5">
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-0.5">
                     {option.tradeoffs.map((t, i) => (
                       <li key={i} className="flex gap-1.5">
                         <span className="text-gray-500">•</span>
@@ -171,7 +171,7 @@ export default function ResultCard({
                   href={option.source.startsWith("http") ? option.source : `https://${option.source}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 text-sm underline block"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm underline block"
                 >
                   View source →
                 </a>
@@ -181,9 +181,9 @@ export default function ResultCard({
 
           {/* Deep dive */}
           {deepDiveText && (
-            <div className="mt-4 bg-gray-800 rounded p-3">
+            <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded p-3">
               <p className="text-gray-500 text-xs uppercase mb-1">Deep Dive</p>
-              <p className="text-gray-300 text-sm">{deepDiveText}</p>
+              <p className="text-gray-700 dark:text-gray-300 text-sm">{deepDiveText}</p>
             </div>
           )}
 
@@ -191,7 +191,7 @@ export default function ResultCard({
           <div className="mt-4">
             <p className="text-gray-500 text-xs uppercase mb-1">Notes</p>
             <textarea
-              className="w-full bg-gray-800 text-gray-200 text-sm rounded border border-gray-700 p-2 resize-none focus:outline-none focus:border-blue-500"
+              className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded border border-gray-300 dark:border-gray-700 p-2 resize-none focus:outline-none focus:border-blue-500"
               rows={2}
               placeholder="Add notes..."
               value={notes}
@@ -205,7 +205,7 @@ export default function ResultCard({
             <button
               className={`px-3 py-1.5 text-sm rounded transition-colors ${
                 isSaved
-                  ? "bg-blue-800 text-blue-200 hover:bg-blue-700"
+                  ? "bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   : "bg-blue-600 text-white hover:bg-blue-500"
               }`}
               onClick={onSave}
@@ -217,8 +217,8 @@ export default function ResultCard({
                 key={s}
                 className={`px-3 py-1.5 text-sm rounded capitalize transition-colors ${
                   option.status === s
-                    ? "bg-gray-600 text-white"
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                    ? "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
                 onClick={() => onStatusChange(s)}
               >
@@ -226,7 +226,7 @@ export default function ResultCard({
               </button>
             ))}
             <button
-              className="px-3 py-1.5 text-sm rounded bg-gray-800 text-gray-400 hover:bg-gray-700 transition-colors ml-auto"
+              className="px-3 py-1.5 text-sm rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto"
               onClick={handleDeepDive}
               disabled={loadingDive}
             >

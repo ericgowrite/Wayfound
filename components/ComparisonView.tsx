@@ -27,9 +27,12 @@ export default function ComparisonView({ options, profileWeights, onClose }: Pro
   }, [options]);
 
   const scoreColor = (s: number) =>
-    s >= 80 ? "text-green-400" : s >= 60 ? "text-yellow-400" : "text-red-400";
+    s >= 80
+      ? "text-green-600 dark:text-green-400"
+      : s >= 60
+      ? "text-yellow-600 dark:text-yellow-400"
+      : "text-red-600 dark:text-red-400";
 
-  // For each axis, find the max score among options
   const maxScores: Partial<Record<keyof AxisWeights, number>> = {};
   for (const k of AXIS_KEYS) {
     maxScores[k] = Math.max(...options.map((o) => o.axisScores[k]));
@@ -37,36 +40,34 @@ export default function ComparisonView({ options, profileWeights, onClose }: Pro
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-5xl max-h-[90vh] overflow-auto">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700 sticky top-0 bg-gray-900">
-          <h2 className="text-lg font-semibold text-white">Side-by-Side Comparison</h2>
-          <button className="text-gray-400 hover:text-white text-2xl leading-none" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 w-full max-w-5xl max-h-[90vh] overflow-auto">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Side-by-Side Comparison</h2>
+          <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-2xl leading-none" onClick={onClose}>
             ×
           </button>
         </div>
 
         <div className="p-4">
-          {/* Summary */}
           {(loading || summary) && (
-            <div className="mb-4 bg-gray-800 rounded-lg p-3">
+            <div className="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-gray-500 text-xs uppercase mb-1">AI Summary</p>
-              <p className="text-gray-300 text-sm">
+              <p className="text-gray-700 dark:text-gray-300 text-sm">
                 {loading ? "Generating comparison..." : summary}
               </p>
             </div>
           )}
 
-          {/* Option columns */}
           <div className={`grid gap-4`} style={{ gridTemplateColumns: `140px repeat(${options.length}, 1fr)` }}>
             {/* Header row */}
             <div />
             {options.map((opt) => (
               <div key={opt.id} className="text-center">
-                <p className="text-white font-medium text-sm">{opt.name}</p>
+                <p className="text-gray-900 dark:text-white font-medium text-sm">{opt.name}</p>
                 <p className={`text-2xl font-bold ${scoreColor(opt.alignmentScore)}`}>
                   {opt.alignmentScore}%
                 </p>
-                {opt.price && <p className="text-gray-400 text-xs">{opt.price}</p>}
+                {opt.price && <p className="text-gray-600 dark:text-gray-400 text-xs">{opt.price}</p>}
               </div>
             ))}
 
@@ -86,13 +87,13 @@ export default function ComparisonView({ options, profileWeights, onClose }: Pro
                   const isBest = opt.axisScores[k] === maxScores[k];
                   return (
                     <div key={`${opt.id}-${k}`} className="flex flex-col items-center gap-1">
-                      <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${isBest && options.length > 1 ? "bg-green-500" : "bg-blue-500"}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className={`text-xs font-mono ${isBest && options.length > 1 ? "text-green-400" : "text-gray-400"}`}>
+                      <span className={`text-xs font-mono ${isBest && options.length > 1 ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400"}`}>
                         {pct}%
                       </span>
                     </div>
@@ -107,7 +108,7 @@ export default function ComparisonView({ options, profileWeights, onClose }: Pro
             </div>
             {options.map((opt) => (
               <div key={`tradeoff-${opt.id}`} className="pt-2">
-                <ul className="text-xs text-gray-400 space-y-0.5">
+                <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
                   {opt.tradeoffs.map((t, i) => (
                     <li key={i} className="flex gap-1">
                       <span>•</span>

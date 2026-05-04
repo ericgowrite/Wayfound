@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WanderWell Personal",
+  title: "Spectral",
   description: "Psychologically-informed travel search",
 };
 
@@ -27,7 +27,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="h-full flex flex-col bg-gray-950">{children}</body>
+      {/* Anti-flash: apply saved theme before first paint */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="h-full flex flex-col bg-gray-50 dark:bg-gray-950">{children}</body>
     </html>
   );
 }

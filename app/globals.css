@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark, .dark *));
+
 :root {
+  --background: #f9fafb;
+  --foreground: #111827;
+}
+
+.dark {
   --background: #030712;
   --foreground: #f9fafb;
 }
@@ -19,5 +26,9 @@ body {
 
 * {
   scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.dark * {
   scrollbar-color: #374151 transparent;
 }
