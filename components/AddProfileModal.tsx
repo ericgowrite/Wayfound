@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Profile, ProfileTemplate, AXIS_KEYS, AXIS_LABELS, AXIS_DESCRIPTIONS, AxisWeights } from "@/types";
+import { AssessmentResult } from "@/lib/assessment";
+import TravelAssessment from "./TravelAssessment";
 import templates from "@/src/data/profileTemplates.json";
 
 const TEMPLATES = templates as ProfileTemplate[];
@@ -11,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-type Step = "info" | "know-type" | "test" | "type-select" | "review";
+type Step = "info" | "know-type" | "assess" | "type-select" | "review";
 
 export default function AddProfileModal({ onSave, onClose }: Props) {
   const [step, setStep] = useState<Step>("info");
@@ -36,6 +38,21 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
       axisWeights: { ...template.axisWeights },
       thresholds: { ...template.thresholds },
       dealbreakers: [...template.dealbreakers],
+    });
+    setStep("review");
+  }
+
+  function handleAssessmentComplete(result: AssessmentResult) {
+    const typeKey = `${result.type}w${result.wing}`;
+    const t = TEMPLATES.find((tmpl) => tmpl.type === typeKey) ?? TEMPLATES[0];
+    setSelectedType(typeKey);
+    setDraft({
+      name: name.trim(),
+      enneagramType: typeKey,
+      description: result.description,
+      axisWeights: { ...result.axisWeights },
+      thresholds: { ...(t?.thresholds ?? {}) },
+      dealbreakers: [...(t?.dealbreakers ?? [])],
     });
     setStep("review");
   }
@@ -81,8 +98,8 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {step === "info" && "Add Traveler Profile"}
-            {step === "know-type" && "Find Your Type"}
-            {step === "test" && "Take the Test"}
+            {step === "know-type" && "Find Your Travel Style"}
+            {step === "assess" && "Travel Style Assessment"}
             {step === "type-select" && "Select Your Type"}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
@@ -123,33 +140,23 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                 </button>
                 <button
                   className="w-full text-left px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                  onClick={() => setStep("test")}
+                  onClick={() => setStep("assess")}
                 >
                   <p className="text-gray-900 dark:text-white text-sm font-medium">No, help me find out</p>
-                  <p className="text-gray-500 text-xs mt-0.5">I&apos;ll take a quick test first</p>
+                  <p className="text-gray-500 text-xs mt-0.5">Take a quick in-app travel style assessment</p>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 3: Take the test */}
-          {step === "test" && (
-            <div className="space-y-4">
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Take this free 12-minute test to discover your type:
-              </p>
-              <a
-                href="https://cloverleaf.me/assessments/enneagram/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors"
-              >
-                <span className="text-white font-medium text-sm">Take the Enneagram Test</span>
-                <span className="text-blue-200 text-sm">→</span>
-              </a>
-              <p className="text-gray-500 text-sm">
-                When you&apos;re done, come back and select your type.
-              </p>
+          {/* Step 3: In-app travel style assessment */}
+          {step === "assess" && (
+            <div className="-mx-4 -mb-4" style={{ minHeight: 460 }}>
+              <TravelAssessment
+                prefilledName={name.trim()}
+                onComplete={handleAssessmentComplete}
+                onSkip={() => setStep("type-select")}
+              />
             </div>
           )}
 
@@ -265,13 +272,8 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
               ← Back
             </button>
           )}
-          {step === "test" && (
-            <>
-              <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
-              <button className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500" onClick={() => setStep("type-select")}>
-                I&apos;ve completed the test →
-              </button>
-            </>
+          {step === "assess" && (
+            <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
           )}
           {step === "type-select" && (
             <>

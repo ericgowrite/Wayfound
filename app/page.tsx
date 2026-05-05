@@ -5,6 +5,9 @@ import { Profile, TripWorkspace } from "@/types";
 import WorkspaceView from "@/components/WorkspaceView";
 import ProfileEditor from "@/components/ProfileEditor";
 import AddProfileModal from "@/components/AddProfileModal";
+import FitLegendModal from "@/components/FitLegendModal";
+import TravelAssessment from "@/components/TravelAssessment";
+import { AssessmentResult } from "@/lib/assessment";
 import { useTheme } from "@/lib/useTheme";
 
 export default function Home() {
@@ -20,12 +23,15 @@ export default function Home() {
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
+  const [showFitLegend, setShowFitLegend] = useState(false);
   const [profilesOpen, setProfilesOpen] = useState(true);
+  const [profilesLoaded, setProfilesLoaded] = useState(false);
 
   useEffect(() => {
     fetch("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
       setProfiles(ps);
       if (ps.length > 0) setNewTravelers([ps[0].id]);
+      setProfilesLoaded(true);
     });
     fetch("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
       setWorkspaces(ws);
@@ -79,6 +85,26 @@ export default function Home() {
     setWorkspaces((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
   }
 
+  async function handleFirstRunAssessment(result: AssessmentResult, name: string) {
+    const typeKey = `${result.type}w${result.wing}`;
+    const res = await fetch("/api/profiles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name.trim() || "Traveler",
+        enneagramType: typeKey,
+        description: result.description,
+        axisWeights: result.axisWeights,
+        thresholds: {},
+        dealbreakers: [],
+        isDefault: true,
+      }),
+    });
+    const profile: Profile = await res.json();
+    setProfiles([profile]);
+    setNewTravelers([profile.id]);
+  }
+
   function handleProfileUpdate(updated: Profile) {
     setProfiles((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   }
@@ -103,10 +129,36 @@ export default function Home() {
   const btnSecondary = "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600";
   const modalCls = "bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700";
 
-  if (profiles.length === 0) {
+  // Still fetching
+  if (!profilesLoaded) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
-        Loading...
+        Loading…
+      </div>
+    );
+  }
+
+  // First-run: no profiles yet — show full-screen assessment
+  if (profilesLoaded && profiles.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
+        <div className="w-full max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
+          <div className="px-6 pt-6 pb-0 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">ViyaGuide</span>
+              <span className="text-xs text-gray-400 dark:text-gray-600">Welcome</span>
+            </div>
+          </div>
+          <div style={{ minHeight: 520 }}>
+            <TravelAssessment
+              onComplete={handleFirstRunAssessment}
+              onSkip={() => setShowAddProfile(true)}
+            />
+          </div>
+        </div>
+        {showAddProfile && (
+          <AddProfileModal onSave={handleProfileSaved} onClose={() => setShowAddProfile(false)} />
+        )}
       </div>
     );
   }
@@ -117,7 +169,7 @@ export default function Home() {
       <div className="w-56 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
         {/* App header */}
         <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Spectral</h1>
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">ViyaGuide</h1>
           <p className="text-xs text-gray-500 mt-0.5">Personal Travel Search</p>
         </div>
 
@@ -224,15 +276,23 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <p className="text-xs text-gray-400 dark:text-gray-600">v2.0</p>
+        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 space-y-2">
           <button
-            className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            onClick={toggle}
-            title={dark ? "Switch to light mode" : "Switch to night mode"}
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full text-left"
+            onClick={() => setShowFitLegend(true)}
           >
-            {dark ? "☀ Light" : "☾ Night"}
+            What do fit scores mean?
           </button>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400 dark:text-gray-600">v2.0</p>
+            <button
+              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              onClick={toggle}
+              title={dark ? "Switch to light mode" : "Switch to night mode"}
+            >
+              {dark ? "☀ Light" : "☾ Night"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -379,6 +439,9 @@ export default function Home() {
           onClose={() => setShowAddProfile(false)}
         />
       )}
+
+      {/* Fit legend modal */}
+      {showFitLegend && <FitLegendModal onClose={() => setShowFitLegend(false)} />}
     </div>
   );
 }
