@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Profile, ScoredOption, SearchCategory } from "@/types";
+import { Profile, ScoredOption, SearchCategory, DeepDiveResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 function getClient() {
@@ -182,19 +182,56 @@ Highlight the key differentiators. Be direct and specific.`;
 export async function generateDeepDive(
   option: ScoredOption,
   profile: Profile
-): Promise<string> {
-  const prompt = `Do a deep dive on "${option.name}" for ${profile.name} (Type ${profile.enneagramType}).
+): Promise<DeepDiveResult> {
+  const prompt = `Do a deep dive on "${option.name}" for ${profile.name} (travel type: ${profile.enneagramType}).
 
-Search for more detailed information, recent reviews, and specific details.
-Then write a detailed 4-6 sentence analysis of whether this is a good fit, including:
-- What makes it unique
-- Specific pros/cons for a Type ${profile.enneagramType} traveler
-- Any red flags or standout features
-- Overall recommendation
+Search the web for detailed information, recent reviews, and specific details about this option.
+Current fit score: ${option.alignmentScore}%
+Profile axis weights: ${JSON.stringify(option.axisScores)}
 
-Current fit score: ${option.alignmentScore}%`;
+Return ONLY a valid JSON object with exactly these fields (no markdown, no extra text):
+{
+  "overview": "2-3 sentences covering location, what it is, any notable awards or recognition, and key facts",
+  "whyItFits": ["3-5 specific reasons this option aligns with this traveler's style and preferences — reference their actual interests"],
+  "watchOutFor": ["1-3 honest cautions, limitations, or tradeoffs to be aware of"],
+  "standoutFeatures": ["3-5 notable amenities, unique features, or details that make this option distinctive"],
+  "bottomLine": "2-3 sentences with a direct recommendation: should this traveler book it, and why or why not"
+}
 
-  return callWithSearch("You are a travel research assistant. Search for detailed information about the given option and provide a thorough analysis.", prompt);
+Each array item should be a single concise bullet (1-2 lines max). Be specific and honest.`;
+
+  const raw = await callWithSearch(
+    "You are a travel research assistant. Search for detailed information about the given travel option and return a structured JSON analysis.",
+    prompt
+  );
+
+  // Parse structured response, fall back gracefully
+  try {
+    const cleaned = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]) as DeepDiveResult;
+      // Normalise: ensure arrays are arrays
+      return {
+        overview: parsed.overview ?? "",
+        whyItFits: Array.isArray(parsed.whyItFits) ? parsed.whyItFits : [],
+        watchOutFor: Array.isArray(parsed.watchOutFor) ? parsed.watchOutFor : [],
+        standoutFeatures: Array.isArray(parsed.standoutFeatures) ? parsed.standoutFeatures : [],
+        bottomLine: parsed.bottomLine ?? "",
+      };
+    }
+  } catch {
+    // fall through to text fallback
+  }
+
+  // Plain-text fallback: wrap everything in overview
+  return {
+    overview: raw.slice(0, 600),
+    whyItFits: [],
+    watchOutFor: [],
+    standoutFeatures: [],
+    bottomLine: "",
+  };
 }
 
 export async function scoreSpecific(

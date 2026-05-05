@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights } from "@/types";
+import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import AxisBar from "./AxisBar";
 
@@ -41,7 +41,7 @@ export default function ResultCard({
   const [expanded, setExpanded] = useState(false);
   const [showFullExplanation, setShowFullExplanation] = useState(false);
   const [notes, setNotes] = useState(option.notes);
-  const [deepDiveText, setDeepDiveText] = useState("");
+  const [deepDive, setDeepDive] = useState<DeepDiveResult | null>(null);
   const [loadingDive, setLoadingDive] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -77,7 +77,7 @@ export default function ResultCard({
         body: JSON.stringify({ option }),
       });
       const data = await res.json();
-      setDeepDiveText(data.analysis || "");
+      if (data.deepDive) setDeepDive(data.deepDive);
     } finally {
       setLoadingDive(false);
     }
@@ -306,10 +306,68 @@ export default function ResultCard({
           )}
 
           {/* Deep dive result */}
-          {deepDiveText && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3.5 border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1.5">Deep Dive</p>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{deepDiveText}</p>
+          {deepDive && (
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Overview */}
+              {deepDive.overview && (
+                <div className="px-4 py-3.5 bg-gray-50 dark:bg-gray-800/60">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">Overview</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{deepDive.overview}</p>
+                </div>
+              )}
+
+              {/* Why it fits */}
+              {deepDive.whyItFits.length > 0 && (
+                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-green-600 dark:text-green-500 mb-2">Why it fits you</p>
+                  <ul className="space-y-1.5">
+                    {deepDive.whyItFits.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                        <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Watch out for */}
+              {deepDive.watchOutFor.length > 0 && (
+                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-2">Watch out for</p>
+                  <ul className="space-y-1.5">
+                    {deepDive.watchOutFor.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                        <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Standout features */}
+              {deepDive.standoutFeatures.length > 0 && (
+                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Standout features</p>
+                  <ul className="space-y-1.5">
+                    {deepDive.standoutFeatures.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                        <span className="text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Bottom line */}
+              {deepDive.bottomLine && (
+                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">Bottom line</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">{deepDive.bottomLine}</p>
+                </div>
+              )}
             </div>
           )}
 

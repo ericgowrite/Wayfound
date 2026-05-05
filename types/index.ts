@@ -118,3 +118,11 @@ export const AXIS_DESCRIPTIONS: Record<keyof AxisWeights, string> = {
 };
 
 export const AXIS_KEYS = Object.keys(AXIS_LABELS) as (keyof AxisWeights)[];
+
+export interface DeepDiveResult {
+  overview: string;
+  whyItFits: string[];
+  watchOutFor: string[];
+  standoutFeatures: string[];
+  bottomLine: string;
+}
