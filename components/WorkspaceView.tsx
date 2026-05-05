@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Profile,
   TripWorkspace,
@@ -60,6 +60,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     workspace.searches[0]?.id ?? null
   );
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
+  const [showFitCallout, setShowFitCallout] = useState(false);
+
+  useEffect(() => {
+    if (
+      !showFitCallout &&
+      workspace.searches.length > 0 &&
+      workspace.searches[0].scoredResults.length > 0 &&
+      !localStorage.getItem("hasSeenFitLegend")
+    ) {
+      setShowFitCallout(true);
+    }
+  }, [workspace.searches]);
 
   const activeSearch = workspace.searches.find((s) => s.id === activeSearchId) ?? null;
 
@@ -324,14 +336,20 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             🔍 Search
           </button>
           <button
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
               mode === "score"
                 ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow font-medium"
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             }`}
             onClick={() => setMode("score")}
           >
-            ✦ Score specific
+            ✦ Score
+            <span
+              className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default"
+              title="Paste a specific travel option here to score"
+            >
+              i
+            </span>
           </button>
         </div>
 
@@ -502,6 +520,31 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   <span className="font-medium text-gray-700 dark:text-gray-300">Group sort</span>
                   {" "}— options where everyone scores ≥65% rank first, then by average
                 </span>
+              </div>
+            )}
+
+            {/* First-time fit score callout */}
+            {showFitCallout && !searching && sortedResults.length > 0 && (
+              <div className="mb-3 flex items-start gap-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-3">
+                <span className="text-blue-500 text-lg flex-shrink-0">💡</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-0.5">About fit scores</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                    Each score shows how well an option matches your profile. <span className="font-medium text-green-600 dark:text-green-400">Green (80%+)</span> is a strong fit,{" "}
+                    <span className="font-medium text-yellow-600 dark:text-yellow-400">yellow (65–79%)</span> has tradeoffs,{" "}
+                    <span className="font-medium text-orange-600 dark:text-orange-400">orange (50–64%)</span> is marginal,{" "}
+                    <span className="font-medium text-red-600 dark:text-red-400">red (&lt;50%)</span> is a poor fit. Hover any score to see the guide.
+                  </p>
+                </div>
+                <button
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium flex-shrink-0 transition-colors"
+                  onClick={() => {
+                    localStorage.setItem("hasSeenFitLegend", "1");
+                    setShowFitCallout(false);
+                  }}
+                >
+                  Got it
+                </button>
               </div>
             )}
 

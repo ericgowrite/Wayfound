@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights } from "@/types";
+import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import AxisBar from "./AxisBar";
 
 interface Props {
@@ -41,25 +42,17 @@ export default function ResultCard({
   const [notes, setNotes] = useState(option.notes);
   const [deepDiveText, setDeepDiveText] = useState("");
   const [loadingDive, setLoadingDive] = useState(false);
+  const [showScoreLegend, setShowScoreLegend] = useState(false);
+  const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const score = option.alignmentScore;
+  const tier = fitTier(score);
   const isSaved = workspace.savedOptions.some((s) => s.id === option.id);
-
-  const scoreColor =
-    score >= 80
-      ? "text-green-600 dark:text-green-400"
-      : score >= 60
-      ? "text-yellow-600 dark:text-yellow-400"
-      : "text-red-600 dark:text-red-400";
 
   const borderColor =
     option.dealbreakersTriggered.length > 0
       ? "border-red-400 dark:border-red-700"
-      : score >= 80
-      ? "border-green-400 dark:border-green-800"
-      : score >= 60
-      ? "border-yellow-400 dark:border-yellow-800"
-      : "border-gray-300 dark:border-gray-700";
+      : tier.border;
 
   const statusEmoji: Record<ScoredOption["status"], string> = {
     new: "",
@@ -84,12 +77,22 @@ export default function ResultCard({
     onDeepDive();
   }
 
+  function handleScoreMouseEnter() {
+    if (legendTimeout.current) clearTimeout(legendTimeout.current);
+    setShowScoreLegend(true);
+  }
+
+  function handleScoreMouseLeave() {
+    legendTimeout.current = setTimeout(() => setShowScoreLegend(false), 150);
+  }
+
   // Group fit summary badge
   const hasMultipleTravelers = travelers.length > 1;
   const travelerScoreValues = hasMultipleTravelers
     ? travelers.map((t) => option.travelerScores?.[t.id]?.alignmentScore ?? option.alignmentScore)
     : [];
   const groupMin = hasMultipleTravelers ? Math.min(...travelerScoreValues) : null;
+  const groupMinTier = groupMin !== null ? fitTier(groupMin) : null;
 
   return (
     <div className={`border rounded-xl bg-white dark:bg-gray-900 ${borderColor} transition-all`}>
@@ -107,14 +110,40 @@ export default function ResultCard({
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-lg font-bold tabular-nums ${scoreColor}`}>{score}%</span>
-            {hasMultipleTravelers && groupMin !== null && (
+            {/* Score badge with hover legend */}
+            <div className="relative flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               <span
-                className={`text-xs px-1.5 py-0.5 rounded-full border font-medium ${
-                  groupMin >= 65
-                    ? "text-green-600 dark:text-green-400 border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/30"
-                    : "text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30"
-                }`}
+                className={`text-lg font-bold tabular-nums cursor-default ${tier.text}`}
+                onMouseEnter={handleScoreMouseEnter}
+                onMouseLeave={handleScoreMouseLeave}
+              >
+                {score}%
+              </span>
+              {showScoreLegend && (
+                <div
+                  className="absolute left-0 top-full mt-1.5 z-30 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-3 w-52"
+                  onMouseEnter={handleScoreMouseEnter}
+                  onMouseLeave={handleScoreMouseLeave}
+                >
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Fit score guide</p>
+                  <div className="space-y-1.5">
+                    {FIT_TIERS.map((t) => (
+                      <div key={t.min} className={`flex items-center gap-2 text-xs rounded-md px-1.5 py-0.5 ${t.min === tier.min ? `${t.bg} font-medium` : ""}`}>
+                        <span className="w-4 text-center">{t.emoji}</span>
+                        <span className="text-gray-700 dark:text-gray-300 flex-1">{t.label}</span>
+                        <span className="text-gray-400 dark:text-gray-500 tabular-nums">
+                          {t.min === 0 ? "<50%" : t.min === 80 ? "80%+" : `${t.min}–${t.min === 65 ? 79 : 64}%`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {hasMultipleTravelers && groupMin !== null && groupMinTier && (
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded-full border font-medium ${groupMinTier.text} ${groupMinTier.border} ${groupMinTier.bg}`}
                 title="Lowest score across travelers"
               >
                 min {groupMin}%
@@ -220,8 +249,7 @@ export default function ResultCard({
                   const ts = option.travelerScores?.[traveler.id];
                   const tScore = ts?.alignmentScore ?? option.alignmentScore;
                   const violations = ts?.thresholdViolations ?? [];
-                  const barColor =
-                    tScore >= 80 ? "#16a34a" : tScore >= 60 ? "#ca8a04" : "#dc2626";
+                  const tTier = fitTier(tScore);
 
                   return (
                     <div key={traveler.id} className="flex items-center gap-3">
@@ -236,12 +264,12 @@ export default function ResultCard({
                       <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all"
-                          style={{ width: `${tScore}%`, backgroundColor: barColor }}
+                          style={{ width: `${tScore}%`, backgroundColor: tTier.hex }}
                         />
                       </div>
                       <span
                         className="text-xs font-mono tabular-nums w-8 text-right flex-shrink-0 font-medium"
-                        style={{ color: barColor }}
+                        style={{ color: tTier.hex }}
                       >
                         {tScore}%
                       </span>

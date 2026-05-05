@@ -43,7 +43,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
   }
 
   function handleAssessmentComplete(result: AssessmentResult) {
-    const typeKey = `${result.type}w${result.wing}`;
+    const typeKey = String(result.type);
     const t = TEMPLATES.find((tmpl) => tmpl.type === typeKey) ?? TEMPLATES[0];
     setSelectedType(typeKey);
     setDraft({
@@ -166,10 +166,10 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
               <div>
                 <label className="text-gray-500 text-xs uppercase block mb-2">Enneagram Type</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {baseTypes.map((base) =>
-                    TEMPLATES.filter(
-                      (t) => t.type === base || t.type.startsWith(`${base}w`)
-                    ).map((t) => (
+                  {baseTypes.map((base) => {
+                    const t = TEMPLATES.find((tmpl) => tmpl.type === base);
+                    if (!t) return null;
+                    return (
                       <button
                         key={t.type}
                         className={`text-left px-3 py-2 rounded border text-xs transition-colors ${
@@ -182,8 +182,8 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                         <div className="font-semibold">Type {t.type}</div>
                         <div className="text-gray-500 text-xs mt-0.5 line-clamp-1">{t.description.split("—")[0].trim()}</div>
                       </button>
-                    ))
-                  )}
+                    );
+                  })}
                 </div>
               </div>
               {selectedType && (

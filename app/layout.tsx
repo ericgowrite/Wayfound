@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Spectral",
+  title: "ViyaGuide",
   description: "Psychologically-informed travel search",
 };
 

@@ -86,7 +86,7 @@ export default function Home() {
   }
 
   async function handleFirstRunAssessment(result: AssessmentResult, name: string) {
-    const typeKey = `${result.type}w${result.wing}`;
+    const typeKey = String(result.type);
     const res = await fetch("/api/profiles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

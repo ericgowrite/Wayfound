@@ -12,7 +12,6 @@ export interface AssessmentQuestion {
 
 export interface Archetype {
   type: number;
-  wing: number;
   name: string;
   tagline: string;
   description: string;
@@ -22,6 +21,8 @@ export interface Archetype {
 export interface AssessmentResult extends Archetype {
   typeScores: number[];
   topAxes: { axis: keyof AxisWeights; label: string }[];
+  confidence: "high" | "medium" | "low";
+  runnerUpTypes: number[];  // indices of 2nd and 3rd place types
 }
 
 // ── Axis travel-priority labels ───────────────────────────────────────────────
@@ -159,146 +160,79 @@ export const QUESTIONS: AssessmentQuestion[] = [
   },
 ];
 
-// ── Archetype definitions (18 = 9 types × 2 wings each) ──────────────────────
+// ── 9 core archetypes ─────────────────────────────────────────────────────────
 
-type ArchetypeMap = Record<string, Omit<Archetype, "topAxes">>;
-
-const ARCHETYPES: ArchetypeMap = {
-  "1w9": {
-    type: 1, wing: 9,
-    name: "The Principled Nomad",
-    tagline: "Meaningful, unhurried, and done right",
-    description: "You're drawn to places with genuine craft and integrity — where things are made well and tourism hasn't hollowed them out. Slower, more purposeful travel is your ideal: a week in one region done properly beats a rushed circuit of ten. Peace and authenticity matter to you in equal measure.",
-    axisWeights: { calm: 0.68, designSincerity: 0.85, valueIntegrity: 0.65, socialPermeability: 0.60, autonomy: 0.52, novelty: 0.48, locationFriction: 0.52 },
+export const CORE_ARCHETYPES: Record<number, Archetype> = {
+  1: {
+    type: 1,
+    name: "The Discerning Traveler",
+    tagline: "Principled, precise, and done right",
+    description: "You travel with standards — authentic experiences, genuine craft, and real value for money. Sloppy execution or tourist-trap shortcuts frustrate you. Your ideal trip is thoughtfully chosen, well-researched, and experienced with real intention.",
+    axisWeights: { calm: 0.6, designSincerity: 0.85, valueIntegrity: 0.9, socialPermeability: 0.6, autonomy: 0.5, novelty: 0.4, locationFriction: 0.5 },
   },
-  "1w2": {
-    type: 1, wing: 2,
-    name: "The Purposeful Explorer",
-    tagline: "Ethical, connected, and intentional",
-    description: "You travel with intention — ethical choices, locally-owned, leaving a place better than you found it. The connections you build along the way mean as much as the destination. You prefer quality over quantity and sincerity over spectacle.",
-    axisWeights: { calm: 0.62, designSincerity: 0.82, valueIntegrity: 0.62, socialPermeability: 0.42, autonomy: 0.45, novelty: 0.45, locationFriction: 0.58 },
+  2: {
+    type: 2,
+    name: "The Generous Connector",
+    tagline: "Warm, social, and people-first",
+    description: "Travel is fundamentally about people for you. You gravitate toward warm, social environments — family-run places, shared tables, guides who become friends. The best trip is one that leaves you richer in human connection.",
+    axisWeights: { calm: 0.5, designSincerity: 0.7, valueIntegrity: 0.6, socialPermeability: 0.3, autonomy: 0.4, novelty: 0.5, locationFriction: 0.6 },
   },
-  "2w1": {
-    type: 2, wing: 1,
-    name: "The Warmhearted Traveler",
-    tagline: "Connection-first, community-rooted",
-    description: "What makes a trip unforgettable is the people. You gravitate toward family-run guesthouses, local guides, and experiences that feel like genuine exchange rather than service. The best version of travel, for you, is one that creates real human connection.",
-    axisWeights: { calm: 0.58, designSincerity: 0.70, valueIntegrity: 0.60, socialPermeability: 0.15, autonomy: 0.38, novelty: 0.48, locationFriction: 0.68 },
+  3: {
+    type: 3,
+    name: "The Ambitious Explorer",
+    tagline: "Driven, impressive, and high-achieving",
+    description: "You set a high bar for your trips and clear it. Whether it's a prestigious destination or a demanding itinerary, you travel with drive and return with stories worth telling. Efficiency matters — wasted time is the only real travel failure.",
+    axisWeights: { calm: 0.4, designSincerity: 0.7, valueIntegrity: 0.6, socialPermeability: 0.4, autonomy: 0.6, novelty: 0.6, locationFriction: 0.3 },
   },
-  "2w3": {
-    type: 2, wing: 3,
-    name: "The Social Curator",
-    tagline: "People-focused, shareable, convivial",
-    description: "You travel to create shared experiences — and you have a talent for finding the places worth going to together. Lively, accessible, and worth sharing with others all matter to you. The best trip is one that brings people into the same room.",
-    axisWeights: { calm: 0.48, designSincerity: 0.58, valueIntegrity: 0.45, socialPermeability: 0.18, autonomy: 0.42, novelty: 0.35, locationFriction: 0.68 },
+  4: {
+    type: 4,
+    name: "The Soulful Seeker",
+    tagline: "Authentic, resonant, and beautifully unique",
+    description: "You're after places that resonate deeply — beautiful, unique, and genuinely far from the mainstream. You travel to feel something real, and you'd rather disappear into one extraordinary place than rush through ten average ones. Authenticity is non-negotiable.",
+    axisWeights: { calm: 0.7, designSincerity: 0.9, valueIntegrity: 0.7, socialPermeability: 0.7, autonomy: 0.7, novelty: 0.6, locationFriction: 0.5 },
   },
-  "3w2": {
-    type: 3, wing: 2,
-    name: "The Aspirational Explorer",
-    tagline: "Impressive, people-connected, efficient",
-    description: "You're drawn to destinations at the top of everyone's list — but you want to experience them right, not just pass through. Travel is both personal achievement and a way to connect with people who share your ambitions. You move efficiently and come back with things worth sharing.",
-    axisWeights: { calm: 0.38, designSincerity: 0.48, valueIntegrity: 0.28, socialPermeability: 0.28, autonomy: 0.58, novelty: 0.22, locationFriction: 0.65 },
+  5: {
+    type: 5,
+    name: "The Curious Observer",
+    tagline: "Immersive, intellectual, and deeply private",
+    description: "You travel to understand, not just to see. Long mornings at a quiet museum, a conversation with a local expert, hours inside a single neighborhood — these are the moments that matter. You prefer solitude and depth over packed social itineraries.",
+    axisWeights: { calm: 0.8, designSincerity: 0.8, valueIntegrity: 0.75, socialPermeability: 0.8, autonomy: 0.8, novelty: 0.5, locationFriction: 0.5 },
   },
-  "3w4": {
-    type: 3, wing: 4,
-    name: "The Achievement Seeker",
-    tagline: "Ambitious itineraries with emotional depth",
-    description: "You set high bars for your trips — not just for the story, but because you genuinely want experiences that matter. You want to come back with things that challenged or moved you, not just a checklist. Travel is how you measure how fully you're living.",
-    axisWeights: { calm: 0.42, designSincerity: 0.58, valueIntegrity: 0.32, socialPermeability: 0.40, autonomy: 0.62, novelty: 0.20, locationFriction: 0.60 },
+  6: {
+    type: 6,
+    name: "The Prepared Traveler",
+    tagline: "Reliable, well-researched, comfortably confident",
+    description: "You travel with confidence because you've done the work. Trusted recommendations, solid logistics, and a well-understood destination let you fully relax and enjoy. Reliability isn't a limitation — it's what makes the trip actually good.",
+    axisWeights: { calm: 0.6, designSincerity: 0.7, valueIntegrity: 0.8, socialPermeability: 0.5, autonomy: 0.4, novelty: 0.3, locationFriction: 0.6 },
   },
-  "4w3": {
-    type: 4, wing: 3,
-    name: "The Aesthetic Voyager",
-    tagline: "Beautiful, singular, quietly impressive",
-    description: "You seek beauty and experiences that feel genuinely distinctive. You want your travels to be memorable not because they're trendy, but because they're true. You find places worth photographing before anyone else does — and sometimes that's the whole point.",
-    axisWeights: { calm: 0.52, designSincerity: 0.88, valueIntegrity: 0.48, socialPermeability: 0.62, autonomy: 0.72, novelty: 0.18, locationFriction: 0.42 },
+  7: {
+    type: 7,
+    name: "The Enthusiastic Adventurer",
+    tagline: "Fun-first, variety-driven, endlessly curious",
+    description: "You want it all — every experience, every neighborhood, every local recommendation. Variety and novelty are your fuel. You move fast, keep the plan loose, and always manage to find the best thing happening anywhere you land.",
+    axisWeights: { calm: 0.3, designSincerity: 0.6, valueIntegrity: 0.5, socialPermeability: 0.3, autonomy: 0.8, novelty: 0.8, locationFriction: 0.4 },
   },
-  "4w5": {
-    type: 4, wing: 5,
-    name: "The Deep Romantic",
-    tagline: "Obscure, emotionally resonant, transformative",
-    description: "You travel to feel things deeply. You're most at home in obscure, emotionally resonant places where you can disappear for days and come back changed. Crowds and packed itineraries are the enemy of the kind of travel you actually want.",
-    axisWeights: { calm: 0.58, designSincerity: 0.90, valueIntegrity: 0.52, socialPermeability: 0.78, autonomy: 0.78, novelty: 0.15, locationFriction: 0.32 },
+  8: {
+    type: 8,
+    name: "The Bold Leader",
+    tagline: "Confident, direct, and unapologetically real",
+    description: "You travel with confidence and directness. Remote, raw, and real is your preference — you don't need luxury, but you demand authenticity. You make your own rules on the road and come back having done things others only ever talk about.",
+    axisWeights: { calm: 0.5, designSincerity: 0.8, valueIntegrity: 0.85, socialPermeability: 0.5, autonomy: 0.9, novelty: 0.6, locationFriction: 0.4 },
   },
-  "5w4": {
-    type: 5, wing: 4,
-    name: "The Curious Scholar",
-    tagline: "Immersive, layered, beautifully quiet",
-    description: "You travel to understand. You're drawn to places with layered histories, living craft traditions, and long afternoons free for observation. The best souvenir is something you know — about a culture, a technique, a place — that you couldn't have learned any other way.",
-    axisWeights: { calm: 0.68, designSincerity: 0.82, valueIntegrity: 0.65, socialPermeability: 0.88, autonomy: 0.82, novelty: 0.28, locationFriction: 0.28 },
-  },
-  "5w6": {
-    type: 5, wing: 6,
-    name: "The Methodical Explorer",
-    tagline: "Researched, immersive, deliberately chosen",
-    description: "You prepare thoroughly and travel deliberately. Deep immersion in one well-chosen destination beats a rushed tour of many. You're most relaxed when you've done the work in advance — culturally, logistically, historically.",
-    axisWeights: { calm: 0.70, designSincerity: 0.78, valueIntegrity: 0.68, socialPermeability: 0.82, autonomy: 0.72, novelty: 0.38, locationFriction: 0.38 },
-  },
-  "6w5": {
-    type: 6, wing: 5,
-    name: "The Thoughtful Planner",
-    tagline: "Reliable, well-researched, comfortably familiar",
-    description: "You travel confidently when you've done your homework. Trusted recommendations, clear logistics, and a known-quantity destination let you fully relax and enjoy. Reliability is a feature, not a limitation — and you've built a list of places you love returning to.",
-    axisWeights: { calm: 0.70, designSincerity: 0.62, valueIntegrity: 0.70, socialPermeability: 0.55, autonomy: 0.28, novelty: 0.62, locationFriction: 0.72 },
-  },
-  "6w7": {
-    type: 6, wing: 7,
-    name: "The Spirited Realist",
-    tagline: "Adventure within a sensible framework",
-    description: "You want real adventure — but not at the cost of basic comfort. Plan carefully, choose well, then give yourself permission to enjoy the ride. You're happiest when the itinerary has a few surprises, all of them well within reach.",
-    axisWeights: { calm: 0.60, designSincerity: 0.58, valueIntegrity: 0.65, socialPermeability: 0.42, autonomy: 0.35, novelty: 0.48, locationFriction: 0.68 },
-  },
-  "7w6": {
-    type: 7, wing: 6,
-    name: "The Joyful Wanderer",
-    tagline: "Fun-first, social, endlessly curious",
-    description: "You want to do everything, see everything, and laugh the whole time. Fun and variety are your north stars when you travel. You do best with good company, a loose plan, and total openness to whatever the day decides to bring.",
-    axisWeights: { calm: 0.25, designSincerity: 0.55, valueIntegrity: 0.48, socialPermeability: 0.22, autonomy: 0.75, novelty: 0.12, locationFriction: 0.58 },
-  },
-  "7w8": {
-    type: 7, wing: 8,
-    name: "The Relentless Adventurer",
-    tagline: "Maximum variety, maximum intensity",
-    description: "You're at your best when the trip has no ceiling. You pack more into a week than most manage in a month — and you wouldn't have it any other way. The only bad trip is one you planned too safely.",
-    axisWeights: { calm: 0.18, designSincerity: 0.52, valueIntegrity: 0.45, socialPermeability: 0.25, autonomy: 0.85, novelty: 0.08, locationFriction: 0.48 },
-  },
-  "8w7": {
-    type: 8, wing: 7,
-    name: "The Bold Pioneer",
-    tagline: "Challenging, intense, gloriously real",
-    description: "You seek the edge of the map. Remote, rugged, and unglamorous is your ideal — as long as it's genuine. You travel to push yourself and come back having done something few others would attempt or even consider.",
-    axisWeights: { calm: 0.20, designSincerity: 0.68, valueIntegrity: 0.50, socialPermeability: 0.55, autonomy: 0.88, novelty: 0.22, locationFriction: 0.20 },
-  },
-  "8w9": {
-    type: 8, wing: 9,
-    name: "The Grounded Challenger",
-    tagline: "Bold, earthy, wide open",
-    description: "You're drawn to intense experiences in vast, elemental places — wilderness, mountains, remote coastline. You need the freedom to move through a landscape on your own terms, at your own pace, without anyone telling you where to be.",
-    axisWeights: { calm: 0.35, designSincerity: 0.70, valueIntegrity: 0.55, socialPermeability: 0.65, autonomy: 0.82, novelty: 0.28, locationFriction: 0.20 },
-  },
-  "9w8": {
-    type: 9, wing: 8,
-    name: "The Peaceful Wanderer",
-    tagline: "Serene, unhurried, occasionally wild",
-    description: "You travel to breathe. Serenity, flow, and genuine rest are your real destination — whatever the destination happens to be. You're not in a hurry, and that is precisely the point. Occasionally, something bolder calls to you, and you answer.",
-    axisWeights: { calm: 0.88, designSincerity: 0.65, valueIntegrity: 0.65, socialPermeability: 0.52, autonomy: 0.62, novelty: 0.52, locationFriction: 0.52 },
-  },
-  "9w1": {
-    type: 9, wing: 1,
-    name: "The Mindful Traveler",
-    tagline: "Gentle, deliberate, beautifully present",
-    description: "You travel slowly and thoughtfully, choosing places that reward full presence. Authenticity and beauty matter to you, but the greatest luxury is having nowhere to be. You return from trips actually rested — and you carry something of every place with you.",
-    axisWeights: { calm: 0.90, designSincerity: 0.72, valueIntegrity: 0.68, socialPermeability: 0.55, autonomy: 0.58, novelty: 0.55, locationFriction: 0.55 },
+  9: {
+    type: 9,
+    name: "The Grounded Explorer",
+    tagline: "Serene, unhurried, and genuinely present",
+    description: "You travel to rest and reconnect — with a place, with yourself, or with the people you're with. You don't need a packed itinerary; you need the freedom to move at your own pace through beautiful, unhurried places. Serenity is always the real destination.",
+    axisWeights: { calm: 0.8, designSincerity: 0.85, valueIntegrity: 0.9, socialPermeability: 0.7, autonomy: 0.6, novelty: 0.5, locationFriction: 0.4 },
   },
 };
 
-// ── Scoring ───────────────────────────────────────────────────────────────────
-
-function adjacentTypes(type: number): [number, number] {
-  if (type === 1) return [9, 2];
-  if (type === 9) return [8, 1];
-  return [(type - 1) as number, (type + 1) as number];
+export function getArchetypeForType(type: number): Archetype {
+  return CORE_ARCHETYPES[type] ?? CORE_ARCHETYPES[9];
 }
+
+// ── Scoring ───────────────────────────────────────────────────────────────────
 
 export function scoreAssessment(answers: Record<number, "A" | "B">): AssessmentResult {
   const scores = new Array(10).fill(0) as number[];
@@ -309,24 +243,18 @@ export function scoreAssessment(answers: Record<number, "A" | "B">): AssessmentR
     scores[answer === "A" ? q.typeA : q.typeB]++;
   }
 
-  // Top type — break ties by sum of adjacent scores
-  let topType = 1;
-  for (let i = 2; i <= 9; i++) {
-    if (scores[i] > scores[topType]) topType = i;
-    else if (scores[i] === scores[topType]) {
-      const [a1, a2] = adjacentTypes(i);
-      const [b1, b2] = adjacentTypes(topType);
-      if (scores[a1] + scores[a2] > scores[b1] + scores[b2]) topType = i;
-    }
-  }
+  // Rank types 1-9 by score descending
+  const ranked = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort((a, b) => scores[b] - scores[a]);
+  const topType = ranked[0];
+  const runnerUpTypes = [ranked[1], ranked[2]];
 
-  // Wing — higher-scoring adjacent type
-  const [w1, w2] = adjacentTypes(topType);
-  const wing = scores[w1] >= scores[w2] ? w1 : w2;
+  // Confidence based on gap between 1st and 2nd
+  const gap = scores[topType] - scores[ranked[1]];
+  const confidence: AssessmentResult["confidence"] =
+    gap >= 3 ? "high" : gap >= 1 ? "medium" : "low";
 
-  const key = `${topType}w${wing}`;
-  const base = ARCHETYPES[key] ?? ARCHETYPES[Object.keys(ARCHETYPES)[0]];
+  const base = CORE_ARCHETYPES[topType];
   const topAxes = getTopAxes(base.axisWeights);
 
-  return { ...base, typeScores: scores, topAxes };
+  return { ...base, typeScores: scores, topAxes, confidence, runnerUpTypes };
 }
