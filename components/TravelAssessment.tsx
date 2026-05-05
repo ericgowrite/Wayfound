@@ -9,7 +9,7 @@ interface Props {
   onSkip: () => void;
 }
 
-type Phase = "questions" | "result" | "alternatives";
+type Phase = "intro" | "questions" | "result" | "alternatives";
 
 const CONFIDENCE_LABEL = {
   high:   { text: "Strong match",        color: "text-green-600 dark:text-green-400" },
@@ -18,7 +18,7 @@ const CONFIDENCE_LABEL = {
 };
 
 export default function TravelAssessment({ prefilledName, onComplete, onSkip }: Props) {
-  const [phase, setPhase] = useState<Phase>("questions");
+  const [phase, setPhase] = useState<Phase>("intro");
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, "A" | "B">>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
@@ -66,7 +66,7 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
     setAnimating(false);
     setResult(null);
     setActiveType(null);
-    setPhase("questions");
+    setPhase("intro");
   }
 
   function handleAccept() {
@@ -90,6 +90,35 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
 
   const progress = Math.round((idx / QUESTIONS.length) * 100);
   const q = QUESTIONS[idx];
+
+  // ── Intro screen ─────────────────────────────────────────────────────────────
+  if (phase === "intro") {
+    return (
+      <div className="flex flex-col h-full justify-center px-6 py-10">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Travel Style Assessment
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+          The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you.
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-8">Takes about 5 minutes.</p>
+        <button
+          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+          onClick={() => setPhase("questions")}
+        >
+          Start Assessment →
+        </button>
+        <div className="mt-3 text-center">
+          <button
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            onClick={onSkip}
+          >
+            Set up manually instead
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // ── Alternatives screen ──────────────────────────────────────────────────────
   if (phase === "alternatives" && result) {

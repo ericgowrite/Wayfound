@@ -39,11 +39,18 @@ export default function ResultCard({
   onDeepDive,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [showFullExplanation, setShowFullExplanation] = useState(false);
   const [notes, setNotes] = useState(option.notes);
   const [deepDiveText, setDeepDiveText] = useState("");
   const [loadingDive, setLoadingDive] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function isValidSourceUrl(src: string | undefined): boolean {
+    if (!src) return false;
+    const s = src.trim();
+    return s.startsWith("http://") || s.startsWith("https://");
+  }
 
   const score = option.alignmentScore;
   const tier = fitTier(score);
@@ -157,9 +164,19 @@ export default function ResultCard({
               <span className="text-gray-500 dark:text-gray-400 text-sm">{option.price}</span>
             )}
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">
-            {option.fitExplanation}
-          </p>
+          <div className="mt-1">
+            <p className={`text-gray-600 dark:text-gray-400 text-sm leading-relaxed ${showFullExplanation ? "" : "line-clamp-3"}`}>
+              {option.fitExplanation}
+            </p>
+            {option.fitExplanation && option.fitExplanation.length > 160 && (
+              <button
+                className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 mt-0.5 transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowFullExplanation((v) => !v); }}
+              >
+                {showFullExplanation ? "Read less" : "Read more"}
+              </button>
+            )}
+          </div>
           {option.thresholdViolations.length > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {option.thresholdViolations.map((v) => (
@@ -227,9 +244,9 @@ export default function ResultCard({
                   </ul>
                 </div>
               )}
-              {option.source && (
+              {isValidSourceUrl(option.source) && (
                 <a
-                  href={option.source.startsWith("http") ? option.source : `https://${option.source}`}
+                  href={option.source!.trim()}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline text-sm inline-flex items-center gap-1"

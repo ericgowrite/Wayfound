@@ -82,7 +82,7 @@ Search the web for this query, then score each result against the profile.
 For each option found (aim for 4-8 results), return a JSON array:
 [{
   "name": "Option name",
-  "source": "URL or source",
+  "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description",
   "price": "Price if available",
   "axisScores": {
@@ -144,7 +144,7 @@ ${profile.id === "combined" ? `This is a combined profile for multiple travelers
 Return a JSON array using the same structure:
 [{
   "name": "Option name",
-  "source": "URL or source",
+  "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description",
   "price": "Price if available",
   "axisScores": { "calm": 0.0-1.0, "designSincerity": 0.0-1.0, "valueIntegrity": 0.0-1.0, "socialPermeability": 0.0-1.0, "autonomy": 0.0-1.0, "novelty": 0.0-1.0, "locationFriction": 0.0-1.0 },
@@ -218,7 +218,7 @@ ${isUrl ? "Fetch the page and use that content to score this option." : "Search 
 Return a single JSON object (not an array):
 {
   "name": "Option name",
-  "source": "URL or source",
+  "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description (2-3 sentences)",
   "price": "Price if found, otherwise omit",
   "axisScores": {

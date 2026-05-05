@@ -127,8 +127,11 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {/* Step 2: Know your type? */}
           {step === "know-type" && (
             <div className="space-y-3">
-              <p className="text-gray-700 dark:text-gray-300 text-sm">
-                Does <span className="text-gray-900 dark:text-white font-medium">{name}</span> know their Enneagram type?
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for you.
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 text-sm pt-1">
+                Does <span className="text-gray-900 dark:text-white font-medium">{name}</span> already know their Enneagram type?
               </p>
               <div className="flex flex-col gap-2 pt-1">
                 <button
