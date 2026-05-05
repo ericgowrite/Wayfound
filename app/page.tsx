@@ -145,7 +145,7 @@ export default function Home() {
         <div className="w-full max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
           <div className="px-6 pt-6 pb-0 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">ViyaGuide</span>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">Viya</span>
               <span className="text-xs text-gray-400 dark:text-gray-600">Welcome</span>
             </div>
           </div>
@@ -169,8 +169,8 @@ export default function Home() {
       <div className="w-56 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
         {/* App header */}
         <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">ViyaGuide</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Personal Travel Search</p>
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Viya</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Travel that feels like you</p>
         </div>
 
         <div className="flex-1 overflow-auto">
