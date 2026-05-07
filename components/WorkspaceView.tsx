@@ -11,6 +11,7 @@ import {
 } from "@/types";
 import { sortByAlignment, sortByGroupFit } from "@/lib/scoring";
 import { CATEGORY_META } from "@/lib/categories";
+import CategorySelect from "@/components/CategorySelect";
 import {
   trackSave,
   trackReject,
@@ -30,14 +31,6 @@ interface Props {
   onChange: (w: TripWorkspace) => void;
   onProfileUpdate: (profile: Profile) => void;
 }
-
-const CATEGORIES: SearchCategory[] = [
-  "accommodation",
-  "tour",
-  "restaurant",
-  "activity",
-  "destination",
-];
 
 type SortMode = "fit" | "group";
 
@@ -180,14 +173,19 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   }
 
   async function updateWorkspace(updated: TripWorkspace) {
-    const res = await fetch(`/api/workspaces/${updated.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
-    });
-    const saved = await res.json();
-    onChange(saved);
-    return saved;
+    try {
+      const res = await fetch(`/api/workspaces/${updated.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const saved = await res.json();
+      onChange(saved);
+      return saved;
+    } catch (e) {
+      console.error("Failed to save workspace:", e);
+    }
   }
 
   function handleSaveOption(option: ScoredOption) {
@@ -378,17 +376,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <select
-              className={`${inputCls} text-sm rounded-lg border px-2 py-2 focus:outline-none transition-colors`}
-              value={category}
-              onChange={(e) => setCategory(e.target.value as SearchCategory)}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c.charAt(0).toUpperCase() + c.slice(1)}
-                </option>
-              ))}
-            </select>
+            <CategorySelect value={category} onChange={setCategory} />
             <button
               className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               onClick={handleSearch}
@@ -413,17 +401,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               onChange={(e) => setScoreInput(e.target.value)}
             />
             <div className="flex gap-2">
-              <select
-                className={`${inputCls} text-sm rounded-lg border px-2 py-1.5 focus:outline-none transition-colors`}
-                value={category}
-                onChange={(e) => setCategory(e.target.value as SearchCategory)}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
-                  </option>
-                ))}
-              </select>
+              <CategorySelect value={category} onChange={setCategory} />
               <button
                 className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 onClick={handleScore}
@@ -481,7 +459,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {workspace.searches.length > 1 && (
               <div className="mb-4 flex gap-2 flex-wrap">
                 {workspace.searches.map((s) => {
-                  const meta = CATEGORY_META[s.category];
+                  const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                   const isActive = s.id === activeSearchId;
                   return (
                     <button
@@ -505,7 +483,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {showCategoryTabs && (
               <div className="mb-3 flex gap-1 flex-wrap">
                 {siblingSearches.map((s) => {
-                  const meta = CATEGORY_META[s.category];
+                  const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                   const isActive = (categoryFilter ?? activeSearch?.category) === s.category;
                   return (
                     <button
@@ -602,7 +580,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <div className="space-y-3">
                 <p className="text-gray-400 dark:text-gray-500 text-xs">
                   {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
-                  {" · "}{CATEGORY_META[displayedSearch!.category].icon} {CATEGORY_META[displayedSearch!.category].label}
+                  {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
                   {" · "}&quot;{displayedSearch!.query}&quot;
                 </p>
                 {sortedResults.map((option) => (
@@ -711,6 +689,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <ComparisonView
           options={selectedOptions}
           profileWeights={profileWeights}
+          workspaceId={workspace.id}
           onClose={() => setShowComparison(false)}
         />
       )}

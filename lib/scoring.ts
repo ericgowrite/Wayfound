@@ -44,19 +44,46 @@ export function scoreForProfile(
   };
 }
 
-// Attach per-traveler scores to each option using the intrinsic axisScores.
-// No extra API calls — just applies each profile's weights locally.
+/**
+ * Attach per-traveler scores and reconcile the headline alignmentScore.
+ *
+ * The AI returns an estimated alignmentScore that can diverge from the actual
+ * weighted formula. This function:
+ *   1. Computes each traveler's score locally (formula is authoritative).
+ *   2. Overwrites alignmentScore with the average of all traveler scores.
+ *   3. Overwrites thresholdViolations with the union across all travelers.
+ *
+ * Result: headline score, per-traveler bars, and "min" badge are all derived
+ * from the same formula and will always be consistent.
+ */
 export function attachTravelerScores(
   options: ScoredOption[],
   profiles: Profile[]
 ): ScoredOption[] {
   if (profiles.length === 0) return options;
-  return options.map((opt) => ({
-    ...opt,
-    travelerScores: Object.fromEntries(
+  return options.map((opt) => {
+    const travelerScores = Object.fromEntries(
       profiles.map((p) => [p.id, scoreForProfile(opt.axisScores, p)])
-    ),
-  }));
+    );
+
+    // Headline = average of all traveler scores (formula-based, not AI estimate)
+    const scoreValues = profiles.map((p) => travelerScores[p.id].alignmentScore);
+    const alignmentScore = Math.round(
+      scoreValues.reduce((sum, s) => sum + s, 0) / scoreValues.length
+    );
+
+    // Threshold violations = union across all travelers (surface any violation)
+    const thresholdViolations = [
+      ...new Set(profiles.flatMap((p) => travelerScores[p.id].thresholdViolations)),
+    ];
+
+    return {
+      ...opt,
+      alignmentScore,
+      thresholdViolations,
+      travelerScores,
+    };
+  });
 }
 
 export function sortByAlignment(options: ScoredOption[]): ScoredOption[] {

@@ -48,7 +48,7 @@ export type SearchCategory =
   | "tour"
   | "restaurant"
   | "activity"
-  | "destination";
+  | "attraction";
 
 export interface Search {
   id: string;
@@ -83,6 +83,7 @@ export interface ScoredOption {
   axisScores: AxisWeights;
   alignmentScore: number;
   thresholdViolations: string[];
+  watchOutFor: string[];
   dealbreakersTriggered: string[];
   fitExplanation: string;
   tradeoffs: string[];

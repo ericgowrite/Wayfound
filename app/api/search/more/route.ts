@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { searchMoreOptions } from "@/lib/gemini";
-import { attachTravelerScores, combineProfiles } from "@/lib/scoring";
+import { attachTravelerScores } from "@/lib/scoring";
 
 export async function POST(request: Request) {
   try {
@@ -18,17 +18,14 @@ export async function POST(request: Request) {
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
-    const searchProfile =
-      travelerProfiles.length > 1
-        ? combineProfiles(travelerProfiles)
-        : (travelerProfiles[0] ?? getProfile());
+    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [getProfile()];
 
     const alreadySeen = search.scoredResults.map((r) => r.name);
     const rawResults = await searchMoreOptions(
       search.query,
       search.category,
       searchId,
-      searchProfile,
+      profiles,
       alreadySeen
     );
     const newResults = attachTravelerScores(rawResults, travelerProfiles);

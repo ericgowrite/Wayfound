@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Profile, ScoredOption, SearchCategory, DeepDiveResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
+import { combineProfiles } from "@/lib/scoring";
 
 function getClient() {
   return new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
@@ -85,6 +86,7 @@ function hydrate(
     notes: "",
     source: sanitizeSourceUrl(item.source),
     thresholdViolations: item.thresholdViolations ?? [],
+    watchOutFor: item.watchOutFor ?? [],
     dealbreakersTriggered: item.dealbreakersTriggered ?? [],
     tradeoffs: item.tradeoffs ?? [],
   };
@@ -112,8 +114,61 @@ const AXIS_GUIDE = `Axis scoring guide:
 - locationFriction: 0=remote/hard to access, 1=very convenient/easy`;
 
 function thresholdLine(profile: Profile): string {
-  return `Profile thresholds: calm < ${profile.thresholds.calm ?? "N/A"}, valueIntegrity < ${profile.thresholds.valueIntegrity ?? "N/A"} → list in thresholdViolations.
+  const entries = (Object.entries(profile.thresholds) as [string, number | undefined][])
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => `${k} < ${v}`);
+  const thresholdStr = entries.length > 0 ? entries.join(", ") : "none";
+  return `Profile thresholds (list axis name in thresholdViolations if its score falls below): ${thresholdStr}.
 Dealbreakers: ${profile.dealbreakers.join("; ")}`;
+}
+
+/**
+ * Build profile context for the Gemini prompt.
+ *
+ * Solo   → returns combined profile JSON + empty group instruction.
+ * Group  → returns combined-weights profile for scoring + per-traveler
+ *           summaries + instruction to write a group-aware fitExplanation.
+ */
+function buildGroupContext(profiles: Profile[]): {
+  scoringProfile: Profile;
+  profileSection: string;
+  fitExplanationInstruction: string;
+} {
+  if (profiles.length <= 1) {
+    const p = profiles[0];
+    return {
+      scoringProfile: p,
+      profileSection: `TRAVELER PROFILE:\n${JSON.stringify(p, null, 2)}`,
+      fitExplanationInstruction: `"fitExplanation": "2-3 sentences explaining why this fits or doesn't fit the profile"`,
+    };
+  }
+
+  const combined = combineProfiles(profiles);
+  const names = profiles.map((p) => p.name).join(" and ");
+
+  // Top-3 axes by weight for each traveler — gives Gemini specific anchors
+  const travelerSummaries = profiles
+    .map((p) => {
+      const topAxes = (Object.entries(p.axisWeights) as [string, number][])
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([k]) => k)
+        .join(", ");
+      return `  - ${p.name} (${p.enneagramType}): top priorities — ${topAxes}; dealbreakers: ${p.dealbreakers.join("; ")}`;
+    })
+    .join("\n");
+
+  return {
+    scoringProfile: combined,
+    profileSection: `GROUP TRIP — ${names}
+
+SCORING PROFILE (combined weights — use for axis scores and alignmentScore):
+${JSON.stringify(combined, null, 2)}
+
+INDIVIDUAL TRAVELERS — reference each by name in fitExplanation:
+${travelerSummaries}`,
+    fitExplanationInstruction: `"fitExplanation": "2-4 sentences covering ALL travelers by name (${names}). Reference what specifically works (or doesn't) for each person based on their individual priorities. Integrate naturally — don't just list. Example structure: 'Works well for both [names]. [Name1] will appreciate [specific fit]. [Name2] benefits from [specific fit]. [Any concern for either traveler].' If profiles are very similar, say so briefly without repeating."`,
+  };
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -122,13 +177,13 @@ export async function searchAndScore(
   query: string,
   category: SearchCategory,
   searchId: string,
-  profile: Profile
+  profiles: Profile[]
 ): Promise<ScoredOption[]> {
   const systemPrompt = buildSystemPrompt("search");
+  const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
 
   const prompt = `
-TRAVELER PROFILE:
-${JSON.stringify(profile, null, 2)}
+${profileSection}
 
 QUERY: "${query}" (category: ${category})
 
@@ -143,8 +198,9 @@ For each option found (aim for 4-8 results), return a JSON array:
   ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
   "thresholdViolations": ["axis names that fall below profile thresholds"],
-  "dealbreakersTriggered": ["dealbreaker descriptions if any apply"],
-  "fitExplanation": "2-3 sentences explaining why this fits or doesn't fit the profile",
+  "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
+  "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
+  ${fitExplanationInstruction},
   "tradeoffs": ["tradeoff 1", "tradeoff 2"]
 }]
 
@@ -152,7 +208,7 @@ Return ONLY a valid JSON array. No markdown, no explanation outside the JSON.
 
 ${AXIS_GUIDE}
 
-${thresholdLine(profile)}`.trim();
+${thresholdLine(scoringProfile)}`.trim();
 
   const raw = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "search");
@@ -163,15 +219,15 @@ export async function searchMoreOptions(
   query: string,
   category: SearchCategory,
   searchId: string,
-  profile: Profile,
+  profiles: Profile[],
   alreadySeen: string[]
 ): Promise<ScoredOption[]> {
   const systemPrompt = buildSystemPrompt("moreOptions");
+  const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
   const avoidList = alreadySeen.map((n) => `- ${n}`).join("\n");
 
   const prompt = `
-TRAVELER PROFILE:
-${JSON.stringify(profile, null, 2)}
+${profileSection}
 
 QUERY: "${query}" (category: ${category})
 
@@ -180,7 +236,7 @@ ${avoidList}
 
 Search for more options matching this query. Find 4-6 genuinely different options not listed above.
 Prioritize results that score highest against this profile's axis weights.
-${profile.id === "combined" ? `This is a combined profile for multiple travelers — find options that work well for everyone.` : ""}
+${profiles.length > 1 ? `This is a group trip — find options that work well for all travelers.` : ""}
 
 Return a JSON array using the same structure:
 [{
@@ -190,13 +246,18 @@ Return a JSON array using the same structure:
   "price": "Price if available",
   ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
-  "thresholdViolations": [],
-  "dealbreakersTriggered": [],
-  "fitExplanation": "2-3 sentences",
+  "thresholdViolations": ["axis names that fall below profile thresholds"],
+  "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
+  "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
+  ${fitExplanationInstruction},
   "tradeoffs": ["tradeoff 1", "tradeoff 2"]
 }]
 
-Return ONLY valid JSON array. No markdown.`.trim();
+Return ONLY valid JSON array. No markdown.
+
+${AXIS_GUIDE}
+
+${thresholdLine(scoringProfile)}`.trim();
 
   const raw = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
@@ -205,19 +266,24 @@ Return ONLY valid JSON array. No markdown.`.trim();
 
 export async function generateComparison(
   options: ScoredOption[],
-  profile: Profile
+  profiles: Profile[]
 ): Promise<string> {
   const systemPrompt = buildSystemPrompt("comparison");
+  const isGroup = profiles.length > 1;
+  const names = profiles.map((p) => p.name).join(" and ");
+  const travelerContext = isGroup
+    ? `${names} (group trip)`
+    : `${profiles[0]?.name ?? "the traveler"} (Type ${profiles[0]?.enneagramType ?? ""})`;
 
-  const prompt = `Compare these ${options.length} travel options for ${profile.name} (Type ${profile.enneagramType}):
+  const prompt = `Compare these ${options.length} travel options for ${travelerContext}:
 
 ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
 - Alignment: ${o.alignmentScore}%
-- Axis scores: ${JSON.stringify(o.axisScores)}
 - Fit: ${o.fitExplanation}
 - Tradeoffs: ${o.tradeoffs.join(", ")}`).join("\n\n")}
 
-Write a 3-4 sentence comparison summary focusing on which option best fits the profile and why.
+Write a 3-4 sentence comparison focusing on which option best fits ${isGroup ? `the group (${names})` : "the traveler"} and why.
+${isGroup ? `Reference individual travelers by name where their priorities differ.` : ""}
 Highlight the key differentiators. Be direct and specific.`;
 
   const raw = await callPlain(systemPrompt, prompt);
@@ -227,23 +293,51 @@ Highlight the key differentiators. Be direct and specific.`;
 
 export async function generateDeepDive(
   option: ScoredOption,
-  profile: Profile
+  profiles: Profile[]
 ): Promise<DeepDiveResult> {
   const systemPrompt = buildSystemPrompt("deepDive");
 
-  const prompt = `Do a deep dive on "${option.name}" for ${profile.name} (travel type: ${profile.enneagramType}).
+  const isGroup = profiles.length > 1;
+  const names = profiles.map((p) => p.name).join(" and ");
+  const travelerIntro = isGroup
+    ? `${names} (group trip)`
+    : `${profiles[0]?.name ?? "the traveler"} (travel type: ${profiles[0]?.enneagramType ?? ""})`;
+
+  const travelerSummaries = isGroup
+    ? `\nINDIVIDUAL TRAVELERS (reference each by name in whyItFits and bottomLine):\n` +
+      profiles
+        .map((p) => {
+          const topAxes = (Object.entries(p.axisWeights) as [string, number][])
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 3)
+            .map(([k]) => k)
+            .join(", ");
+          return `  - ${p.name} (${p.enneagramType}): top priorities — ${topAxes}; dealbreakers: ${p.dealbreakers.join("; ")}`;
+        })
+        .join("\n")
+    : "";
+
+  const whyItFitsInstruction = isGroup
+    ? `"whyItFits": ["3-6 reasons this option works for the group — reference individual travelers by name where their priorities differ. E.g. '${profiles[0]?.name} will appreciate X, while ${profiles[1]?.name} benefits from Y.' For shared strengths, say 'Both ${names} will appreciate...'"]`
+    : `"whyItFits": ["3-5 specific reasons this option aligns with this traveler's style and preferences — write in plain language, do NOT reference axis names or numeric scores"]`;
+
+  const bottomLineInstruction = isGroup
+    ? `"bottomLine": "2-3 sentences with a direct group recommendation: should ${names} book it, and why or why not. Note any meaningful difference in fit between the two travelers."`
+    : `"bottomLine": "2-3 sentences with a direct recommendation: should this traveler book it, and why or why not"`;
+
+  const prompt = `Do a deep dive on "${option.name}" for ${travelerIntro}.
 
 Search the web for detailed information, recent reviews, and specific details about this option.
 Current fit score: ${option.alignmentScore}%
-Profile axis weights (for your internal reasoning only — do NOT mention these values or axis names in your output): ${JSON.stringify(option.axisScores)}
-
+Axis scores (for your internal reasoning only — do NOT mention axis names or numeric scores in your output): ${JSON.stringify(option.axisScores)}
+${travelerSummaries}
 Return ONLY a valid JSON object with exactly these fields (no markdown, no extra text):
 {
   "overview": "2-3 sentences covering location, what it is, any notable awards or recognition, and key facts",
-  "whyItFits": ["3-5 specific reasons this option aligns with this traveler's style and preferences — write in plain language, do NOT reference axis names or numeric scores"],
-  "watchOutFor": ["1-3 honest cautions, limitations, or tradeoffs to be aware of"],
+  ${whyItFitsInstruction},
+  "watchOutFor": ["1-3 honest cautions, limitations, or tradeoffs to be aware of — note if a concern is specific to one traveler"],
   "standoutFeatures": ["3-5 notable amenities, unique features, or details that make this option distinctive"],
-  "bottomLine": "2-3 sentences with a direct recommendation: should this traveler book it, and why or why not"
+  ${bottomLineInstruction}
 }
 
 Each array item should be a single concise bullet (1-2 lines max). Be specific and honest. Never include axis names (calm, designSincerity, valueIntegrity, etc.) or numeric scores in any field.`;
@@ -282,17 +376,17 @@ export async function scoreSpecific(
   input: string,
   category: SearchCategory,
   searchId: string,
-  profile: Profile
+  profiles: Profile[]
 ): Promise<ScoredOption> {
   const systemPrompt = buildSystemPrompt("scoreSpecific");
+  const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
 
   // Capture any URL the user explicitly provided — this is authoritative (Sacred Rule 1).
   const userProvidedUrl = extractUserUrl(input);
   const isUrl = input.startsWith("http://") || input.startsWith("https://") || !!userProvidedUrl;
 
   const prompt = `
-TRAVELER PROFILE:
-${JSON.stringify(profile, null, 2)}
+${profileSection}
 
 OPTION TO SCORE:
 ${userProvidedUrl ? `URL: ${userProvidedUrl}` : `"${input}"`}
@@ -309,8 +403,9 @@ Return a single JSON object (not an array):
   ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
   "thresholdViolations": ["axis names below profile thresholds"],
-  "dealbreakersTriggered": ["any dealbreakers that apply"],
-  "fitExplanation": "2-3 sentences on why this fits or doesn't fit the profile",
+  "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
+  "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
+  ${fitExplanationInstruction},
   "tradeoffs": ["tradeoff 1", "tradeoff 2"]
 }
 
@@ -318,7 +413,7 @@ Return ONLY valid JSON. No markdown, no extra text.
 
 ${AXIS_GUIDE}
 
-${thresholdLine(profile)}`.trim();
+${thresholdLine(scoringProfile)}`.trim();
 
   const raw = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "scoreSpecific", { userProvidedUrl });

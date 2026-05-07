@@ -47,6 +47,7 @@ export default function ResultCard({
   const [notes, setNotes] = useState(option.notes);
   const [deepDive, setDeepDive] = useState<DeepDiveResult | null>(null);
   const [loadingDive, setLoadingDive] = useState(false);
+  const [deepDiveError, setDeepDiveError] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -112,10 +113,7 @@ export default function ResultCard({
   const tier = fitTier(score);
   const isSaved = workspace.savedOptions.some((s) => s.id === option.id);
 
-  const borderColor =
-    option.dealbreakersTriggered.length > 0
-      ? "border-red-400 dark:border-red-700"
-      : tier.border;
+  const borderColor = tier.border;
 
   const statusEmoji: Record<ScoredOption["status"], string> = {
     new: "",
@@ -126,18 +124,25 @@ export default function ResultCard({
 
   async function handleDeepDive() {
     setLoadingDive(true);
+    setDeepDiveError(false);
     try {
       const res = await fetch("/api/deepdive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ option }),
+        body: JSON.stringify({ option, workspaceId: workspace.id }),
       });
       const data = await res.json();
-      if (data.deepDive) setDeepDive(data.deepDive);
+      if (data.deepDive) {
+        setDeepDive(data.deepDive);
+        onDeepDive();
+      } else {
+        setDeepDiveError(true);
+      }
+    } catch {
+      setDeepDiveError(true);
     } finally {
       setLoadingDive(false);
     }
-    onDeepDive();
   }
 
   function handleScoreMouseEnter() {
@@ -204,10 +209,10 @@ export default function ResultCard({
               )}
             </div>
 
-            {hasMultipleTravelers && groupMin !== null && groupMinTier && (
+            {hasMultipleTravelers && groupMin !== null && groupMinTier && groupMin !== score && (
               <span
                 className={`text-xs px-1.5 py-0.5 rounded-full border font-medium ${groupMinTier.text} ${groupMinTier.border} ${groupMinTier.bg}`}
-                title="Lowest score across travelers"
+                title="Lowest individual score across travelers"
               >
                 min {groupMin}%
               </span>
@@ -246,6 +251,18 @@ export default function ResultCard({
                   className="text-xs bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 px-1.5 py-0.5 rounded-full"
                 >
                   ⚠ {v}
+                </span>
+              ))}
+            </div>
+          )}
+          {option.watchOutFor && option.watchOutFor.length > 0 && (
+            <div className="flex gap-1 mt-1.5 flex-wrap">
+              {option.watchOutFor.map((w) => (
+                <span
+                  key={w}
+                  className="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-1.5 py-0.5 rounded-full"
+                >
+                  ⚠ {w}
                 </span>
               ))}
             </div>
@@ -494,19 +511,24 @@ export default function ResultCard({
                 {s === "interested" ? "⭐ Interested" : s === "rejected" ? "✗ Reject" : "✅ Booked"}
               </button>
             ))}
-            <button
-              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto disabled:opacity-50"
-              onClick={handleDeepDive}
-              disabled={loadingDive}
-            >
-              {loadingDive ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="animate-spin inline-block">⟳</span> Researching…
-                </span>
-              ) : (
-                "Deep Dive →"
+            <div className="ml-auto flex items-center gap-2">
+              {deepDiveError && (
+                <span className="text-xs text-red-500 dark:text-red-400">Research failed — try again</span>
               )}
-            </button>
+              <button
+                className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                onClick={handleDeepDive}
+                disabled={loadingDive}
+              >
+                {loadingDive ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="animate-spin inline-block">⟳</span> Researching…
+                  </span>
+                ) : (
+                  deepDive ? "Re-research →" : "Deep Dive →"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

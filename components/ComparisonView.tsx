@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { ScoredOption, AXIS_KEYS, AXIS_LABELS, AxisWeights } from "@/types";
+import { fitTier } from "@/lib/fitScore";
 
 interface Props {
   options: ScoredOption[];
   profileWeights: AxisWeights;
+  workspaceId: string;
   onClose: () => void;
 }
 
-export default function ComparisonView({ options, profileWeights, onClose }: Props) {
+export default function ComparisonView({ options, profileWeights, workspaceId, onClose }: Props) {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,19 +21,14 @@ export default function ComparisonView({ options, profileWeights, onClose }: Pro
     fetch("/api/compare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ options }),
+      body: JSON.stringify({ options, workspaceId }),
     })
       .then((r) => r.json())
       .then((d) => setSummary(d.summary || ""))
       .finally(() => setLoading(false));
-  }, [options]);
+  }, [options, workspaceId]);
 
-  const scoreColor = (s: number) =>
-    s >= 80
-      ? "text-green-600 dark:text-green-400"
-      : s >= 60
-      ? "text-yellow-600 dark:text-yellow-400"
-      : "text-red-600 dark:text-red-400";
+  const scoreColor = (s: number) => fitTier(s).text;
 
   const maxScores: Partial<Record<keyof AxisWeights, number>> = {};
   for (const k of AXIS_KEYS) {

@@ -17,10 +17,10 @@ export async function POST(request: Request) {
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
-    const primaryProfile = travelerProfiles[0] ?? getProfile();
+    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [getProfile()];
 
     const searchId = uuidv4();
-    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, primaryProfile);
+    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles);
     const scoredResults = attachTravelerScores(rawResults, travelerProfiles);
 
     const search: Search = {
