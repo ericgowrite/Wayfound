@@ -47,7 +47,8 @@ export function getTopAxes(weights: AxisWeights): AssessmentResult["topAxes"] {
     }));
 }
 
-// ── Questions (18 total; each of the 9 types appears exactly 4 times) ─────────
+// ── Questions (21 total; each of the 9 types appears at least twice,
+//    with key discriminators added for accurate core-type detection) ─────────
 
 export const QUESTIONS: AssessmentQuestion[] = [
   {
@@ -157,6 +158,24 @@ export const QUESTIONS: AssessmentQuestion[] = [
     a: "I tend to return to regions I love rather than gamble on somewhere unfamiliar.",
     b: "I research new destinations thoroughly before I go — I want to do it properly.",
     typeA: 6, typeB: 1,
+  },
+  {
+    id: 18,
+    a: "I feel best when I know everyone on the trip is happy.",
+    b: "Others' moods don't affect my own experience much.",
+    typeA: 2, typeB: 5,
+  },
+  {
+    id: 19,
+    a: "I go along with plans to keep things easy and comfortable.",
+    b: "I go along with plans because I don't want to miss out.",
+    typeA: 9, typeB: 7,
+  },
+  {
+    id: 20,
+    a: "When something's wrong, I address it directly.",
+    b: "When something's wrong, I consider whether it's worth raising.",
+    typeA: 8, typeB: 6,
   },
 ];
 

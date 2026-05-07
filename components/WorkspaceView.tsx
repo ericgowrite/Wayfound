@@ -10,6 +10,7 @@ import {
   SearchCategory,
 } from "@/types";
 import { sortByAlignment, sortByGroupFit } from "@/lib/scoring";
+import { CATEGORY_META } from "@/lib/categories";
 import {
   trackSave,
   trackReject,
@@ -61,6 +62,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   );
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
   const [showFitCallout, setShowFitCallout] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
 
   useEffect(() => {
     if (
@@ -75,16 +77,30 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   const activeSearch = workspace.searches.find((s) => s.id === activeSearchId) ?? null;
 
-  const sortedResults = activeSearch
+  // Searches sharing the same normalised query as the active search — used for category tabs
+  const siblingSearches = activeSearch
+    ? workspace.searches.filter(
+        (s) => s.query.trim().toLowerCase() === activeSearch.query.trim().toLowerCase()
+      )
+    : [];
+  const showCategoryTabs = siblingSearches.length > 1;
+
+  // If category tabs are showing, the "active search" may be overridden by the tab filter
+  const displayedSearch = showCategoryTabs && categoryFilter
+    ? siblingSearches.find((s) => s.category === categoryFilter) ?? activeSearch
+    : activeSearch;
+
+  const sortedResults = displayedSearch
     ? sortMode === "group" && travelers.length > 1
-      ? sortByGroupFit(activeSearch.scoredResults, travelers)
-      : sortByAlignment(activeSearch.scoredResults)
+      ? sortByGroupFit(displayedSearch.scoredResults, travelers)
+      : sortByAlignment(displayedSearch.scoredResults)
     : [];
 
   async function handleSearch() {
     if (!query.trim()) return;
     setSearching(true);
     setSearchError("");
+    setCategoryFilter(null);
     try {
       const res = await fetch("/api/search", {
         method: "POST",
@@ -464,19 +480,52 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {/* Search history pills */}
             {workspace.searches.length > 1 && (
               <div className="mb-4 flex gap-2 flex-wrap">
-                {workspace.searches.map((s) => (
-                  <button
-                    key={s.id}
-                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                      s.id === activeSearchId
-                        ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-medium"
-                        : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500"
-                    }`}
-                    onClick={() => setActiveSearchId(s.id)}
-                  >
-                    {s.query}
-                  </button>
-                ))}
+                {workspace.searches.map((s) => {
+                  const meta = CATEGORY_META[s.category];
+                  const isActive = s.id === activeSearchId;
+                  return (
+                    <button
+                      key={s.id}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors flex items-center gap-1 ${
+                        isActive
+                          ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-medium"
+                          : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500"
+                      }`}
+                      onClick={() => { setActiveSearchId(s.id); setCategoryFilter(null); }}
+                    >
+                      <span>{meta.icon}</span>
+                      <span className="truncate max-w-[160px]">{s.query}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Category tabs — shown when same query searched across multiple categories */}
+            {showCategoryTabs && (
+              <div className="mb-3 flex gap-1 flex-wrap">
+                {siblingSearches.map((s) => {
+                  const meta = CATEGORY_META[s.category];
+                  const isActive = (categoryFilter ?? activeSearch?.category) === s.category;
+                  return (
+                    <button
+                      key={s.id}
+                      className={`text-xs px-3 py-1 rounded-lg border transition-colors flex items-center gap-1.5 ${
+                        isActive
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium"
+                          : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
+                      }`}
+                      onClick={() => {
+                        setActiveSearchId(s.id);
+                        setCategoryFilter(s.category);
+                      }}
+                    >
+                      <span>{meta.icon}</span>
+                      <span>{meta.label}</span>
+                      <span className="text-gray-400 dark:text-gray-600">({s.scoredResults.length})</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -552,7 +601,9 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {!searching && sortedResults.length > 0 && (
               <div className="space-y-3">
                 <p className="text-gray-400 dark:text-gray-500 text-xs">
-                  {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""} · &quot;{activeSearch!.query}&quot;
+                  {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
+                  {" · "}{CATEGORY_META[displayedSearch!.category].icon} {CATEGORY_META[displayedSearch!.category].label}
+                  {" · "}&quot;{displayedSearch!.query}&quot;
                 </p>
                 {sortedResults.map((option) => (
                   <ResultCard
@@ -562,10 +613,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     travelers={travelers}
                     profileWeights={profileWeights}
                     isSelected={selectedIds.has(option.id)}
+                    category={displayedSearch!.category}
                     onToggleSelect={() => toggleSelect(option.id)}
                     onSave={() => handleSaveOption(option)}
-                    onStatusChange={(s) => handleStatusChange(activeSearch!.id, option.id, s)}
-                    onNotesChange={(n) => handleNotesChange(activeSearch!.id, option.id, n)}
+                    onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
+                    onNotesChange={(n) => handleNotesChange(displayedSearch!.id, option.id, n)}
                     onDeepDive={() => {}}
                   />
                 ))}
@@ -617,21 +669,25 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             ) : (
               <div className="space-y-3">
-                {workspace.savedOptions.map((option) => (
-                  <ResultCard
-                    key={option.id}
-                    option={option}
-                    workspace={workspace}
-                    travelers={travelers}
-                    profileWeights={profileWeights}
-                    isSelected={false}
-                    onToggleSelect={() => {}}
-                    onSave={() => handleSaveOption(option)}
-                    onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
-                    onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
-                    onDeepDive={() => {}}
-                  />
-                ))}
+                {workspace.savedOptions.map((option) => {
+                  const sourceSearch = workspace.searches.find((s) => s.id === option.searchId);
+                  return (
+                    <ResultCard
+                      key={option.id}
+                      option={option}
+                      workspace={workspace}
+                      travelers={travelers}
+                      profileWeights={profileWeights}
+                      isSelected={false}
+                      category={sourceSearch?.category}
+                      onToggleSelect={() => {}}
+                      onSave={() => handleSaveOption(option)}
+                      onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
+                      onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
+                      onDeepDive={() => {}}
+                    />
+                  );
+                })}
               </div>
             )}
 

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult } from "@/types";
+import { useState, useRef, useEffect } from "react";
+import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
+import { CATEGORY_META } from "@/lib/categories";
+import { validateUrl, reportBadUrl } from "@/lib/urlValidation";
 import AxisBar from "./AxisBar";
 
 interface Props {
@@ -11,6 +13,7 @@ interface Props {
   travelers: Profile[];
   profileWeights: AxisWeights | undefined;
   isSelected: boolean;
+  category?: SearchCategory;
   onToggleSelect: () => void;
   onSave: () => void;
   onStatusChange: (status: ScoredOption["status"]) => void;
@@ -32,6 +35,7 @@ export default function ResultCard({
   travelers,
   profileWeights,
   isSelected,
+  category,
   onToggleSelect,
   onSave,
   onStatusChange,
@@ -46,10 +50,62 @@ export default function ResultCard({
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function isValidSourceUrl(src: string | undefined): boolean {
-    if (!src) return false;
-    const s = src.trim();
-    return s.startsWith("http://") || s.startsWith("https://");
+  // URL validation
+  type UrlStatus = "idle" | "checking" | "valid" | "invalid";
+  const [urlStatus, setUrlStatus] = useState<UrlStatus>("idle");
+  const [resolvedUrl, setResolvedUrl] = useState<string>(option.source ?? "");
+  const [reportSent, setReportSent] = useState(false);
+
+  // Trigger validation the first time the card expands
+  useEffect(() => {
+    if (!expanded || urlStatus !== "idle") return;
+    const raw = option.source?.trim();
+    if (!raw || !/^https?:\/\//i.test(raw)) {
+      setUrlStatus("invalid");
+      return;
+    }
+    setUrlStatus("checking");
+    validateUrl(raw).then((result) => {
+      if (result.valid && result.finalUrl) {
+        setResolvedUrl(result.finalUrl);
+        setUrlStatus("valid");
+      } else {
+        setUrlStatus("invalid");
+      }
+    });
+  }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleReport() {
+    reportBadUrl({
+      resultId: option.id,
+      resultName: option.name,
+      reportedUrl: resolvedUrl || option.source || "",
+      timestamp: new Date().toISOString(),
+    });
+    setReportSent(true);
+    setUrlStatus("invalid"); // hide the link immediately after report
+  }
+
+  const AFFILIATE_PARTNERS: Record<string, string> = {
+    "booking.com": "Booking.com",
+    "viator.com": "Viator",
+    "getyourguide.com": "GetYourGuide",
+    "tripadvisor.com": "Tripadvisor",
+    "hotels.com": "Hotels.com",
+  };
+
+  function getSourceLabel(src: string): string {
+    try {
+      const hostname = new URL(src).hostname.replace(/^www\./, "");
+      for (const [domain, name] of Object.entries(AFFILIATE_PARTNERS)) {
+        if (hostname === domain || hostname.endsWith(`.${domain}`)) {
+          return `Book on ${name} →`;
+        }
+      }
+    } catch {
+      // invalid URL — fall through
+    }
+    return "View source →";
   }
 
   const score = option.alignmentScore;
@@ -163,6 +219,11 @@ export default function ResultCard({
             {option.price && (
               <span className="text-gray-500 dark:text-gray-400 text-sm">{option.price}</span>
             )}
+            {category && CATEGORY_META[category] && (
+              <span className="ml-auto flex-shrink-0 text-[10px] text-gray-400 dark:text-gray-600 uppercase tracking-wider font-medium">
+                {CATEGORY_META[category].icon} {CATEGORY_META[category].label}
+              </span>
+            )}
           </div>
           <div className="mt-1">
             <p className={`text-gray-600 dark:text-gray-400 text-sm leading-relaxed ${showFullExplanation ? "" : "line-clamp-3"}`}>
@@ -244,16 +305,40 @@ export default function ResultCard({
                   </ul>
                 </div>
               )}
-              {isValidSourceUrl(option.source) && (
-                <a
-                  href={option.source!.trim()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm inline-flex items-center gap-1"
-                >
-                  View source →
-                </a>
-              )}
+              {/* Source link — validated before display */}
+              <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
+                {urlStatus === "checking" && (
+                  <span className="text-xs text-gray-400 dark:text-gray-600 animate-pulse">Checking source…</span>
+                )}
+
+                {urlStatus === "valid" && (
+                  <>
+                    <a
+                      href={resolvedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm inline-flex items-center gap-1"
+                    >
+                      {getSourceLabel(resolvedUrl)}
+                    </a>
+                    {reportSent ? (
+                      <span className="text-xs text-gray-400 dark:text-gray-600">Reported — thanks</span>
+                    ) : (
+                      <button
+                        onClick={handleReport}
+                        className="text-xs text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                        title="Report a bad or incorrect link"
+                      >
+                        🚩 Report
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {urlStatus === "invalid" && !reportSent && (
+                  <span className="text-xs text-gray-400 dark:text-gray-600">Source not available</span>
+                )}
+              </div>
             </div>
           </div>
 

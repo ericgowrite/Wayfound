@@ -1,21 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Profile, ScoredOption, SearchCategory, DeepDiveResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 
 function getClient() {
   return new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 }
 
-const SEARCH_SYSTEM_PROMPT = `You are a travel recommendation engine that performs two tasks in one call:
-1. Web search: Find real travel options matching the query
-2. Psychological scoring: Score each option against the user's profile
-
-Use Google Search to find relevant travel options.
-After searching, score each found option against the user's psychological travel profile.`;
-
-const SCORE_SYSTEM_PROMPT = `You are a travel recommendation engine. The user has given you a specific travel option to evaluate.
-Research it using Google Search if needed, then score it against their psychological profile.
-Return a single JSON object (not an array).`;
+// ── Transport helpers ─────────────────────────────────────────────────────────
 
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<string> {
   const model = getClient().getGenerativeModel({
@@ -28,14 +20,18 @@ async function callWithSearch(systemPrompt: string, userPrompt: string): Promise
   return result.response.text();
 }
 
-async function callPlain(prompt: string): Promise<string> {
-  const model = getClient().getGenerativeModel({ model: "gemini-2.5-flash" });
-  const result = await model.generateContent(prompt);
+async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
+  const model = getClient().getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: systemPrompt,
+  });
+  const result = await model.generateContent(userPrompt);
   return result.response.text();
 }
 
+// ── Parsers ───────────────────────────────────────────────────────────────────
+
 function parseArray(raw: string): Omit<ScoredOption, "id" | "searchId" | "status" | "notes">[] {
-  // Strip markdown code fences if present
   const cleaned = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
   const match = cleaned.match(/\[[\s\S]*\]/);
   if (!match) throw new Error("Could not parse JSON array from Gemini response");
@@ -49,6 +45,34 @@ function parseObject(raw: string): Omit<ScoredOption, "id" | "searchId" | "statu
   return JSON.parse(match[0]);
 }
 
+// ── Sanitizers ────────────────────────────────────────────────────────────────
+
+/**
+ * Extract the first valid https?:// URL from a string.
+ * Guards against Gemini concatenating multiple URLs into one field.
+ */
+function sanitizeSourceUrl(raw: string | undefined): string {
+  if (!raw) return "";
+  const match = raw.match(/https?:\/\/[^\s"')]+/);
+  if (!match) return "";
+  return match[0].replace(/[.,;)"']+$/, "");
+}
+
+/**
+ * Extract a URL explicitly provided by the user in their input string.
+ * Matches full https?:// URLs or bare domains (e.g. "aromacoffeeandtea.com").
+ * Returns a normalised https:// URL, or null if none found.
+ */
+function extractUserUrl(input: string): string | null {
+  const fullMatch = input.match(/https?:\/\/[^\s,)]+/);
+  if (fullMatch) return fullMatch[0].replace(/[.,;)]+$/, "");
+
+  const bareMatch = input.match(/(?:^|\s)((?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s,)]*)?)/);
+  if (bareMatch) return `https://${bareMatch[1].replace(/[.,;)]+$/, "")}`;
+
+  return null;
+}
+
 function hydrate(
   item: Omit<ScoredOption, "id" | "searchId" | "status" | "notes">,
   searchId: string
@@ -59,11 +83,40 @@ function hydrate(
     searchId,
     status: "new" as const,
     notes: "",
+    source: sanitizeSourceUrl(item.source),
     thresholdViolations: item.thresholdViolations ?? [],
     dealbreakersTriggered: item.dealbreakersTriggered ?? [],
     tradeoffs: item.tradeoffs ?? [],
   };
 }
+
+// ── Shared prompt fragments ───────────────────────────────────────────────────
+
+const AXIS_SCHEMA = `"axisScores": {
+    "calm": 0.0-1.0,
+    "designSincerity": 0.0-1.0,
+    "valueIntegrity": 0.0-1.0,
+    "socialPermeability": 0.0-1.0,
+    "autonomy": 0.0-1.0,
+    "novelty": 0.0-1.0,
+    "locationFriction": 0.0-1.0
+  }`;
+
+const AXIS_GUIDE = `Axis scoring guide:
+- calm: 0=very high energy/stimulating, 1=very peaceful/calm
+- designSincerity: 0=staged/generic/touristy, 1=authentic/genuine
+- valueIntegrity: 0=overpriced/poor value, 1=excellent value for money
+- socialPermeability: 0=highly social/forced interaction, 1=very private
+- autonomy: 0=highly programmed/scheduled, 1=fully self-directed
+- novelty: 0=very exotic/unfamiliar, 1=very familiar/predictable
+- locationFriction: 0=remote/hard to access, 1=very convenient/easy`;
+
+function thresholdLine(profile: Profile): string {
+  return `Profile thresholds: calm < ${profile.thresholds.calm ?? "N/A"}, valueIntegrity < ${profile.thresholds.valueIntegrity ?? "N/A"} → list in thresholdViolations.
+Dealbreakers: ${profile.dealbreakers.join("; ")}`;
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
 
 export async function searchAndScore(
   query: string,
@@ -71,8 +124,10 @@ export async function searchAndScore(
   searchId: string,
   profile: Profile
 ): Promise<ScoredOption[]> {
+  const systemPrompt = buildSystemPrompt("search");
+
   const prompt = `
-PROFILE:
+TRAVELER PROFILE:
 ${JSON.stringify(profile, null, 2)}
 
 QUERY: "${query}" (category: ${category})
@@ -85,15 +140,7 @@ For each option found (aim for 4-8 results), return a JSON array:
   "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description",
   "price": "Price if available",
-  "axisScores": {
-    "calm": 0.0-1.0,
-    "designSincerity": 0.0-1.0,
-    "valueIntegrity": 0.0-1.0,
-    "socialPermeability": 0.0-1.0,
-    "autonomy": 0.0-1.0,
-    "novelty": 0.0-1.0,
-    "locationFriction": 0.0-1.0
-  },
+  ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
   "thresholdViolations": ["axis names that fall below profile thresholds"],
   "dealbreakersTriggered": ["dealbreaker descriptions if any apply"],
@@ -103,19 +150,12 @@ For each option found (aim for 4-8 results), return a JSON array:
 
 Return ONLY a valid JSON array. No markdown, no explanation outside the JSON.
 
-Axis scoring guide:
-- calm: 0=very high energy/stimulating, 1=very peaceful/calm
-- designSincerity: 0=staged/generic/touristy, 1=authentic/genuine
-- valueIntegrity: 0=overpriced/poor value, 1=excellent value for money
-- socialPermeability: 0=highly social/forced interaction, 1=very private
-- autonomy: 0=highly programmed/scheduled, 1=fully self-directed
-- novelty: 0=very exotic/unfamiliar, 1=very familiar/predictable
-- locationFriction: 0=remote/hard to access, 1=very convenient/easy
+${AXIS_GUIDE}
 
-Profile thresholds: calm < ${profile.thresholds.calm ?? "N/A"}, valueIntegrity < ${profile.thresholds.valueIntegrity ?? "N/A"} → list in thresholdViolations.
-Dealbreakers: ${profile.dealbreakers.join("; ")}`;
+${thresholdLine(profile)}`.trim();
 
-  const raw = await callWithSearch(SEARCH_SYSTEM_PROMPT, prompt);
+  const raw = await callWithSearch(systemPrompt, prompt);
+  auditResponse(raw, "search");
   return parseArray(raw).map((item) => hydrate(item, searchId));
 }
 
@@ -126,10 +166,11 @@ export async function searchMoreOptions(
   profile: Profile,
   alreadySeen: string[]
 ): Promise<ScoredOption[]> {
+  const systemPrompt = buildSystemPrompt("moreOptions");
   const avoidList = alreadySeen.map((n) => `- ${n}`).join("\n");
 
   const prompt = `
-PROFILE:
+TRAVELER PROFILE:
 ${JSON.stringify(profile, null, 2)}
 
 QUERY: "${query}" (category: ${category})
@@ -147,7 +188,7 @@ Return a JSON array using the same structure:
   "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description",
   "price": "Price if available",
-  "axisScores": { "calm": 0.0-1.0, "designSincerity": 0.0-1.0, "valueIntegrity": 0.0-1.0, "socialPermeability": 0.0-1.0, "autonomy": 0.0-1.0, "novelty": 0.0-1.0, "locationFriction": 0.0-1.0 },
+  ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
   "thresholdViolations": [],
   "dealbreakersTriggered": [],
@@ -155,9 +196,10 @@ Return a JSON array using the same structure:
   "tradeoffs": ["tradeoff 1", "tradeoff 2"]
 }]
 
-Return ONLY valid JSON array. No markdown.`;
+Return ONLY valid JSON array. No markdown.`.trim();
 
-  const raw = await callWithSearch(SEARCH_SYSTEM_PROMPT, prompt);
+  const raw = await callWithSearch(systemPrompt, prompt);
+  auditResponse(raw, "moreOptions");
   return parseArray(raw).map((item) => hydrate(item, searchId));
 }
 
@@ -165,6 +207,8 @@ export async function generateComparison(
   options: ScoredOption[],
   profile: Profile
 ): Promise<string> {
+  const systemPrompt = buildSystemPrompt("comparison");
+
   const prompt = `Compare these ${options.length} travel options for ${profile.name} (Type ${profile.enneagramType}):
 
 ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
@@ -176,42 +220,42 @@ ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
 Write a 3-4 sentence comparison summary focusing on which option best fits the profile and why.
 Highlight the key differentiators. Be direct and specific.`;
 
-  return callPlain(prompt);
+  const raw = await callPlain(systemPrompt, prompt);
+  auditResponse(raw, "comparison");
+  return raw;
 }
 
 export async function generateDeepDive(
   option: ScoredOption,
   profile: Profile
 ): Promise<DeepDiveResult> {
+  const systemPrompt = buildSystemPrompt("deepDive");
+
   const prompt = `Do a deep dive on "${option.name}" for ${profile.name} (travel type: ${profile.enneagramType}).
 
 Search the web for detailed information, recent reviews, and specific details about this option.
 Current fit score: ${option.alignmentScore}%
-Profile axis weights: ${JSON.stringify(option.axisScores)}
+Profile axis weights (for your internal reasoning only — do NOT mention these values or axis names in your output): ${JSON.stringify(option.axisScores)}
 
 Return ONLY a valid JSON object with exactly these fields (no markdown, no extra text):
 {
   "overview": "2-3 sentences covering location, what it is, any notable awards or recognition, and key facts",
-  "whyItFits": ["3-5 specific reasons this option aligns with this traveler's style and preferences — reference their actual interests"],
+  "whyItFits": ["3-5 specific reasons this option aligns with this traveler's style and preferences — write in plain language, do NOT reference axis names or numeric scores"],
   "watchOutFor": ["1-3 honest cautions, limitations, or tradeoffs to be aware of"],
   "standoutFeatures": ["3-5 notable amenities, unique features, or details that make this option distinctive"],
   "bottomLine": "2-3 sentences with a direct recommendation: should this traveler book it, and why or why not"
 }
 
-Each array item should be a single concise bullet (1-2 lines max). Be specific and honest.`;
+Each array item should be a single concise bullet (1-2 lines max). Be specific and honest. Never include axis names (calm, designSincerity, valueIntegrity, etc.) or numeric scores in any field.`;
 
-  const raw = await callWithSearch(
-    "You are a travel research assistant. Search for detailed information about the given travel option and return a structured JSON analysis.",
-    prompt
-  );
+  const raw = await callWithSearch(systemPrompt, prompt);
+  auditResponse(raw, "deepDive");
 
-  // Parse structured response, fall back gracefully
   try {
     const cleaned = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     const match = cleaned.match(/\{[\s\S]*\}/);
     if (match) {
       const parsed = JSON.parse(match[0]) as DeepDiveResult;
-      // Normalise: ensure arrays are arrays
       return {
         overview: parsed.overview ?? "",
         whyItFits: Array.isArray(parsed.whyItFits) ? parsed.whyItFits : [],
@@ -224,7 +268,7 @@ Each array item should be a single concise bullet (1-2 lines max). Be specific a
     // fall through to text fallback
   }
 
-  // Plain-text fallback: wrap everything in overview
+  // Plain-text fallback
   return {
     overview: raw.slice(0, 600),
     whyItFits: [],
@@ -240,14 +284,18 @@ export async function scoreSpecific(
   searchId: string,
   profile: Profile
 ): Promise<ScoredOption> {
-  const isUrl = input.startsWith("http://") || input.startsWith("https://");
+  const systemPrompt = buildSystemPrompt("scoreSpecific");
+
+  // Capture any URL the user explicitly provided — this is authoritative (Sacred Rule 1).
+  const userProvidedUrl = extractUserUrl(input);
+  const isUrl = input.startsWith("http://") || input.startsWith("https://") || !!userProvidedUrl;
 
   const prompt = `
-PROFILE:
+TRAVELER PROFILE:
 ${JSON.stringify(profile, null, 2)}
 
 OPTION TO SCORE:
-${isUrl ? `URL: ${input}` : `"${input}"`}
+${userProvidedUrl ? `URL: ${userProvidedUrl}` : `"${input}"`}
 Category: ${category}
 
 ${isUrl ? "Fetch the page and use that content to score this option." : "Search the web for more details about this specific option, then score it."}
@@ -258,15 +306,7 @@ Return a single JSON object (not an array):
   "source": "full https:// URL to the official website or booking page (required)",
   "description": "Brief description (2-3 sentences)",
   "price": "Price if found, otherwise omit",
-  "axisScores": {
-    "calm": 0.0-1.0,
-    "designSincerity": 0.0-1.0,
-    "valueIntegrity": 0.0-1.0,
-    "socialPermeability": 0.0-1.0,
-    "autonomy": 0.0-1.0,
-    "novelty": 0.0-1.0,
-    "locationFriction": 0.0-1.0
-  },
+  ${AXIS_SCHEMA},
   "alignmentScore": 0-100,
   "thresholdViolations": ["axis names below profile thresholds"],
   "dealbreakersTriggered": ["any dealbreakers that apply"],
@@ -276,19 +316,19 @@ Return a single JSON object (not an array):
 
 Return ONLY valid JSON. No markdown, no extra text.
 
-Axis scoring:
-- calm: 0=high energy, 1=peaceful
-- designSincerity: 0=staged/generic, 1=authentic
-- valueIntegrity: 0=overpriced, 1=fair value
-- socialPermeability: 0=forced social, 1=private
-- autonomy: 0=programmed, 1=self-directed
-- novelty: 0=exotic/new, 1=familiar/predictable
-- locationFriction: 0=remote/hard, 1=convenient
+${AXIS_GUIDE}
 
-Profile thresholds: calm < ${profile.thresholds.calm ?? "N/A"}, valueIntegrity < ${profile.thresholds.valueIntegrity ?? "N/A"} → list in thresholdViolations.
-Dealbreakers: ${profile.dealbreakers.join("; ")}`;
+${thresholdLine(profile)}`.trim();
 
-  const raw = await callWithSearch(SCORE_SYSTEM_PROMPT, prompt);
+  const raw = await callWithSearch(systemPrompt, prompt);
+  auditResponse(raw, "scoreSpecific", { userProvidedUrl });
+
   const parsed = parseObject(raw);
+
+  // Sacred Rule 1: Always restore user-provided URL — never let Gemini overwrite it.
+  if (userProvidedUrl) {
+    parsed.source = userProvidedUrl;
+  }
+
   return hydrate(parsed, searchId);
 }

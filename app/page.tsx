@@ -276,7 +276,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 space-y-2">
+        <div className="px-4 pt-3 pb-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+          {/* Utility */}
           <button
             className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full text-left"
             onClick={() => setShowFitLegend(true)}
@@ -293,6 +294,19 @@ export default function Home() {
               {dark ? "☀ Light" : "☾ Night"}
             </button>
           </div>
+
+          {/* Legal */}
+          <div className="border-t border-gray-200 dark:border-gray-800 pt-3 space-y-1.5">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-medium">Legal</p>
+            <a href="/privacy" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Privacy Policy →</a>
+            <a href="/terms" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Terms of Service →</a>
+            <a href="/affiliate-disclosure" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">How We Make Money →</a>
+          </div>
+
+          {/* Affiliate disclosure */}
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-relaxed border-t border-gray-200 dark:border-gray-800 pt-2.5">
+            Viya may earn a commission from bookings. This doesn&apos;t affect our recommendations.
+          </p>
         </div>
       </div>
 

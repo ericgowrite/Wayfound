@@ -96,7 +96,7 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Travel Style Assessment
+          Let&apos;s get to know you
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
           The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you.
