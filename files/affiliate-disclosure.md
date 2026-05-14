@@ -14,7 +14,7 @@ ViyaWay is free to use. We earn money through affiliate partnerships with travel
 
 ## What This Means
 
-When you click a "Book" link in ViyaWayWay and complete a purchase on a partner site, we may receive a small commission. This is at no additional cost to you — the price you pay is the same whether you use our link or go directly to the booking site.
+When you click a "Book" link in ViyaWay and complete a purchase on a partner site, we may receive a small commission. This is at no additional cost to you — the price you pay is the same whether you use our link or go directly to the booking site.
 
 ---
 
@@ -60,4 +60,4 @@ If you have questions about our affiliate relationships, please contact us at:
 
 ---
 
-*Thank you for supporting ViyaWayWay by booking through our links. It helps us keep the app free and continue improving.*
+*Thank you for supporting ViyaWay by booking through our links. It helps us keep the app free and continue improving.*

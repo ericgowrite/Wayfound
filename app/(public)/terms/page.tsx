@@ -24,8 +24,8 @@ export default function TermsPage() {
           heading: "Use of the Service",
           body: (
             <>
-              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Eligibility:</strong> You must be at least 13 years old to use ViyaWayWay.</p>
-              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Acceptable use:</strong> You agree to use ViyaWayWay only for lawful purposes. You may not attempt to interfere with the app&apos;s functionality, access data not intended for you, use automated systems (bots, scrapers) to access the app, or misrepresent your identity.</p>
+              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Eligibility:</strong> You must be at least 13 years old to use ViyaWay.</p>
+              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Acceptable use:</strong> You agree to use ViyaWay only for lawful purposes. You may not attempt to interfere with the app&apos;s functionality, access data not intended for you, use automated systems (bots, scrapers) to access the app, or misrepresent your identity.</p>
               <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">User content:</strong> You retain ownership of any content you provide (profile info, notes, saved preferences) but grant us a license to use it to provide and improve the service.</p>
             </>
           ),
@@ -34,7 +34,7 @@ export default function TermsPage() {
           heading: "Intellectual Property",
           body: (
             <>
-              <p>The app, including its design, features, and underlying technology, is owned by ViyaWayWay and protected by intellectual property laws. Our specific implementation, scoring methodology, axis definitions, and travel matching algorithms are proprietary.</p>
+              <p>The app, including its design, features, and underlying technology, is owned by ViyaWay and protected by intellectual property laws. Our specific implementation, scoring methodology, axis definitions, and travel matching algorithms are proprietary.</p>
               <p>Travel information in search results may be sourced from third parties and subject to their respective copyrights.</p>
             </>
           ),
@@ -43,7 +43,7 @@ export default function TermsPage() {
           heading: "Third-Party Services",
           body: (
             <>
-              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Booking partners:</strong> When you click booking links, you leave ViyaWayWay and enter a third-party site. Your interactions are governed by that site&apos;s terms and privacy policy. We are not responsible for third-party content, policies, or practices. We may receive a commission from bookings, which does not affect your price.</p>
+              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Booking partners:</strong> When you click booking links, you leave ViyaWay and enter a third-party site. Your interactions are governed by that site&apos;s terms and privacy policy. We are not responsible for third-party content, policies, or practices. We may receive a commission from bookings, which does not affect your price.</p>
               <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">AI services:</strong> We use Google&apos;s Gemini API to process searches. Your use of these features is also subject to{" "}
                 <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">Google&apos;s Terms of Service</a>.
               </p>

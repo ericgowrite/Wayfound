@@ -64,7 +64,7 @@ export default function LegalPage({ title, subtitle, lastUpdated, sections }: Pr
             <span>·</span>
             <Link href="/affiliate-disclosure" className="hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money</Link>
           </div>
-          <p className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] mt-3">© 2026 ViyaWayWay.com</p>
+          <p className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] mt-3">© 2026 ViyaWay.com</p>
         </div>
       </div>
     </div>

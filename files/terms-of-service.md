@@ -27,11 +27,11 @@ ViyaWay is a travel discovery application that uses personality-based matching t
 
 ### Eligibility
 
-You must be at least 13 years old to use ViyaWayWay. By using the app, you represent that you meet this requirement.
+You must be at least 13 years old to use ViyaWay. By using the app, you represent that you meet this requirement.
 
 ### Acceptable Use
 
-You agree to use ViyaWayWay only for lawful purposes and in accordance with these Terms. You agree not to:
+You agree to use ViyaWay only for lawful purposes and in accordance with these Terms. You agree not to:
 
 - Use the app for any illegal or unauthorized purpose
 - Attempt to interfere with or disrupt the app's functionality
@@ -49,7 +49,7 @@ You are responsible for any content you provide, including profile information, 
 
 ### Our Content
 
-The app, including its design, features, text, graphics, and underlying technology, is owned by ViyaWayWay and protected by intellectual property laws. You may not copy, modify, distribute, or reverse engineer any part of the app without our permission.
+The app, including its design, features, text, graphics, and underlying technology, is owned by ViyaWay and protected by intellectual property laws. You may not copy, modify, distribute, or reverse engineer any part of the app without our permission.
 
 ### Enneagram Framework
 
@@ -67,7 +67,7 @@ Travel information, descriptions, and images displayed in search results may be 
 
 ViyaWay provides links to third-party booking services (Booking.com, Viator, GetYourGuide, etc.). When you click these links:
 
-- You leave ViyaWayWay and enter the third party's site
+- You leave ViyaWay and enter the third party's site
 - Your interactions are governed by that site's terms and privacy policy
 - We are not responsible for third-party content, policies, or practices
 - We may receive a commission from bookings, which does not affect your price
