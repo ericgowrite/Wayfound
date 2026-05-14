@@ -52,17 +52,17 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
     }
   }
 
-  const modal = "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700";
-  const input = "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-700 focus:border-blue-500";
-  const label = "text-gray-500 dark:text-gray-500 text-xs uppercase";
-  const btnSecondary = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600";
+  const modal = "bg-white dark:bg-[#1e2d3d] border-[#E0E8ED] dark:border-[#3D5A6E]";
+  const input = "bg-[#F8FAFB] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
+  const label = "text-[#6B8299] dark:text-[#6B8299] text-xs uppercase";
+  const btnSecondary = "bg-[#EEF4F8] dark:bg-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#E0E8ED] dark:hover:bg-[#4A7A8F]";
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className={`${modal} rounded-xl border w-full max-w-2xl max-h-[90vh] overflow-auto`}>
-        <div className={`flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900`}>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile: {draft.name} ({draft.enneagramType})</h2>
-          <button className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
+        <div className={`flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]`}>
+          <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">Profile: {draft.name} ({draft.enneagramType})</h2>
+          <button className="text-[#9BB0C1] hover:text-[#6B8299] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
 
         <div className="p-4 space-y-6">
@@ -82,10 +82,10 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
               {AXIS_KEYS.map((k) => (
                 <div key={k}>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm text-gray-700 dark:text-gray-300" title={AXIS_DESCRIPTIONS[k]}>
+                    <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]" title={AXIS_DESCRIPTIONS[k]}>
                       {AXIS_LABELS[k]}
                     </span>
-                    <span className="text-sm font-mono text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-mono text-[#6B8299] dark:text-[#9BB0C1]">
                       {draft.axisWeights[k].toFixed(2)}
                     </span>
                   </div>
@@ -93,7 +93,7 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
                     type="range" min={0} max={1} step={0.05}
                     value={draft.axisWeights[k]}
                     onChange={(e) => setWeight(k, parseFloat(e.target.value))}
-                    className="w-full accent-blue-500"
+                    className="w-full accent-[#5B8BA0]"
                   />
                 </div>
               ))}
@@ -105,7 +105,7 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
             <div className="grid grid-cols-2 gap-2">
               {AXIS_KEYS.map((k) => (
                 <div key={k} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 w-28 truncate">{AXIS_LABELS[k]}</span>
+                  <span className="text-xs text-[#6B8299] dark:text-[#9BB0C1] w-28 truncate">{AXIS_LABELS[k]}</span>
                   <input
                     type="number" min={0} max={1} step={0.05}
                     className={`w-16 ${input} text-xs rounded border p-1 focus:outline-none`}
@@ -122,9 +122,9 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
             <label className={`${label} block mb-2`}>Dealbreakers</label>
             <div className="space-y-1.5 mb-2">
               {draft.dealbreakers.map((d, i) => (
-                <div key={i} className="flex items-center gap-2 bg-red-50 dark:bg-gray-800 rounded px-2 py-1.5">
+                <div key={i} className="flex items-center gap-2 bg-red-50 dark:bg-[#2a3f52] rounded px-2 py-1.5">
                   <span className="text-red-600 dark:text-red-400 text-sm flex-1">{d}</span>
-                  <button className="text-gray-400 hover:text-red-500 text-sm" onClick={() => removeDealbreaker(i)}>×</button>
+                  <button className="text-[#9BB0C1] hover:text-red-500 text-sm" onClick={() => removeDealbreaker(i)}>×</button>
                 </div>
               ))}
             </div>
@@ -141,10 +141,10 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-gray-900">
+        <div className="p-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E] flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-[#1e2d3d]">
           <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={onClose}>Cancel</button>
           <button
-            className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+            className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
             onClick={handleSave} disabled={saving}
           >
             {saving ? "Saving..." : "Save Profile"}

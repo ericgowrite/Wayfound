@@ -89,21 +89,21 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
 
   const baseTypes = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-  const input = "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-700 focus:border-blue-500";
-  const btnSecondary = "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600";
+  const input = "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
+  const btnSecondary = "bg-[#E0E8ED] dark:bg-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#D0DCE4] dark:hover:bg-[#4A7A8F]";
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 w-full max-w-lg max-h-[90vh] overflow-auto">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="bg-white dark:bg-[#1e2d3d] rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] w-full max-w-lg max-h-[90vh] overflow-auto">
+        <div className="flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]">
+          <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">
             {step === "info" && "Add Traveler Profile"}
             {step === "know-type" && "Find Your Travel Style"}
             {step === "assess" && "Travel Style Assessment"}
             {step === "type-select" && "Select Your Type"}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
-          <button className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
+          <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
 
         <div className="p-4">
@@ -111,7 +111,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {step === "info" && (
             <div className="space-y-4">
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-1">Traveler Name</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-1">Traveler Name</label>
                 <input
                   className={`w-full ${input} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="Sarah"
@@ -127,26 +127,26 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {/* Step 2: Know your type? */}
           {step === "know-type" && (
             <div className="space-y-3">
-              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+              <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed">
                 Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for you.
               </p>
-              <p className="text-gray-700 dark:text-gray-300 text-sm pt-1">
-                Does <span className="text-gray-900 dark:text-white font-medium">{name}</span> already know their Enneagram type?
+              <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm pt-1">
+                Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their Enneagram type?
               </p>
               <div className="flex flex-col gap-2 pt-1">
                 <button
-                  className="w-full text-left px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                  className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("type-select")}
                 >
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Yes, I know my type</p>
-                  <p className="text-gray-500 text-xs mt-0.5">I&apos;ll pick from the list</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">Yes, I know my type</p>
+                  <p className="text-[#6B8299] text-xs mt-0.5">I&apos;ll pick from the list</p>
                 </button>
                 <button
-                  className="w-full text-left px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                  className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("assess")}
                 >
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">No, help me find out</p>
-                  <p className="text-gray-500 text-xs mt-0.5">Take a quick in-app travel style assessment</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">No, help me find out</p>
+                  <p className="text-[#6B8299] text-xs mt-0.5">Take a quick in-app travel style assessment</p>
                 </button>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {step === "type-select" && (
             <div className="space-y-4">
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-2">Enneagram Type</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-2">Enneagram Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {baseTypes.map((base) => {
                     const t = TEMPLATES.find((tmpl) => tmpl.type === base);
@@ -177,23 +177,23 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                         key={t.type}
                         className={`text-left px-3 py-2 rounded border text-xs transition-colors ${
                           selectedType === t.type
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300"
-                            : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                            ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                            : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
                         }`}
                         onClick={() => setSelectedType(t.type)}
                       >
                         <div className="font-semibold">Type {t.type}</div>
-                        <div className="text-gray-500 text-xs mt-0.5 line-clamp-1">{t.description.split("—")[0].trim()}</div>
+                        <div className="text-[#6B8299] text-xs mt-0.5 line-clamp-1">{t.description.split("—")[0].trim()}</div>
                       </button>
                     );
                   })}
                 </div>
               </div>
               {selectedType && (
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                  <p className="text-xs text-gray-500 uppercase mb-1">Selected</p>
-                  <p className="text-gray-900 dark:text-white font-medium text-sm">Type {selectedType}</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{template.description}</p>
+                <div className="bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-3">
+                  <p className="text-xs text-[#6B8299] uppercase mb-1">Selected</p>
+                  <p className="text-[#2C3E50] dark:text-white font-medium text-sm">Type {selectedType}</p>
+                  <p className="text-[#6B8299] dark:text-[#9BB0C1] text-xs mt-0.5">{template.description}</p>
                 </div>
               )}
             </div>
@@ -201,18 +201,18 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
 
           {step === "review" && draft.axisWeights && (
             <div className="space-y-5">
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{draft.description}</p>
+              <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">{draft.description}</p>
 
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-3">Axis Weights — adjust to fit</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-3">Axis Weights — adjust to fit</label>
                 <div className="space-y-3">
                   {AXIS_KEYS.map((k) => (
                     <div key={k}>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm text-gray-700 dark:text-gray-300" title={AXIS_DESCRIPTIONS[k]}>
+                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]" title={AXIS_DESCRIPTIONS[k]}>
                           {AXIS_LABELS[k]}
                         </span>
-                        <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+                        <span className="text-sm font-mono text-[#6B8299] dark:text-[#9BB0C1]">
                           {(draft.axisWeights![k] ?? 0).toFixed(2)}
                         </span>
                       </div>
@@ -223,7 +223,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                         step={0.05}
                         value={draft.axisWeights![k] ?? 0}
                         onChange={(e) => setWeight(k, parseFloat(e.target.value))}
-                        className="w-full accent-blue-500"
+                        className="w-full accent-[#5B8BA0]"
                       />
                     </div>
                   ))}
@@ -231,12 +231,12 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
               </div>
 
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-2">Dealbreakers</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-2">Dealbreakers</label>
                 <div className="space-y-1.5 mb-2">
                   {(draft.dealbreakers ?? []).map((d, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-red-50 dark:bg-gray-800 rounded px-2 py-1.5">
+                    <div key={i} className="flex items-center gap-2 bg-red-50 dark:bg-[#2a3f52] rounded px-2 py-1.5">
                       <span className="text-red-600 dark:text-red-400 text-sm flex-1">{d}</span>
-                      <button className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 text-sm" onClick={() => removeDealbreaker(i)}>×</button>
+                      <button className="text-[#9BB0C1] hover:text-red-500 dark:hover:text-red-400 text-sm" onClick={() => removeDealbreaker(i)}>×</button>
                     </div>
                   ))}
                 </div>
@@ -257,12 +257,12 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-2 justify-between sticky bottom-0 bg-white dark:bg-gray-900">
+        <div className="p-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E] flex gap-2 justify-between sticky bottom-0 bg-white dark:bg-[#1e2d3d]">
           {step === "info" && (
             <>
               <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={onClose}>Cancel</button>
               <button
-                className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={handleNameNext}
                 disabled={!name.trim()}
               >
@@ -282,7 +282,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
             <>
               <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
               <button
-                className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={handleTypeConfirmed}
                 disabled={!selectedType}
               >
@@ -294,7 +294,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
             <>
               <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("type-select")}>← Back</button>
               <button
-                className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={handleSave}
                 disabled={saving}
               >

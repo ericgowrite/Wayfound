@@ -22,7 +22,7 @@ interface Props {
 }
 
 const AVATAR_COLORS = [
-  "bg-blue-600",
+  "bg-[#5B8BA0]",
   "bg-violet-600",
   "bg-emerald-600",
   "bg-amber-600",
@@ -163,7 +163,7 @@ export default function ResultCard({
   const groupMinTier = groupMin !== null ? fitTier(groupMin) : null;
 
   return (
-    <div className={`border rounded-xl bg-white dark:bg-gray-900 ${borderColor} transition-all`}>
+    <div className={`border rounded-xl bg-white dark:bg-[#1e2d3d] ${borderColor} transition-all`}>
       {/* Header */}
       <div
         className="flex items-start gap-3 p-4 cursor-pointer select-none"
@@ -171,7 +171,7 @@ export default function ResultCard({
       >
         <input
           type="checkbox"
-          className="mt-1 accent-blue-500 cursor-pointer flex-shrink-0"
+          className="mt-1 accent-[#5B8BA0] cursor-pointer flex-shrink-0"
           checked={isSelected}
           onChange={(e) => { e.stopPropagation(); onToggleSelect(); }}
           onClick={(e) => e.stopPropagation()}
@@ -189,17 +189,17 @@ export default function ResultCard({
               </span>
               {showScoreLegend && (
                 <div
-                  className="absolute left-0 top-full mt-1.5 z-30 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-3 w-52"
+                  className="absolute left-0 top-full mt-1.5 z-30 bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-xl shadow-xl p-3 w-52"
                   onMouseEnter={handleScoreMouseEnter}
                   onMouseLeave={handleScoreMouseLeave}
                 >
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Fit score guide</p>
+                  <p className="text-xs font-medium text-[#6B8299] dark:text-[#9BB0C1] mb-2 uppercase tracking-wide">Fit score guide</p>
                   <div className="space-y-1.5">
                     {FIT_TIERS.map((t) => (
                       <div key={t.min} className={`flex items-center gap-2 text-xs rounded-md px-1.5 py-0.5 ${t.min === tier.min ? `${t.bg} font-medium` : ""}`}>
                         <span className="w-4 text-center">{t.emoji}</span>
-                        <span className="text-gray-700 dark:text-gray-300 flex-1">{t.label}</span>
-                        <span className="text-gray-400 dark:text-gray-500 tabular-nums">
+                        <span className="text-[#3D5A6E] dark:text-[#B8D4E3] flex-1">{t.label}</span>
+                        <span className="text-[#9BB0C1] dark:text-[#6B8299] tabular-nums">
                           {t.min === 0 ? "<50%" : t.min === 80 ? "80%+" : `${t.min}–${t.min === 65 ? 79 : 64}%`}
                         </span>
                       </div>
@@ -220,23 +220,23 @@ export default function ResultCard({
             {statusEmoji[option.status] && (
               <span className="text-sm">{statusEmoji[option.status]}</span>
             )}
-            <span className="text-gray-900 dark:text-white font-semibold truncate">{option.name}</span>
+            <span className="text-[#2C3E50] dark:text-white font-semibold truncate">{option.name}</span>
             {option.price && (
-              <span className="text-gray-500 dark:text-gray-400 text-sm">{option.price}</span>
+              <span className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">{option.price}</span>
             )}
             {category && CATEGORY_META[category] && (
-              <span className="ml-auto flex-shrink-0 text-[10px] text-gray-400 dark:text-gray-600 uppercase tracking-wider font-medium">
+              <span className="ml-auto flex-shrink-0 text-[10px] text-[#E8A87C] uppercase tracking-wider font-medium">
                 {CATEGORY_META[category].icon} {CATEGORY_META[category].label}
               </span>
             )}
           </div>
           <div className="mt-1">
-            <p className={`text-gray-600 dark:text-gray-400 text-sm leading-relaxed ${showFullExplanation ? "" : "line-clamp-3"}`}>
+            <p className={`text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed ${showFullExplanation ? "" : "line-clamp-3"}`}>
               {option.fitExplanation}
             </p>
             {option.fitExplanation && option.fitExplanation.length > 160 && (
               <button
-                className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 mt-0.5 transition-colors"
+                className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] mt-0.5 transition-colors"
                 onClick={(e) => { e.stopPropagation(); setShowFullExplanation((v) => !v); }}
               >
                 {showFullExplanation ? "Read less" : "Read more"}
@@ -280,16 +280,16 @@ export default function ResultCard({
             </div>
           )}
         </div>
-        <span className="text-gray-400 text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
+        <span className="text-[#9BB0C1] text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
       </div>
 
       {/* Expanded details */}
       {expanded && (
-        <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-800 pt-4 space-y-4">
+        <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: axis bars */}
             <div>
-              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-2">
+              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-2">
                 Axis Scores{travelers[0] ? ` — ${travelers[0].name}` : ""}
               </p>
               {profileWeights && AXIS_KEYS.map((k) => (
@@ -306,16 +306,16 @@ export default function ResultCard({
             {/* Right: description, tradeoffs, source */}
             <div className="space-y-3">
               <div>
-                <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1">Description</p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{option.description}</p>
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1">Description</p>
+                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
               </div>
               {option.tradeoffs.length > 0 && (
                 <div>
-                  <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1">Tradeoffs</p>
-                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1">Tradeoffs</p>
+                  <ul className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] space-y-1">
                     {option.tradeoffs.map((t, i) => (
                       <li key={i} className="flex gap-1.5">
-                        <span className="text-gray-400 flex-shrink-0 mt-0.5">•</span>
+                        <span className="text-[#9BB0C1] flex-shrink-0 mt-0.5">•</span>
                         <span>{t}</span>
                       </li>
                     ))}
@@ -325,7 +325,7 @@ export default function ResultCard({
               {/* Source link — validated before display */}
               <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
                 {urlStatus === "checking" && (
-                  <span className="text-xs text-gray-400 dark:text-gray-600 animate-pulse">Checking source…</span>
+                  <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
                 )}
 
                 {urlStatus === "valid" && (
@@ -334,16 +334,16 @@ export default function ResultCard({
                       href={resolvedUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:underline text-sm inline-flex items-center gap-1"
+                      className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
                     >
                       {getSourceLabel(resolvedUrl)}
                     </a>
                     {reportSent ? (
-                      <span className="text-xs text-gray-400 dark:text-gray-600">Reported — thanks</span>
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
                     ) : (
                       <button
                         onClick={handleReport}
-                        className="text-xs text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                        className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         title="Report a bad or incorrect link"
                       >
                         🚩 Report
@@ -353,7 +353,7 @@ export default function ResultCard({
                 )}
 
                 {urlStatus === "invalid" && !reportSent && (
-                  <span className="text-xs text-gray-400 dark:text-gray-600">Source not available</span>
+                  <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
                 )}
               </div>
             </div>
@@ -361,8 +361,8 @@ export default function ResultCard({
 
           {/* Per-traveler scores — only when 2+ travelers */}
           {hasMultipleTravelers && (
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-              <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-3">Traveler Fit</p>
+            <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4">
+              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-3">Traveler Fit</p>
               <div className="space-y-2.5">
                 {travelers.map((traveler, idx) => {
                   const ts = option.travelerScores?.[traveler.id];
@@ -377,10 +377,10 @@ export default function ResultCard({
                       >
                         {traveler.name[0]}
                       </div>
-                      <span className="text-sm text-gray-700 dark:text-gray-300 w-20 truncate flex-shrink-0">
+                      <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">
                         {traveler.name}
                       </span>
-                      <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-[#E0E8ED] dark:bg-[#3D5A6E] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all"
                           style={{ width: `${tScore}%`, backgroundColor: tTier.hex }}
@@ -409,22 +409,22 @@ export default function ResultCard({
 
           {/* Deep dive result */}
           {deepDive && (
-            <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] overflow-hidden">
               {/* Overview */}
               {deepDive.overview && (
-                <div className="px-4 py-3.5 bg-gray-50 dark:bg-gray-800/60">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">Overview</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{deepDive.overview}</p>
+                <div className="px-4 py-3.5 bg-[#F8FAFB] dark:bg-[#2a3f52]/60">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Overview</p>
+                  <p className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-relaxed">{deepDive.overview}</p>
                 </div>
               )}
 
               {/* Why it fits */}
               {deepDive.whyItFits.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
+                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-green-600 dark:text-green-500 mb-2">Why it fits you</p>
                   <ul className="space-y-1.5">
                     {deepDive.whyItFits.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
                         <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
                         <span>{item}</span>
                       </li>
@@ -435,11 +435,11 @@ export default function ResultCard({
 
               {/* Watch out for */}
               {deepDive.watchOutFor.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
+                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-2">Watch out for</p>
                   <ul className="space-y-1.5">
                     {deepDive.watchOutFor.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
                         <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
                         <span>{item}</span>
                       </li>
@@ -450,12 +450,12 @@ export default function ResultCard({
 
               {/* Standout features */}
               {deepDive.standoutFeatures.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Standout features</p>
+                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-2">Standout features</p>
                   <ul className="space-y-1.5">
                     {deepDive.standoutFeatures.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
-                        <span className="text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5">•</span>
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-[#9BB0C1] dark:text-[#6B8299] flex-shrink-0 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -465,9 +465,9 @@ export default function ResultCard({
 
               {/* Bottom line */}
               {deepDive.bottomLine && (
-                <div className="px-4 py-3.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">Bottom line</p>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">{deepDive.bottomLine}</p>
+                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E] bg-[#F8FAFB] dark:bg-[#2a3f52]/60">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Bottom line</p>
+                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
                 </div>
               )}
             </div>
@@ -475,9 +475,9 @@ export default function ResultCard({
 
           {/* Notes */}
           <div>
-            <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wide mb-1.5">Notes</p>
+            <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1.5">Notes</p>
             <textarea
-              className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded-lg border border-gray-200 dark:border-gray-700 p-2.5 resize-none focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#F8FAFB] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] text-sm rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2.5 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
               rows={2}
               placeholder="Add notes…"
               value={notes}
@@ -491,8 +491,8 @@ export default function ResultCard({
             <button
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
                 isSaved
-                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60"
-                  : "bg-blue-600 text-white hover:bg-blue-500"
+                  ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/20 dark:hover:bg-[#5B8BA0]/30"
+                  : "bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
               }`}
               onClick={onSave}
             >
@@ -503,8 +503,8 @@ export default function ResultCard({
                 key={s}
                 className={`px-3 py-1.5 text-sm rounded-lg capitalize transition-colors ${
                   option.status === s
-                    ? "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white font-medium"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    ? "bg-[#E0E8ED] dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white font-medium"
+                    : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
                 }`}
                 onClick={() => onStatusChange(s)}
               >
@@ -516,7 +516,7 @@ export default function ResultCard({
                 <span className="text-xs text-red-500 dark:text-red-400">Research failed — try again</span>
               )}
               <button
-                className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-sm rounded-lg bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E] transition-colors disabled:opacity-50"
                 onClick={handleDeepDive}
                 disabled={loadingDive}
               >

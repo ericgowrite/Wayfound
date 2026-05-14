@@ -289,19 +289,19 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const selectedOptions = activeSearch?.scoredResults.filter((o) => selectedIds.has(o.id)) ?? [];
 
   const inputCls =
-    "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-700 focus:border-blue-500";
+    "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
 
   return (
     <div className="flex flex-col h-full">
       {/* Workspace header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-6 py-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{workspace.name}</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <h1 className="text-xl font-semibold text-[#2C3E50] dark:text-white">{workspace.name}</h1>
+            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">
               {workspace.destination}
               {travelers.length > 0 && (
-                <span className="ml-2 text-gray-400 dark:text-gray-500">
+                <span className="ml-2 text-[#9BB0C1] dark:text-[#6B8299]">
                   · {travelers.map((t) => t.name).join(", ")}
                 </span>
               )}
@@ -309,12 +309,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           </div>
           {/* Group sort toggle — only visible when 2+ travelers */}
           {travelers.length > 1 && (
-            <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 text-xs flex-shrink-0">
+            <div className="flex items-center gap-0.5 bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-0.5 text-xs flex-shrink-0">
               <button
                 className={`px-2.5 py-1 rounded-md transition-colors ${
                   sortMode === "fit"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-medium"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
+                    : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
                 }`}
                 onClick={() => setSortMode("fit")}
               >
@@ -323,8 +323,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <button
                 className={`px-2.5 py-1 rounded-md transition-colors ${
                   sortMode === "group"
-                    ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-medium"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
+                    : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
                 }`}
                 onClick={() => setSortMode("group")}
               >
@@ -336,14 +336,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       </div>
 
       {/* Search / Score bar */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-3 space-y-2">
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-6 py-3 space-y-2">
         {/* Mode toggle */}
-        <div className="flex items-center gap-0.5 bg-gray-200 dark:bg-gray-800 rounded-lg p-0.5 w-fit">
+        <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 w-fit">
           <button
             className={`px-3 py-1 text-xs rounded-md transition-colors ${
               mode === "search"
-                ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow font-medium"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
             }`}
             onClick={() => setMode("search")}
           >
@@ -352,8 +352,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           <button
             className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
               mode === "score"
-                ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow font-medium"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
             }`}
             onClick={() => setMode("score")}
           >
@@ -378,7 +378,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             />
             <CategorySelect value={category} onChange={setCategory} />
             <button
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               onClick={handleSearch}
               disabled={searching || !query.trim()}
             >
@@ -403,7 +403,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             <div className="flex gap-2">
               <CategorySelect value={category} onChange={setCategory} />
               <button
-                className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                className="px-4 py-1.5 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 onClick={handleScore}
                 disabled={searching || !scoreInput.trim()}
               >
@@ -420,20 +420,28 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         )}
 
         {searchError && (
-          <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
-            <span className="text-red-500 text-xs mt-0.5 flex-shrink-0">⚠</span>
-            <p className="text-red-700 dark:text-red-400 text-xs">{searchError}</p>
+          <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-lg px-3 py-2.5">
+            <span className="text-amber-500 text-sm mt-px flex-shrink-0">↻</span>
+            <div>
+              <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-xs">{searchError}</p>
+              <button
+                className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline mt-1"
+                onClick={() => setSearchError("")}
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6">
+      <div className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-6">
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "search"
-              ? "border-blue-500 text-blue-600 dark:text-blue-400"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
           }`}
           onClick={() => setActiveTab("search")}
         >
@@ -442,8 +450,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "saved"
-              ? "border-blue-500 text-blue-600 dark:text-blue-400"
-              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
           }`}
           onClick={() => setActiveTab("saved")}
         >
@@ -466,8 +474,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                       key={s.id}
                       className={`text-xs px-2.5 py-1 rounded-full border transition-colors flex items-center gap-1 ${
                         isActive
-                          ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-medium"
-                          : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500"
+                          ? "border-[#5B8BA0] text-[#5B8BA0] dark:text-[#7DBAD4] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 font-medium"
+                          : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1]"
                       }`}
                       onClick={() => { setActiveSearchId(s.id); setCategoryFilter(null); }}
                     >
@@ -490,8 +498,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                       key={s.id}
                       className={`text-xs px-3 py-1 rounded-lg border transition-colors flex items-center gap-1.5 ${
                         isActive
-                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium"
-                          : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-900"
+                          ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4] font-medium"
+                          : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1] bg-white dark:bg-[#1e2d3d]"
                       }`}
                       onClick={() => {
                         setActiveSearchId(s.id);
@@ -500,7 +508,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     >
                       <span>{meta.icon}</span>
                       <span>{meta.label}</span>
-                      <span className="text-gray-400 dark:text-gray-600">({s.scoredResults.length})</span>
+                      <span className="text-[#9BB0C1] dark:text-[#6B8299]">({s.scoredResults.length})</span>
                     </button>
                   );
                 })}
@@ -509,18 +517,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Comparison bar */}
             {selectedIds.size >= 2 && (
-              <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-xl px-4 py-2.5">
-                <span className="text-blue-700 dark:text-blue-300 text-sm font-medium">
+              <div className="mb-4 flex items-center gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/40 dark:border-[#5B8BA0] rounded-xl px-4 py-2.5">
+                <span className="text-[#5B8BA0] dark:text-[#7DBAD4] text-sm font-medium">
                   {selectedIds.size} selected
                 </span>
                 <button
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-500 transition-colors"
+                  className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
                   onClick={() => setShowComparison(true)}
                 >
                   Compare →
                 </button>
                 <button
-                  className="text-gray-500 text-sm hover:text-gray-800 dark:hover:text-white ml-auto transition-colors"
+                  className="text-[#6B8299] text-sm hover:text-[#2C3E50] dark:hover:text-white ml-auto transition-colors"
                   onClick={() => setSelectedIds(new Set())}
                 >
                   Clear
@@ -532,10 +540,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {searching && (
               <div className="text-center py-16">
                 <div className="text-5xl mb-4 animate-pulse">{mode === "score" ? "✦" : "🔍"}</div>
-                <p className="text-gray-700 dark:text-gray-300 font-medium">
+                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] font-medium">
                   {mode === "score" ? "Researching and scoring…" : "Searching and scoring options…"}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">This may take 15–30 seconds</p>
+                <p className="text-sm text-[#6B8299] mt-1">This may take 15–30 seconds</p>
               </div>
             )}
 
@@ -543,8 +551,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {!searching && sortMode === "group" && travelers.length > 1 && sortedResults.length > 0 && (
               <div className="mb-3 flex items-center gap-2 text-xs">
                 <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                <span className="text-gray-600 dark:text-gray-400">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Group sort</span>
+                <span className="text-[#6B8299] dark:text-[#9BB0C1]">
+                  <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Group sort</span>
                   {" "}— options where everyone scores ≥65% rank first, then by average
                 </span>
               </div>
@@ -552,11 +560,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* First-time fit score callout */}
             {showFitCallout && !searching && sortedResults.length > 0 && (
-              <div className="mb-3 flex items-start gap-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-3">
-                <span className="text-blue-500 text-lg flex-shrink-0">💡</span>
+              <div className="mb-3 flex items-start gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/30 dark:border-[#5B8BA0]/50 rounded-xl px-4 py-3">
+                <span className="text-[#5B8BA0] text-lg flex-shrink-0">💡</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-0.5">About fit scores</p>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                  <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3] mb-0.5">About fit scores</p>
+                  <p className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] leading-relaxed">
                     Each score shows how well an option matches your profile. <span className="font-medium text-green-600 dark:text-green-400">Green (80%+)</span> is a strong fit,{" "}
                     <span className="font-medium text-yellow-600 dark:text-yellow-400">yellow (65–79%)</span> has tradeoffs,{" "}
                     <span className="font-medium text-orange-600 dark:text-orange-400">orange (50–64%)</span> is marginal,{" "}
@@ -564,7 +572,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   </p>
                 </div>
                 <button
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium flex-shrink-0 transition-colors"
+                  className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] font-medium flex-shrink-0 transition-colors"
                   onClick={() => {
                     localStorage.setItem("hasSeenFitLegend", "1");
                     setShowFitCallout(false);
@@ -578,7 +586,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {/* Results */}
             {!searching && sortedResults.length > 0 && (
               <div className="space-y-3">
-                <p className="text-gray-400 dark:text-gray-500 text-xs">
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
                   {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
                   {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
                   {" · "}&quot;{displayedSearch!.query}&quot;
@@ -603,17 +611,17 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 {/* Find more */}
                 <div className="pt-2 pb-4 flex justify-center">
                   {loadingMore ? (
-                    <div className="text-center text-gray-500">
+                    <div className="text-center text-[#6B8299]">
                       <div className="text-2xl mb-1 animate-spin">⟳</div>
                       <p className="text-sm">Finding more options…</p>
                     </div>
                   ) : (
                     <button
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#5B8BA0] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors text-sm"
                       onClick={handleMore}
                     >
                       <span>Find more options</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-600">aligned to your profile</span>
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">aligned to your profile</span>
                       <span>→</span>
                     </button>
                   )}
@@ -625,10 +633,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {!searching && sortedResults.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">✈️</div>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
                   {workspace.searches.length > 0 ? "No results found" : "Search to get started"}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-[#6B8299] mt-1">
                   Try &quot;boutique hotels in {workspace.destination || "Tuscany"}&quot;
                 </p>
               </div>
@@ -642,8 +650,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {workspace.savedOptions.length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">📋</div>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">No saved options yet</p>
-                <p className="text-sm text-gray-500 mt-1">Save results from your searches to compare later</p>
+                <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No saved options yet</p>
+                <p className="text-sm text-[#6B8299] mt-1">Save results from your searches to compare later</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -671,7 +679,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Trip notes */}
             <div className="mt-6">
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Trip Notes</p>
+              <p className="text-[#6B8299] text-xs uppercase tracking-wide mb-2">Trip Notes</p>
               <textarea
                 className={`w-full ${inputCls} text-sm rounded-lg border p-3 resize-none focus:outline-none transition-colors`}
                 rows={4}

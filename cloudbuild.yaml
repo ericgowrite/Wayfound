@@ -1,0 +1,32 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAZ_nqrpqTK5Js-hmqP9uZrDnPtokKnAOE'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=viyaway-travel-app.firebaseapp.com'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_PROJECT_ID=viyaway-travel-app'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=viyaway-travel-app.firebasestorage.app'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=4349124323'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=1:4349124323:web:ce06b21e2ba749bf456fd6'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-L7QPZ103EZ'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/viyaway'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/viyaway']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'viyaway'
+      - '--image=gcr.io/$PROJECT_ID/viyaway'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=512Mi'
+      - '--min-instances=0'
+      - '--max-instances=10'

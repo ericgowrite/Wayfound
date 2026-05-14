@@ -26,7 +26,7 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
     method: "HEAD",
     redirect: "follow",
     signal,
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Viya/1.0)" },
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)" },
   });
   // Some servers reject HEAD — fall back to GET
   if (res.status === 405) {
@@ -34,7 +34,7 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
       method: "GET",
       redirect: "follow",
       signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; Viya/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)" },
     });
   }
   return res;

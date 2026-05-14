@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { searchMoreOptions } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
+import { friendlyError } from "@/lib/errorMessages";
 
 export async function POST(request: Request) {
   try {
@@ -44,6 +45,6 @@ export async function POST(request: Request) {
     return NextResponse.json(updatedSearch);
   } catch (e) {
     console.error("Search more error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }

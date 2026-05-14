@@ -3,13 +3,13 @@
 @custom-variant dark (&:is(.dark, .dark *));
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #F8FAFB;
+  --foreground: #2C3E50;
 }
 
 .dark {
-  --background: #030712;
-  --foreground: #f9fafb;
+  --background: #0f1923;
+  --foreground: #B8D4E3;
 }
 
 @theme inline {
@@ -26,9 +26,9 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-color: #E0E8ED transparent;
 }
 
 .dark * {
-  scrollbar-color: #374151 transparent;
+  scrollbar-color: #3D5A6E transparent;
 }

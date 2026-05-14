@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { scoreSpecific } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
+import { friendlyError } from "@/lib/errorMessages";
 import { Search, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -39,6 +40,6 @@ export async function POST(request: Request) {
     return NextResponse.json(search);
   } catch (e) {
     console.error("Score error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }

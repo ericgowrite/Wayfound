@@ -95,22 +95,22 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
   if (phase === "intro") {
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-3">
           Let&apos;s get to know you
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+        <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-3">
           The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you.
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-8">Takes about 5 minutes.</p>
+        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">Takes about 5 minutes.</p>
         <button
-          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+          className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
           onClick={() => setPhase("questions")}
         >
           Start Assessment →
         </button>
         <div className="mt-3 text-center">
           <button
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
             onClick={onSkip}
           >
             Set up manually instead
@@ -127,13 +127,13 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
       <div className="flex flex-col h-full">
         <div className="px-6 pt-5 pb-3">
           <button
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mb-3"
+            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors mb-3"
             onClick={() => setPhase("result")}
           >
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">Your top results</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Pick the one that feels most like you.</p>
+          <h3 className="text-base font-semibold text-[#2C3E50] dark:text-white">Your top results</h3>
+          <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">Pick the one that feels most like you.</p>
         </div>
 
         <div className="flex-1 px-6 pb-4 space-y-3 overflow-auto">
@@ -147,27 +147,27 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
                 onClick={() => setActiveType(type)}
                 className={`w-full text-left px-4 py-4 rounded-xl border transition-all ${
                   isSelected
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
-                    : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-700"
+                    ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15"
+                    : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] hover:border-[#5B8BA0]/40 dark:hover:border-[#5B8BA0]"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold ${isSelected ? "text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-white"}`}>
+                    <p className={`text-sm font-semibold ${isSelected ? "text-[#2C3E50] dark:text-[#B8D4E3]" : "text-[#2C3E50] dark:text-white"}`}>
                       {arch.name}
                     </p>
-                    <p className={`text-xs mt-0.5 ${isSelected ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-400"}`}>
+                    <p className={`text-xs mt-0.5 ${isSelected ? "text-[#5B8BA0] dark:text-[#7DBAD4]" : "text-[#6B8299] dark:text-[#9BB0C1]"}`}>
                       {arch.tagline}
                     </p>
-                    <p className={`text-xs mt-2 leading-relaxed line-clamp-2 ${isSelected ? "text-blue-800 dark:text-blue-200" : "text-gray-600 dark:text-gray-400"}`}>
+                    <p className={`text-xs mt-2 leading-relaxed line-clamp-2 ${isSelected ? "text-[#3D5A6E] dark:text-[#B8D4E3]" : "text-[#6B8299] dark:text-[#9BB0C1]"}`}>
                       {arch.description}
                     </p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-600"}`}>
+                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-[#5B8BA0] dark:text-[#7DBAD4]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
                       {score}
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-600">pts</div>
+                    <div className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">pts</div>
                   </div>
                 </div>
               </button>
@@ -177,14 +177,14 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
 
         <div className="px-6 pb-6 space-y-2">
           <button
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors"
+            className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
             onClick={() => setPhase("result")}
           >
             Use selected style →
           </button>
           <div className="text-center">
             <button
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={handleRetake}
             >
               Retake assessment
@@ -205,9 +205,9 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="text-center px-6 pt-6 pb-3">
-          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Your travel style</p>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{displayed.name}</h2>
-          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">{displayed.tagline}</p>
+          <p className="text-xs text-[#E8A87C] uppercase tracking-widest font-semibold mb-2">Your travel style</p>
+          <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-1">{displayed.name}</h2>
+          <p className="text-sm text-[#5B8BA0] dark:text-[#7DBAD4] font-medium">{displayed.tagline}</p>
           <p className={`text-xs mt-2 ${conf.color}`}>
             {conf.text}
           </p>
@@ -215,24 +215,24 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
 
         {/* Description */}
         <div className="px-6 pb-4">
-          <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed text-center">{displayed.description}</p>
+          <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed text-center">{displayed.description}</p>
         </div>
 
         {/* Top priorities */}
         <div className="px-6 pb-4">
-          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center mb-3">What matters most to you</p>
+          <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wide text-center mb-3">What matters most to you</p>
           <div className="flex flex-col gap-2">
             {displayedTopAxes.map(({ axis, label }, i) => (
               <div
                 key={axis}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm ${
                   i === 0
-                    ? "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200"
-                    : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+                    ? "bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border-[#5B8BA0]/30 dark:border-[#5B8BA0]/50 text-[#3D5A6E] dark:text-[#B8D4E3]"
+                    : "bg-[#F8FAFB] dark:bg-[#2a3f52] border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3]"
                 }`}
               >
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                  i === 0 ? "bg-blue-600 text-white" : "bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200"
+                  i === 0 ? "bg-[#5B8BA0] text-white" : "bg-[#E0E8ED] dark:bg-[#4A7A8F] text-[#3D5A6E] dark:text-[#B8D4E3]"
                 }`}>
                   {i + 1}
                 </span>
@@ -245,11 +245,11 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
         {/* Name input (only if not pre-filled) */}
         {!prefilledName && (
           <div className="px-6 pb-3">
-            <label className="block text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] uppercase tracking-wide mb-1.5">
               What should we call you?
             </label>
             <input
-              className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#5B8BA0] transition-colors"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -262,7 +262,7 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
         {/* Actions */}
         <div className="px-6 pb-6 pt-1 flex flex-col gap-2 mt-auto">
           <button
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+            className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
             onClick={handleAccept}
             disabled={!prefilledName && !name.trim()}
           >
@@ -270,14 +270,14 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
           </button>
           <div className="flex gap-3 justify-center">
             <button
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={() => setPhase("alternatives")}
             >
               Not quite me — see alternatives
             </button>
-            <span className="text-gray-300 dark:text-gray-700">·</span>
+            <span className="text-[#B8D4E3] dark:text-[#3D5A6E]">·</span>
             <button
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={onSkip}
             >
               Set up manually
@@ -294,19 +294,19 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
       {/* Progress */}
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 dark:text-gray-500">
+          <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
             Question {idx + 1} of {QUESTIONS.length}
           </span>
           <button
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
             onClick={onSkip}
           >
             Skip →
           </button>
         </div>
-        <div className="h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
+            className="h-full bg-[#E8A87C] rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -317,7 +317,7 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
         className="flex-1 flex flex-col justify-center px-6 pb-2"
         style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}
       >
-        <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center mb-5">
+        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-widest text-center mb-5">
           Which resonates more?
         </p>
 
@@ -332,11 +332,11 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
                 disabled={animating}
                 className={`w-full text-left px-4 py-4 rounded-xl border transition-all text-sm leading-relaxed ${
                   chosen
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100"
-                    : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
+                    ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#2C3E50] dark:text-[#B8D4E3]"
+                    : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/5 dark:hover:bg-[#5B8BA0]/8"
                 }`}
               >
-                <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${chosen ? "text-blue-500" : "text-gray-400 dark:text-gray-600"}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${chosen ? "text-[#5B8BA0]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
                   {side}
                 </span>
                 {text}
@@ -349,13 +349,13 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
       {/* Back / counter */}
       <div className="px-6 pb-5 pt-2 flex justify-between items-center">
         <button
-          className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-30"
+          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors disabled:opacity-30"
           onClick={handleBack}
           disabled={idx === 0}
         >
           ← Back
         </button>
-        <span className="text-xs text-gray-300 dark:text-gray-700 tabular-nums">
+        <span className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] tabular-nums">
           {Object.keys(answers).length}/{QUESTIONS.length} answered
         </span>
       </div>

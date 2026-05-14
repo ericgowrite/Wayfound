@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 
-export const metadata = { title: "How We Make Money — Viya" };
+export const metadata = { title: "How We Make Money — ViyaWay" };
 
 export default function AffiliatePage() {
   return (
@@ -11,7 +11,7 @@ export default function AffiliatePage() {
         {
           heading: "The Short Version",
           body: (
-            <p>Viya is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
+            <p>ViyaWay is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
           ),
         },
         {
@@ -28,13 +28,13 @@ export default function AffiliatePage() {
                   ["Hotels.com", "Hotels and accommodations"],
                 ].map(([name, desc]) => (
                   <li key={name} className="flex gap-2">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">{name}</span>
-                    <span className="text-gray-400">—</span>
+                    <span className="font-medium text-[#2C3E50] dark:text-[#B8D4E3]">{name}</span>
+                    <span className="text-[#9BB0C1]">—</span>
                     <span>{desc}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-gray-400 dark:text-gray-500 text-xs">This list may be updated as we add new partners.</p>
+              <p className="mt-3 text-[#9BB0C1] dark:text-[#6B8299] text-xs">This list may be updated as we add new partners.</p>
             </>
           ),
         },
@@ -42,16 +42,16 @@ export default function AffiliatePage() {
           heading: "Our Commitment to You",
           body: (
             <>
-              <p><strong className="text-gray-800 dark:text-gray-200">Recommendations are independent.</strong> Our fit scores are calculated based on your personality profile and preferences — not on which options pay us the highest commission.</p>
+              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Recommendations are independent.</strong> Our fit scores are calculated based on your personality profile and preferences — not on which options pay us the highest commission.</p>
               <p>We will never rank an option higher because it pays more, hide better-fit options to promote partners, or let affiliate relationships influence our scoring algorithm.</p>
-              <p><strong className="text-gray-800 dark:text-gray-200">Transparency.</strong> Affiliate booking links are clearly labeled with partner names. Our scoring methodology is identical for all options, affiliate or not.</p>
+              <p><strong className="text-[#2C3E50] dark:text-[#B8D4E3]">Transparency.</strong> Affiliate booking links are clearly labeled with partner names. Our scoring methodology is identical for all options, affiliate or not.</p>
             </>
           ),
         },
         {
           heading: "Contact",
           body: (
-            <p>Questions about our affiliate relationships? Email us at <a href="mailto:support@viyaway.com" className="text-blue-600 dark:text-blue-400 hover:underline">support@viyaway.com</a></p>
+            <p>Questions about our affiliate relationships? Email us at <a href="mailto:support@viyaway.com" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">support@viyaway.com</a></p>
           ),
         },
       ]}

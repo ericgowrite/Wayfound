@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace } from "@/lib/storage";
 import { generateComparison } from "@/lib/gemini";
+import { friendlyError } from "@/lib/errorMessages";
 import { ScoredOption } from "@/types";
 
 export async function POST(request: Request) {
@@ -27,6 +28,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ summary });
   } catch (e) {
     console.error("Compare error:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }

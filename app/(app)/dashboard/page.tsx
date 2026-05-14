@@ -9,9 +9,11 @@ import FitLegendModal from "@/components/FitLegendModal";
 import TravelAssessment from "@/components/TravelAssessment";
 import { AssessmentResult } from "@/lib/assessment";
 import { useTheme } from "@/lib/useTheme";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
+  const { logout } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [workspaces, setWorkspaces] = useState<TripWorkspace[]>([]);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
@@ -125,14 +127,14 @@ export default function Home() {
     );
   }
 
-  const inputCls = "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-700 focus:border-blue-500";
-  const btnSecondary = "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600";
-  const modalCls = "bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700";
+  const inputCls = "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
+  const btnSecondary = "bg-[#E0E8ED] dark:bg-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#D0DCE4] dark:hover:bg-[#4A7A8F]";
+  const modalCls = "bg-white dark:bg-[#1e2d3d] border-[#E0E8ED] dark:border-[#3D5A6E]";
 
   // Still fetching
   if (!profilesLoaded) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-center h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#6B8299] dark:text-[#9BB0C1]">
         Loading…
       </div>
     );
@@ -141,12 +143,12 @@ export default function Home() {
   // First-run: no profiles yet — show full-screen assessment
   if (profilesLoaded && profiles.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
-        <div className="w-full max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden">
-          <div className="px-6 pt-6 pb-0 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFB] dark:bg-[#0f1923] p-4">
+        <div className="w-full max-w-md bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-2xl shadow-xl overflow-hidden">
+          <div className="px-6 pt-6 pb-0 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">Viya</span>
-              <span className="text-xs text-gray-400 dark:text-gray-600">Welcome</span>
+              <span className="text-sm font-semibold text-[#2C3E50] dark:text-white">ViyaWay</span>
+              <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Welcome</span>
             </div>
           </div>
           <div style={{ minHeight: 520 }}>
@@ -164,32 +166,32 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#2C3E50] dark:text-[#B8D4E3] overflow-hidden">
       {/* Sidebar */}
-      <div className="w-56 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className="w-56 flex-shrink-0 bg-white dark:bg-[#1e2d3d] border-r border-[#E0E8ED] dark:border-[#2a3f52] flex flex-col">
         {/* App header */}
-        <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Viya</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Travel that feels like you</p>
+        <div className="px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+          <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
+          <p className="text-xs text-[#6B8299] mt-0.5">Your true path to travel</p>
         </div>
 
         <div className="flex-1 overflow-auto">
           {/* Profiles section */}
           <div className="mt-2">
             <button
-              className="w-full flex items-center justify-between px-4 py-2 text-xs text-gray-500 uppercase font-medium tracking-wide hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#6B8299] uppercase font-medium tracking-wide hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={() => setProfilesOpen((o) => !o)}
             >
               <span>Travelers</span>
               <span className="flex items-center gap-1">
                 <span
-                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white transition-colors"
                   onClick={(e) => { e.stopPropagation(); setShowAddProfile(true); }}
                   title="Add traveler"
                 >
                   +
                 </span>
-                <span className="text-gray-400 dark:text-gray-600">{profilesOpen ? "▴" : "▾"}</span>
+                <span className="text-[#9BB0C1] dark:text-[#6B8299]">{profilesOpen ? "▴" : "▾"}</span>
               </span>
             </button>
 
@@ -198,19 +200,19 @@ export default function Home() {
                 {profiles.map((p) => (
                   <div
                     key={p.id}
-                    className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] transition-colors"
                     onClick={() => setEditingProfile(p)}
                   >
-                    <div className="w-6 h-6 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[#5B8BA0] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                       {p.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{p.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-600">Type {p.enneagramType}</p>
+                      <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3] truncate">{p.name}</p>
+                      <p className="text-xs text-[#6B8299] dark:text-[#6B8299]">Type {p.enneagramType}</p>
                     </div>
                     {!p.isDefault && (
                       <button
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
+                        className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
                         onClick={(e) => { e.stopPropagation(); setDeleteProfileId(p.id); }}
                       >
                         ×
@@ -223,13 +225,13 @@ export default function Home() {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-200 dark:border-gray-800 mx-4" />
+          <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mx-4" />
 
           {/* Trips section */}
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
-            <span className="text-xs text-gray-500 uppercase font-medium tracking-wide">Trips</span>
+            <span className="text-xs text-[#6B8299] uppercase font-medium tracking-wide">Trips</span>
             <button
-              className="text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
+              className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-sm transition-colors"
               onClick={() => setShowNewWorkspace(true)}
               title="New Trip"
             >
@@ -239,7 +241,7 @@ export default function Home() {
 
           <div className="px-2">
             {workspaces.length === 0 ? (
-              <p className="text-xs text-gray-400 dark:text-gray-600 px-2 py-1">No trips yet</p>
+              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] px-2 py-1">No trips yet</p>
             ) : (
               workspaces.map((w) => {
                 const primaryProfile = profiles.find((p) => p.id === w.travelers[0]);
@@ -249,22 +251,22 @@ export default function Home() {
                     key={w.id}
                     className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
                       w.id === activeWorkspaceId
-                        ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                        : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
                     }`}
                     onClick={() => setActiveWorkspaceId(w.id)}
                   >
                     <span className="text-sm">📁</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{w.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-600 truncate">
+                      <p className="text-xs text-[#6B8299] dark:text-[#6B8299] truncate">
                         {primaryProfile?.name ?? ""}
                         {extraCount > 0 ? ` +${extraCount}` : ""}
                         {w.destination ? ` · ${w.destination}` : ""}
                       </p>
                     </div>
                     <button
-                      className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
+                      className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
                       onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
                     >
                       ×
@@ -276,36 +278,45 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 pt-3 pb-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+        <div className="px-4 pt-3 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] space-y-3">
           {/* Utility */}
           <button
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full text-left"
+            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors w-full text-left"
             onClick={() => setShowFitLegend(true)}
           >
             What do fit scores mean?
           </button>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-400 dark:text-gray-600">v2.0</p>
-            <button
-              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-              onClick={toggle}
-              title={dark ? "Switch to light mode" : "Switch to night mode"}
-            >
-              {dark ? "☀ Light" : "☾ Night"}
-            </button>
+            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">v2.0</p>
+            <div className="flex items-center gap-3">
+              <button
+                className="text-xs text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
+                onClick={toggle}
+                title={dark ? "Switch to light mode" : "Switch to night mode"}
+              >
+                {dark ? "☀ Light" : "☾ Night"}
+              </button>
+              <button
+                className="text-xs text-[#9BB0C1] hover:text-red-500 transition-colors"
+                onClick={logout}
+                title="Log out"
+              >
+                Log out
+              </button>
+            </div>
           </div>
 
           {/* Legal */}
-          <div className="border-t border-gray-200 dark:border-gray-800 pt-3 space-y-1.5">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-medium">Legal</p>
-            <a href="/privacy" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Privacy Policy →</a>
-            <a href="/terms" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Terms of Service →</a>
-            <a href="/affiliate-disclosure" className="block text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">How We Make Money →</a>
+          <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-3 space-y-1.5">
+            <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wider font-medium">Legal</p>
+            <a href="/privacy" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Privacy Policy →</a>
+            <a href="/terms" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Terms of Service →</a>
+            <a href="/affiliate-disclosure" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money →</a>
           </div>
 
           {/* Affiliate disclosure */}
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-relaxed border-t border-gray-200 dark:border-gray-800 pt-2.5">
-            Viya may earn a commission from bookings. This doesn&apos;t affect our recommendations.
+          <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-2.5">
+            ViyaWay may earn a commission from bookings. This doesn&apos;t affect our recommendations.
           </p>
         </div>
       </div>
@@ -320,12 +331,12 @@ export default function Home() {
             onProfileUpdate={handleProfileUpdate}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-[#6B8299]">
             <div className="text-6xl mb-4">🗺️</div>
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Start planning a trip</p>
+            <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Start planning a trip</p>
             <p className="text-sm mt-1">Create a workspace to begin</p>
             <button
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 text-sm"
+              className="mt-4 px-4 py-2 bg-[#5B8BA0] text-white rounded hover:bg-[#4A7A8F] text-sm"
               onClick={() => setShowNewWorkspace(true)}
             >
               + New Trip
@@ -338,10 +349,10 @@ export default function Home() {
       {showNewWorkspace && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Trip</h2>
+            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-4">New Trip</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-1">Trip Name</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-1">Trip Name</label>
                 <input
                   className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="Tuscany 2026"
@@ -352,7 +363,7 @@ export default function Home() {
                 />
               </div>
               <div>
-                <label className="text-gray-500 text-xs uppercase block mb-1">Destination</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-1">Destination</label>
                 <input
                   className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="Tuscany, Italy"
@@ -363,26 +374,26 @@ export default function Home() {
               </div>
               {profiles.length > 1 && (
                 <div>
-                  <label className="text-gray-500 text-xs uppercase block mb-2">Traveling With</label>
+                  <label className="text-[#6B8299] text-xs uppercase block mb-2">Traveling With</label>
                   <div className="flex flex-wrap gap-2">
                     {profiles.map((p) => (
                       <button
                         key={p.id}
                         className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-colors ${
                           newTravelers.includes(p.id)
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300"
-                            : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500"
+                            ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                            : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1]"
                         }`}
                         onClick={() => toggleTraveler(p.id)}
                       >
-                        <span className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white">
+                        <span className="w-4 h-4 rounded-full bg-[#5B8BA0] flex items-center justify-center text-xs font-bold text-white">
                           {p.name[0]}
                         </span>
                         {p.name}
                       </button>
                     ))}
                   </div>
-                  <p className="text-gray-500 dark:text-gray-600 text-xs mt-1">Results scored against first selected traveler</p>
+                  <p className="text-[#6B8299] dark:text-[#6B8299] text-xs mt-1">Results scored against first selected traveler</p>
                 </div>
               )}
             </div>
@@ -394,7 +405,7 @@ export default function Home() {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={createWorkspace}
                 disabled={!newName.trim()}
               >
@@ -409,8 +420,8 @@ export default function Home() {
       {deleteWorkspaceId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Trip?</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Delete Trip?</h2>
+            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mb-4">
               This will permanently delete &quot;{workspaces.find((w) => w.id === deleteWorkspaceId)?.name}&quot; and all its searches.
             </p>
             <div className="flex gap-2 justify-end">
@@ -425,8 +436,8 @@ export default function Home() {
       {deleteProfileId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Remove Traveler?</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Remove Traveler?</h2>
+            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mb-4">
               Remove &quot;{profiles.find((p) => p.id === deleteProfileId)?.name}&quot; from your profiles?
             </p>
             <div className="flex gap-2 justify-end">

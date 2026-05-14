@@ -2,7 +2,7 @@
 
 ## Overview
 
-All Gemini API calls in Viya use a three-layer instruction hierarchy defined in
+All Gemini API calls in ViyaWay use a three-layer instruction hierarchy defined in
 `/lib/ai-instructions.ts`. Every call receives all three layers, always in the
 same order. Feature-specific prompts never conflict with higher-priority layers
 because lower layers cannot override higher ones.
