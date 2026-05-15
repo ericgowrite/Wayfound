@@ -309,9 +309,9 @@ export default function Home() {
           {/* Legal */}
           <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-3 space-y-1.5">
             <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wider font-medium">Legal</p>
-            <a href="/privacy" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Privacy Policy →</a>
-            <a href="/terms" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Terms of Service →</a>
-            <a href="/affiliate-disclosure" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money →</a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Privacy Policy ↗</a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Terms of Service ↗</a>
+            <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money ↗</a>
           </div>
 
           {/* Affiliate disclosure */}
