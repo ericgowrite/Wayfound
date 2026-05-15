@@ -5,6 +5,7 @@ import { QUESTIONS, scoreAssessment, AssessmentResult, getArchetypeForType, getT
 
 interface Props {
   prefilledName?: string;
+  isSelf?: boolean; // true = primary user (I/me/my), false = another traveler (they/them/their)
   onComplete: (result: AssessmentResult, name: string) => void;
   onSkip: () => void;
 }
@@ -17,7 +18,7 @@ const CONFIDENCE_LABEL = {
   low:    { text: "Close call — see alternatives", color: "text-orange-600 dark:text-orange-400" },
 };
 
-export default function TravelAssessment({ prefilledName, onComplete, onSkip }: Props) {
+export default function TravelAssessment({ prefilledName, isSelf = true, onComplete, onSkip }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<number, "A" | "B">>({});
@@ -93,13 +94,16 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
 
   // ── Intro screen ─────────────────────────────────────────────────────────────
   if (phase === "intro") {
+    const displayName = prefilledName || "them";
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
         <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-3">
-          Let&apos;s get to know you
+          {isSelf ? "Let’s get to know you" : `Let’s get to know ${displayName}`}
         </h3>
         <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-3">
-          The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you.
+          {isSelf
+            ? "The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you."
+            : `The following questions help us understand how ${displayName} experiences travel. There are no right or wrong answers — just pick what feels more like ${displayName}.`}
         </p>
         <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">Takes about 5 minutes.</p>
         <button
@@ -132,8 +136,12 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
           >
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-[#2C3E50] dark:text-white">Your top results</h3>
-          <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">Pick the one that feels most like you.</p>
+          <h3 className="text-base font-semibold text-[#2C3E50] dark:text-white">
+            {isSelf ? "Your top results" : `${prefilledName || "Their"} top results`}
+          </h3>
+          <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">
+            {isSelf ? "Pick the one that feels most like you." : `Pick the one that feels most like ${prefilledName || "them"}.`}
+          </p>
         </div>
 
         <div className="flex-1 px-6 pb-4 space-y-3 overflow-auto">
@@ -205,7 +213,9 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="text-center px-6 pt-6 pb-3">
-          <p className="text-xs text-[#E8A87C] uppercase tracking-widest font-semibold mb-2">Your travel style</p>
+          <p className="text-xs text-[#E8A87C] uppercase tracking-widest font-semibold mb-2">
+            {isSelf ? "Your travel style" : `${prefilledName ? prefilledName + "'s" : "Their"} travel style`}
+          </p>
           <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-1">{displayed.name}</h2>
           <p className="text-sm text-[#5B8BA0] dark:text-[#7DBAD4] font-medium">{displayed.tagline}</p>
           <p className={`text-xs mt-2 ${conf.color}`}>
@@ -220,7 +230,9 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
 
         {/* Top priorities */}
         <div className="px-6 pb-4">
-          <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wide text-center mb-3">What matters most to you</p>
+          <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wide text-center mb-3">
+            {isSelf ? "What matters most to you" : `What matters most to ${prefilledName || "them"}`}
+          </p>
           <div className="flex flex-col gap-2">
             {displayedTopAxes.map(({ axis, label }, i) => (
               <div
@@ -266,14 +278,14 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
             onClick={handleAccept}
             disabled={!prefilledName && !name.trim()}
           >
-            This feels right — create my profile →
+            {isSelf ? "This feels right — create my profile →" : `This feels right — create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
           </button>
           <div className="flex gap-3 justify-center">
             <button
               className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={() => setPhase("alternatives")}
             >
-              Not quite me — see alternatives
+              {isSelf ? "Not quite me — see alternatives" : "Not quite right — see alternatives"}
             </button>
             <span className="text-[#B8D4E3] dark:text-[#3D5A6E]">·</span>
             <button
@@ -318,7 +330,7 @@ export default function TravelAssessment({ prefilledName, onComplete, onSkip }: 
         style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}
       >
         <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-widest text-center mb-5">
-          Which resonates more?
+          {isSelf ? "Which resonates more?" : `Which resonates more for ${prefilledName || "them"}?`}
         </p>
 
         <div className="space-y-3">

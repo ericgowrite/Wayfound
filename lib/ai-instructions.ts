@@ -37,6 +37,13 @@ Never include user names, email addresses, personal notes, or profile details in
 source URLs, API calls beyond what is required, or any log-visible output fields.
 Profile data is used for scoring only — it must not appear verbatim in result fields.
 
+RULE 5 — PROPERTY NAME ACCURACY:
+Return property names EXACTLY as they appear in search results. Never drop or add
+articles (The, A, An), never abbreviate, never paraphrase. "The Sanctuary Beach
+Resort" must stay "The Sanctuary Beach Resort" — not "Sanctuary Beach Resort".
+Name accuracy is critical: it affects URL resolution and user trust. When uncertain,
+preserve the name exactly as the source shows it.
+
 === END SACRED RULES ===
 `.trim();
 
@@ -123,6 +130,8 @@ Task: Search the web for real travel options matching the query, then score each
       against the provided traveler profile.
 Output: JSON array of 4–8 results. No markdown. No explanation outside JSON.
 Source field: Official website or primary booking page for each option.
+Names: Return property names exactly as they appear in search results. Do not modify,
+       shorten, or paraphrase names. Include articles (The, A, An) exactly as shown.
 === END FEATURE ===
 `.trim(),
 
@@ -132,6 +141,8 @@ Role: You are a travel recommendation engine.
 Task: Search for additional travel options not already shown to the user.
       Find 4–6 genuinely different options. Prioritize higher profile alignment.
 Output: JSON array. Same schema as search results. No markdown. No duplicates.
+Names: Return property names exactly as they appear in search results. Do not modify,
+       shorten, or paraphrase names. Include articles (The, A, An) exactly as shown.
 === END FEATURE ===
 `.trim(),
 
@@ -142,6 +153,8 @@ Task: Research and score one specific option (name, URL, or description) against
       the traveler profile. Use Google Search to gather facts.
 Output: Single JSON object (not an array). No markdown. No extra text.
 Critical: If the user provided a URL, your source field MUST match it exactly.
+Names: Return the property name exactly as it appears in search results. Do not modify,
+       shorten, or paraphrase. Include articles (The, A, An) exactly as shown.
 === END FEATURE ===
 `.trim(),
 

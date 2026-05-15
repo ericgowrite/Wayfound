@@ -428,18 +428,22 @@ export default function ResultCard({
                 )}
               </div>
 
-              {/* Chat trigger — subtle text link below tradeoffs/source */}
+              {/* Chat trigger — styled as a card action button */}
               <button
-                className="flex items-center gap-1.5 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors mt-1"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
+                  chatOpen
+                    ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                    : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
+                }`}
                 onClick={() => {
                   setChatOpen((v) => !v);
                   if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
                 }}
               >
-                <span>💬</span>
+                <span className="text-sm">💬</span>
                 <span>{chatOpen ? "Hide chat" : "Ask about this"}</span>
                 {chatMessages.length > 0 && !chatOpen && (
-                  <span className="text-[#9BB0C1]/60 dark:text-[#6B8299]/60">
+                  <span className="text-xs opacity-60">
                     ({chatMessages.length})
                   </span>
                 )}

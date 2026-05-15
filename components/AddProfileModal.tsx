@@ -98,9 +98,9 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
         <div className="flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]">
           <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">
             {step === "info" && "Add Traveler Profile"}
-            {step === "know-type" && "Find Your Travel Style"}
+            {step === "know-type" && `Find ${name ? name + "'s" : "Their"} Travel Style`}
             {step === "assess" && "Travel Style Assessment"}
-            {step === "type-select" && "Select Your Type"}
+            {step === "type-select" && `Select ${name ? name + "'s" : "Their"} Type`}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
           <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
@@ -128,7 +128,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {step === "know-type" && (
             <div className="space-y-3">
               <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed">
-                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for you.
+                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name}</span>.
               </p>
               <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm pt-1">
                 Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their Enneagram type?
@@ -138,14 +138,14 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                   className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("type-select")}
                 >
-                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">Yes, I know my type</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">Yes, I know their type</p>
                   <p className="text-[#6B8299] text-xs mt-0.5">I&apos;ll pick from the list</p>
                 </button>
                 <button
                   className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("assess")}
                 >
-                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">No, help me find out</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">No, help them find out</p>
                   <p className="text-[#6B8299] text-xs mt-0.5">Take a quick in-app travel style assessment</p>
                 </button>
               </div>
@@ -157,6 +157,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
             <div className="-mx-4 -mb-4" style={{ minHeight: 460 }}>
               <TravelAssessment
                 prefilledName={name.trim()}
+                isSelf={false}
                 onComplete={handleAssessmentComplete}
                 onSkip={() => setStep("type-select")}
               />

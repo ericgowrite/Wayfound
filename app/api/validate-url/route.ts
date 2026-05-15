@@ -40,6 +40,76 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
   return res;
 }
 
+/** Try to validate a single URL. Returns the result or null on hard failure. */
+async function checkUrl(url: string): Promise<ValidateResult> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const res = await tryHead(url, controller.signal);
+    clearTimeout(timer);
+
+    const finalUrl = res.url || url;
+    const status = res.status;
+
+    if (status === 404) {
+      return { valid: false, finalUrl: null, status, reason: "not_found" };
+    }
+    if (status >= 200 && status < 300 && !sameDomain(url, finalUrl)) {
+      return { valid: false, finalUrl: null, status, reason: "cross_domain_redirect" };
+    }
+    if (status >= 200 && status < 400) {
+      return { valid: true, finalUrl, status, reason: "ok" };
+    }
+    if (status === 403 || status === 405 || status >= 500) {
+      return { valid: true, finalUrl: url, status, reason: "blocked_or_error" };
+    }
+    return { valid: false, finalUrl: null, status, reason: "unexpected_status" };
+  } catch (e) {
+    clearTimeout(timer);
+    const reason = (e instanceof Error && e.name === "AbortError") ? "timeout" : "network_error";
+    return { valid: false, finalUrl: null, status: 0, reason };
+  }
+}
+
+/**
+ * Generate fallback URL variants for common name mismatches.
+ * e.g. sanctuarybeachresort.com → thesanctuarybeachresort.com, and vice versa.
+ */
+function generateUrlVariants(url: string): string[] {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    const parts = host.split(".");
+    if (parts.length < 2) return [];
+
+    const name = parts.slice(0, -1).join("."); // e.g. "sanctuarybeachresort"
+    const tld = parts.slice(-1)[0]; // e.g. "com"
+    const variants: string[] = [];
+
+    // Try adding "the" prefix
+    if (!name.startsWith("the")) {
+      variants.push(`${parsed.protocol}//www.the${name}.${tld}${parsed.pathname}`);
+    }
+    // Try removing "the" prefix
+    if (name.startsWith("the") && name.length > 3) {
+      variants.push(`${parsed.protocol}//www.${name.slice(3)}.${tld}${parsed.pathname}`);
+    }
+    // Try adding "hotel" suffix
+    if (!name.endsWith("hotel")) {
+      variants.push(`${parsed.protocol}//www.${name}hotel.${tld}${parsed.pathname}`);
+    }
+    // Try adding "resort" suffix
+    if (!name.endsWith("resort")) {
+      variants.push(`${parsed.protocol}//www.${name}resort.${tld}${parsed.pathname}`);
+    }
+
+    return variants;
+  } catch {
+    return [];
+  }
+}
+
 export async function POST(request: Request): Promise<NextResponse<ValidateResult>> {
   let url: string;
   try {
@@ -53,40 +123,21 @@ export async function POST(request: Request): Promise<NextResponse<ValidateResul
     return NextResponse.json({ valid: false, finalUrl: null, status: 0, reason: "invalid_url" });
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3000);
-
-  try {
-    const res = await tryHead(url, controller.signal);
-    clearTimeout(timer);
-
-    const finalUrl = res.url || url;
-    const status = res.status;
-
-    // 404 → definitively missing
-    if (status === 404) {
-      return NextResponse.json({ valid: false, finalUrl: null, status, reason: "not_found" });
-    }
-
-    // Cross-domain redirect after 200 → suspicious
-    if (status >= 200 && status < 300 && !sameDomain(url, finalUrl)) {
-      return NextResponse.json({ valid: false, finalUrl: null, status, reason: "cross_domain_redirect" });
-    }
-
-    // 2xx same domain, or 3xx to same domain (already followed) → valid
-    if (status >= 200 && status < 400) {
-      return NextResponse.json({ valid: true, finalUrl, status, reason: "ok" });
-    }
-
-    // 403/405/5xx — site exists but blocks crawlers; treat as uncertain but valid
-    if (status === 403 || status === 405 || status >= 500) {
-      return NextResponse.json({ valid: true, finalUrl: url, status, reason: "blocked_or_error" });
-    }
-
-    return NextResponse.json({ valid: false, finalUrl: null, status, reason: "unexpected_status" });
-  } catch (e) {
-    clearTimeout(timer);
-    const reason = (e instanceof Error && e.name === "AbortError") ? "timeout" : "network_error";
-    return NextResponse.json({ valid: false, finalUrl: null, status: 0, reason });
+  // Try the original URL first
+  const primary = await checkUrl(url);
+  if (primary.valid) {
+    return NextResponse.json(primary);
   }
+
+  // If primary fails, try common name variants (the/hotel/resort prefixes/suffixes)
+  const variants = generateUrlVariants(url);
+  for (const variant of variants) {
+    const result = await checkUrl(variant);
+    if (result.valid) {
+      return NextResponse.json(result);
+    }
+  }
+
+  // All attempts failed — return the original failure
+  return NextResponse.json(primary);
 }
