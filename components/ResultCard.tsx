@@ -380,14 +380,18 @@ export default function ResultCard({
                       <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">
                         {traveler.name}
                       </span>
-                      <div className="flex-1 h-1.5 bg-[#E0E8ED] dark:bg-[#3D5A6E] rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-[#E0E8ED] dark:bg-[#3D5A6E] rounded-full">
                         <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${tScore}%`, backgroundColor: tTier.hex }}
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, tScore))}%`,
+                            backgroundColor: tTier.hex,
+                            backgroundImage: "none",
+                          }}
                         />
                       </div>
                       <span
-                        className="text-xs font-mono tabular-nums w-8 text-right flex-shrink-0 font-medium"
+                        className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
                         style={{ color: tTier.hex }}
                       >
                         {tScore}%
