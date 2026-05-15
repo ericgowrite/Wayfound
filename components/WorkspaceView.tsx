@@ -617,11 +617,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     </div>
                   ) : (
                     <button
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#5B8BA0] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors text-sm"
+                      className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
                       onClick={handleMore}
                     >
                       <span>Find more options</span>
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">aligned to your profile</span>
+                      <span className="text-xs text-white/70">aligned to your profile</span>
                       <span>→</span>
                     </button>
                   )}
