@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory } from "@/types";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
 import { validateUrl, reportBadUrl } from "@/lib/urlValidation";
@@ -14,10 +14,12 @@ interface Props {
   profileWeights: AxisWeights | undefined;
   isSelected: boolean;
   category?: SearchCategory;
+  searchQuery?: string;
   onToggleSelect: () => void;
   onSave: () => void;
   onStatusChange: (status: ScoredOption["status"]) => void;
   onNotesChange: (notes: string) => void;
+  onChatUpdate: (messages: ChatMessage[]) => void;
   onDeepDive: () => void;
 }
 
@@ -36,10 +38,12 @@ export default function ResultCard({
   profileWeights,
   isSelected,
   category,
+  searchQuery,
   onToggleSelect,
   onSave,
   onStatusChange,
   onNotesChange,
+  onChatUpdate,
   onDeepDive,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -50,6 +54,73 @@ export default function ResultCard({
   const [deepDiveError, setDeepDiveError] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Chat state — initialize from persisted history
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(option.chatHistory ?? []);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages]);
+
+  const handleChatSend = useCallback(async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+
+    const userMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      role: "user",
+      content: msg,
+      timestamp: new Date().toISOString(),
+    };
+    const updatedHistory = [...chatMessages, userMsg];
+    setChatMessages(updatedHistory);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          option,
+          workspaceId: workspace.id,
+          history: updatedHistory,
+          message: msg,
+          searchQuery,
+        }),
+      });
+      const data = await res.json();
+      const replyMsg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        role: "assistant",
+        content: data.reply || data.error || "Sorry, I couldn't get a response. Try again.",
+        timestamp: new Date().toISOString(),
+      };
+      const fullHistory = [...updatedHistory, replyMsg];
+      setChatMessages(fullHistory);
+      onChatUpdate(fullHistory);
+    } catch {
+      const errorMsg: ChatMessage = {
+        id: `msg-${Date.now()}`,
+        role: "assistant",
+        content: "Something went wrong. Please try again.",
+        timestamp: new Date().toISOString(),
+      };
+      const fullHistory = [...updatedHistory, errorMsg];
+      setChatMessages(fullHistory);
+      onChatUpdate(fullHistory);
+    } finally {
+      setChatLoading(false);
+    }
+  }, [chatInput, chatLoading, chatMessages, option, workspace.id, searchQuery, onChatUpdate]);
 
   // URL validation
   type UrlStatus = "idle" | "checking" | "valid" | "invalid";
@@ -356,8 +427,117 @@ export default function ResultCard({
                   <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
                 )}
               </div>
+
+              {/* Chat trigger — subtle text link below tradeoffs/source */}
+              <button
+                className="flex items-center gap-1.5 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors mt-1"
+                onClick={() => {
+                  setChatOpen((v) => !v);
+                  if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
+                }}
+              >
+                <span>💬</span>
+                <span>{chatOpen ? "Hide chat" : "Ask about this"}</span>
+                {chatMessages.length > 0 && !chatOpen && (
+                  <span className="text-[#9BB0C1]/60 dark:text-[#6B8299]/60">
+                    ({chatMessages.length})
+                  </span>
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Inline Chat — full width below the grid */}
+          {chatOpen && (
+            <div className="rounded-xl bg-[#F3F7FA] dark:bg-[#1a2a38] border border-[#E0E8ED] dark:border-[#2a3f52] overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-3 py-2 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+                <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] font-medium">
+                  Ask anything about {option.name}
+                </p>
+                <div className="flex items-center gap-2">
+                  {chatMessages.length > 0 && (
+                    <button
+                      className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                      onClick={() => { setChatMessages([]); onChatUpdate([]); }}
+                      title="Clear chat history"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <button
+                    className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
+                    onClick={() => setChatOpen(false)}
+                  >
+                    Collapse
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages area */}
+              <div className="max-h-64 sm:max-h-72 overflow-y-auto p-3 space-y-2.5">
+                {chatMessages.length === 0 && (
+                  <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] text-center py-4">
+                    Pricing, vibe, logistics, or how it fits your travel style — ask away.
+                  </p>
+                )}
+                {chatMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                        msg.role === "user"
+                          ? "bg-[#5B8BA0] text-white rounded-br-md"
+                          : "bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-bl-md"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white dark:bg-[#2a3f52] border border-[#E0E8ED] dark:border-[#3D5A6E] px-3 py-2 rounded-2xl rounded-bl-md">
+                      <span className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* Input area — sticky on mobile */}
+              <div className="flex items-center gap-2 px-3 py-2.5 border-t border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] sticky bottom-0">
+                <input
+                  ref={chatInputRef}
+                  type="text"
+                  className="flex-1 bg-transparent text-sm text-[#2C3E50] dark:text-[#B8D4E3] placeholder-[#9BB0C1] dark:placeholder-[#6B8299] outline-none min-w-0"
+                  placeholder="Why does this trigger my dealbreaker?"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleChatSend();
+                    }
+                  }}
+                  disabled={chatLoading}
+                />
+                <button
+                  className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:text-[#4A7A8F] dark:hover:text-[#9DCAE8] disabled:opacity-40 transition-colors text-sm font-medium px-2 py-1 flex-shrink-0"
+                  onClick={handleChatSend}
+                  disabled={chatLoading || !chatInput.trim()}
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Per-traveler scores — only when 2+ travelers */}
           {hasMultipleTravelers && (
@@ -534,6 +714,7 @@ export default function ResultCard({
               </button>
             </div>
           </div>
+
         </div>
       )}
     </div>

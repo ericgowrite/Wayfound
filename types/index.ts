@@ -91,6 +91,8 @@ export interface ScoredOption {
   notes: string;
   // Keyed by profile.id — populated for every traveler on the workspace
   travelerScores?: Record<string, TravelerScore>;
+  // Inline chat history persisted per option
+  chatHistory?: ChatMessage[];
 }
 
 export interface SavedOption extends ScoredOption {
@@ -126,4 +128,11 @@ export interface DeepDiveResult {
   watchOutFor: string[];
   standoutFeatures: string[];
   bottomLine: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
 }

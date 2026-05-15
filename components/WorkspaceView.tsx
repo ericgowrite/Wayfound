@@ -242,6 +242,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     });
   }
 
+  function handleChatUpdate(searchId: string, optionId: string, chatHistory: import("@/types").ChatMessage[]) {
+    updateWorkspace({
+      ...workspace,
+      searches: workspace.searches.map((s) =>
+        s.id === searchId
+          ? { ...s, scoredResults: s.scoredResults.map((o) => (o.id === optionId ? { ...o, chatHistory } : o)) }
+          : s
+      ),
+      savedOptions: workspace.savedOptions.map((o) => (o.id === optionId ? { ...o, chatHistory } : o)),
+    });
+  }
+
   async function handleCalibrationAccept(newWeights: import("@/types").AxisWeights) {
     if (!primaryProfile || !pendingCalibration) return;
     const res = await fetch(`/api/profiles/${primaryProfile.id}`, {
@@ -359,10 +371,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           >
             ✦ Score
             <span
-              className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default"
-              title="Paste a specific travel option here to score"
+              className="relative inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default group/info"
+              onClick={(e) => e.stopPropagation()}
+              onMouseEnter={(e) => e.stopPropagation()}
             >
               i
+              <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
+                Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
+              </span>
             </span>
           </button>
         </div>
@@ -600,10 +616,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     profileWeights={profileWeights}
                     isSelected={selectedIds.has(option.id)}
                     category={displayedSearch!.category}
+                    searchQuery={displayedSearch!.query}
                     onToggleSelect={() => toggleSelect(option.id)}
                     onSave={() => handleSaveOption(option)}
                     onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
                     onNotesChange={(n) => handleNotesChange(displayedSearch!.id, option.id, n)}
+                    onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, option.id, msgs)}
                     onDeepDive={() => {}}
                   />
                 ))}
@@ -666,10 +684,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                       profileWeights={profileWeights}
                       isSelected={false}
                       category={sourceSearch?.category}
+                      searchQuery={sourceSearch?.query}
                       onToggleSelect={() => {}}
                       onSave={() => handleSaveOption(option)}
                       onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
                       onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
+                      onChatUpdate={(msgs) => handleChatUpdate(option.searchId, option.id, msgs)}
                       onDeepDive={() => {}}
                     />
                   );

@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Profile, ScoredOption, SearchCategory, DeepDiveResult } from "@/types";
+import { Profile, ScoredOption, SearchCategory, DeepDiveResult, ChatMessage } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 import { combineProfiles } from "@/lib/scoring";
@@ -426,4 +426,55 @@ ${thresholdLine(scoringProfile)}`.trim();
   }
 
   return hydrate(parsed, searchId);
+}
+
+export async function chatAboutOption(
+  option: ScoredOption,
+  profiles: Profile[],
+  history: ChatMessage[],
+  userMessage: string,
+  searchQuery?: string
+): Promise<string> {
+  const systemPrompt = buildSystemPrompt("chat");
+
+  const isGroup = profiles.length > 1;
+  const names = profiles.map((p) => p.name).join(" and ");
+  const travelerIntro = isGroup
+    ? `${names} (group trip)`
+    : `${profiles[0]?.name ?? "the traveler"} (travel type: ${profiles[0]?.enneagramType ?? ""})`;
+
+  const travelerDetails = profiles
+    .map((p) => {
+      const topAxes = (Object.entries(p.axisWeights) as [string, number][])
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([k]) => k)
+        .join(", ");
+      return `  - ${p.name} (${p.enneagramType}): top priorities — ${topAxes}; dealbreakers: ${p.dealbreakers.join("; ")}`;
+    })
+    .join("\n");
+
+  const conversationHistory = history
+    .map((m) => `${m.role === "user" ? "User" : "ViyaWay"}: ${m.content}`)
+    .join("\n");
+
+  const prompt = `OPTION: ${option.name}
+Fit score: ${option.alignmentScore}%
+Description: ${option.description}
+Fit explanation: ${option.fitExplanation}
+Tradeoffs: ${option.tradeoffs.join(", ") || "None noted"}
+Price: ${option.price || "Not listed"}
+${searchQuery ? `Search query: "${searchQuery}"` : ""}
+
+TRAVELER(S): ${travelerIntro}
+${travelerDetails}
+
+${conversationHistory ? `CONVERSATION SO FAR:\n${conversationHistory}\n` : ""}
+User: ${userMessage}
+
+Respond helpfully and concisely (2-4 sentences unless more detail is requested). Reference the traveler's profile when relevant.`;
+
+  const raw = await callPlain(systemPrompt, prompt);
+  auditResponse(raw, "chat");
+  return raw.trim();
 }
