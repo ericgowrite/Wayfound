@@ -553,40 +553,52 @@ export default function ResultCard({
                   const tScore = ts?.alignmentScore ?? option.alignmentScore;
                   const violations = ts?.thresholdViolations ?? [];
                   const tTier = fitTier(tScore);
+                  const barWidth = Math.max(0, Math.min(100, tScore));
 
                   return (
-                    <div key={traveler.id} className="flex items-center gap-3">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
-                      >
-                        {traveler.name[0]}
-                      </div>
-                      <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">
-                        {traveler.name}
-                      </span>
-                      <div className="flex-1 h-2 bg-[#E0E8ED] dark:bg-[#3D5A6E] rounded-full">
+                    <div key={traveler.id}>
+                      <div className="flex items-center gap-3">
                         <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${Math.max(0, Math.min(100, tScore))}%`,
-                            backgroundColor: tTier.hex,
-                            backgroundImage: "none",
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
-                        style={{ color: tTier.hex }}
-                      >
-                        {tScore}%
-                      </span>
-                      {violations.length > 0 && (
-                        <span
-                          className="text-xs text-amber-600 dark:text-amber-400 flex-shrink-0"
-                          title={`Below threshold: ${violations.join(", ")}`}
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
                         >
-                          ⚠ {violations.join(", ")}
+                          {traveler.name[0]}
+                        </div>
+                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">
+                          {traveler.name}
                         </span>
+                        {/* Bar track */}
+                        <div
+                          className="flex-1 relative bg-[#E0E8ED] dark:bg-[#3D5A6E]"
+                          style={{ height: "8px", borderRadius: "9999px" }}
+                        >
+                          {/* Filled bar — solid color, width = score */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              height: "8px",
+                              borderRadius: "9999px",
+                              width: `${barWidth}%`,
+                              backgroundColor: tTier.hex,
+                              backgroundImage: "none",
+                              background: tTier.hex,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
+                          style={{ color: tTier.hex }}
+                        >
+                          {tScore}%
+                        </span>
+                      </div>
+                      {violations.length > 0 && (
+                        <div className="ml-[calc(1.5rem+0.75rem+5rem+0.75rem)] mt-1">
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            ⚠ Below threshold: {violations.join(", ")}
+                          </span>
+                        </div>
                       )}
                     </div>
                   );
