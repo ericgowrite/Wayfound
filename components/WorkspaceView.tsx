@@ -40,7 +40,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   const [mode, setMode] = useState<"search" | "score">("search");
   const [sortMode, setSortMode] = useState<SortMode>("fit");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(workspace.searches[0]?.query ?? "");
   const [scoreInput, setScoreInput] = useState("");
   const [category, setCategory] = useState<SearchCategory>("accommodation");
   const [searching, setSearching] = useState(false);
@@ -493,7 +493,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                           ? "border-[#5B8BA0] text-[#5B8BA0] dark:text-[#7DBAD4] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 font-medium"
                           : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1]"
                       }`}
-                      onClick={() => { setActiveSearchId(s.id); setCategoryFilter(null); }}
+                      onClick={() => { setActiveSearchId(s.id); setCategoryFilter(null); setQuery(s.query); }}
                     >
                       <span>{meta.icon}</span>
                       <span className="truncate max-w-[160px]">{s.query}</span>

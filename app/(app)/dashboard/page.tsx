@@ -325,6 +325,7 @@ export default function Home() {
       <div className="flex-1 overflow-hidden">
         {activeWorkspace && travelerProfiles.length > 0 ? (
           <WorkspaceView
+            key={activeWorkspace.id}
             workspace={activeWorkspace}
             travelers={travelerProfiles}
             onChange={handleWorkspaceChange}

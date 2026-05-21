@@ -4,30 +4,56 @@ import { v4 as uuidv4 } from "uuid";
 import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 import { combineProfiles } from "@/lib/scoring";
 
-function getClient() {
-  return new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+// Singleton client — one instance for the process lifetime
+const client = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+
+// ── Retry logic ───────────────────────────────────────────────────────────────
+
+// Errors worth retrying: Gemini capacity spikes and rate limits are transient
+const RETRYABLE = /503|high.?demand|overload|429|quota|rate.?limit|resource.?exhaust/i;
+const PRIMARY_MODEL = "gemini-2.5-flash";
+const FALLBACK_MODEL = "gemini-2.0-flash";
+const MAX_ATTEMPTS = 3;   // 1 initial + 2 retries
+const BASE_DELAY_MS = 800;
+
+async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    // Switch to fallback model on the final retry so we get a fresh capacity pool
+    const model = attempt < MAX_ATTEMPTS - 1 ? PRIMARY_MODEL : FALLBACK_MODEL;
+    try {
+      return await fn(model);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!RETRYABLE.test(msg)) throw e; // non-retryable — surface immediately
+      lastError = e;
+      // Exponential backoff with jitter: 800ms, ~1.6s, (then switches model)
+      const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 400;
+      console.warn(`[VIYA-AI] Gemini ${model} attempt ${attempt + 1} failed (${msg.slice(0, 60)}…) — retrying in ${Math.round(delay)}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastError;
 }
 
 // ── Transport helpers ─────────────────────────────────────────────────────────
 
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<string> {
-  const model = getClient().getGenerativeModel({
-    model: "gemini-2.5-flash",
+  return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tools: [{ googleSearch: {} } as any],
-    systemInstruction: systemPrompt,
+    const m = client.getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
+    const result = await m.generateContent(userPrompt);
+    return result.response.text();
   });
-  const result = await model.generateContent(userPrompt);
-  return result.response.text();
 }
 
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
-  const model = getClient().getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: systemPrompt,
+  return withRetry(async (model) => {
+    const m = client.getGenerativeModel({ model, systemInstruction: systemPrompt });
+    const result = await m.generateContent(userPrompt);
+    return result.response.text();
   });
-  const result = await model.generateContent(userPrompt);
-  return result.response.text();
 }
 
 // ── Parsers ───────────────────────────────────────────────────────────────────
