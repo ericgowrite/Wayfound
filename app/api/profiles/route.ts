@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function GET() {
   try {
-    return NextResponse.json(getProfiles());
+    return NextResponse.json(await getProfiles());
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       dealbreakers: body.dealbreakers ?? [],
       isDefault: false,
     };
-    saveProfileToList(profile);
+    await saveProfileToList(profile);
     return NextResponse.json(profile);
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

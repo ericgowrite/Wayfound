@@ -1,17 +1,36 @@
+/**
+ * Storage layer — Firestore (Admin SDK)
+ *
+ * All reads/writes go through Firebase Admin, so data persists across
+ * deployments and serverless cold starts. Admin SDK bypasses Firestore
+ * security rules, making auth headers unnecessary for server routes.
+ *
+ * Collections:
+ *   config/profiles   – single document { profiles: Profile[] }
+ *   workspaces/{id}   – one document per TripWorkspace
+ *
+ * One-time migration: on first boot, if Firestore is empty, the module
+ * seeds from data/local/ so existing dev data is not lost.
+ */
+
+import { adminDb } from "@/lib/firebase-admin";
+import { Profile, TripWorkspace } from "@/types";
 import fs from "fs";
 import path from "path";
-import { Profile, TripWorkspace } from "@/types";
 
-const DATA_DIR = path.join(process.cwd(), "data", "local");
-const PROFILES_PATH = path.join(DATA_DIR, "profiles.json");
-const LEGACY_PROFILE_PATH = path.join(DATA_DIR, "profile.json");
-const WORKSPACES_DIR = path.join(DATA_DIR, "workspaces");
+// ── Firestore refs ────────────────────────────────────────────────────────────
+
+const PROFILES_REF = adminDb.collection("config").doc("profiles");
+const WORKSPACES = adminDb.collection("workspaces");
+
+// ── Default profile (fallback when Firestore is empty) ────────────────────────
 
 const DEFAULT_PROFILE: Profile = {
   id: "eric-9w8",
   name: "Eric",
   enneagramType: "9w8",
-  description: "Peacemaker with Challenger wing — needs harmony and ease but with substance and directness",
+  description:
+    "Peacemaker with Challenger wing — needs harmony and ease but with substance and directness",
   axisWeights: {
     calm: 0.8,
     designSincerity: 0.85,
@@ -31,96 +50,132 @@ const DEFAULT_PROFILE: Profile = {
   isDefault: true,
 };
 
-function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(WORKSPACES_DIR)) fs.mkdirSync(WORKSPACES_DIR, { recursive: true });
+// ── One-time migration from local filesystem ──────────────────────────────────
+
+const LOCAL_DIR = path.join(process.cwd(), "data", "local");
+const LOCAL_PROFILES = path.join(LOCAL_DIR, "profiles.json");
+const LOCAL_LEGACY_PROFILE = path.join(LOCAL_DIR, "profile.json");
+const LOCAL_WORKSPACES = path.join(LOCAL_DIR, "workspaces");
+
+function readLocalProfiles(): Profile[] | null {
+  try {
+    if (fs.existsSync(LOCAL_PROFILES)) {
+      return JSON.parse(fs.readFileSync(LOCAL_PROFILES, "utf-8")) as Profile[];
+    }
+    if (fs.existsSync(LOCAL_LEGACY_PROFILE)) {
+      const legacy = JSON.parse(fs.readFileSync(LOCAL_LEGACY_PROFILE, "utf-8"));
+      return [
+        {
+          id: legacy.id ?? "eric-9w8",
+          name: legacy.name ?? "Eric",
+          enneagramType: legacy.type ?? legacy.enneagramType ?? "9w8",
+          description: legacy.description ?? "",
+          axisWeights: legacy.axisWeights,
+          thresholds: legacy.thresholds ?? {},
+          dealbreakers: legacy.dealbreakers ?? [],
+          isDefault: true,
+        },
+      ];
+    }
+  } catch {}
+  return null;
 }
 
-function migrateAndLoadProfiles(): Profile[] {
-  // Try new profiles.json first
-  if (fs.existsSync(PROFILES_PATH)) {
-    return JSON.parse(fs.readFileSync(PROFILES_PATH, "utf-8")) as Profile[];
+function readLocalWorkspaces(): TripWorkspace[] {
+  try {
+    if (!fs.existsSync(LOCAL_WORKSPACES)) return [];
+    return fs
+      .readdirSync(LOCAL_WORKSPACES)
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => {
+        try {
+          return JSON.parse(
+            fs.readFileSync(path.join(LOCAL_WORKSPACES, f), "utf-8")
+          ) as TripWorkspace;
+        } catch {
+          return null;
+        }
+      })
+      .filter((w): w is TripWorkspace => w !== null);
+  } catch {
+    return [];
   }
-  // Migrate from legacy single profile.json
-  if (fs.existsSync(LEGACY_PROFILE_PATH)) {
-    const legacy = JSON.parse(fs.readFileSync(LEGACY_PROFILE_PATH, "utf-8"));
-    const migrated: Profile = {
-      id: legacy.id ?? "eric-9w8",
-      name: legacy.name ?? "Eric",
-      enneagramType: legacy.type ?? legacy.enneagramType ?? "9w8",
-      description: legacy.description ?? "",
-      axisWeights: legacy.axisWeights,
-      thresholds: legacy.thresholds ?? {},
-      dealbreakers: legacy.dealbreakers ?? [],
-      isDefault: true,
-    };
-    const profiles = [migrated];
-    fs.writeFileSync(PROFILES_PATH, JSON.stringify(profiles, null, 2));
-    return profiles;
+}
+
+async function migrateLocalToFirestore(): Promise<Profile[]> {
+  const localProfiles = readLocalProfiles() ?? [DEFAULT_PROFILE];
+  const localWorkspaces = readLocalWorkspaces();
+
+  // Write profiles
+  await PROFILES_REF.set({ profiles: localProfiles });
+
+  // Write workspaces in parallel
+  const batch = adminDb.batch();
+  for (const ws of localWorkspaces) {
+    batch.set(WORKSPACES.doc(ws.id), ws);
   }
-  // No data yet — seed with default
-  const profiles = [DEFAULT_PROFILE];
-  fs.writeFileSync(PROFILES_PATH, JSON.stringify(profiles, null, 2));
-  return profiles;
+  if (localWorkspaces.length > 0) await batch.commit();
+
+  console.log(
+    `[VIYA-STORAGE] Migrated ${localProfiles.length} profile(s) and ${localWorkspaces.length} workspace(s) to Firestore`
+  );
+  return localProfiles;
 }
 
-// ── Profiles ────────────────────────────────────────────────────────────────
+// ── Profiles ─────────────────────────────────────────────────────────────────
 
-export function getProfiles(): Profile[] {
-  ensureDirs();
-  return migrateAndLoadProfiles();
+export async function getProfiles(): Promise<Profile[]> {
+  const snap = await PROFILES_REF.get();
+  if (!snap.exists) {
+    // First boot — migrate from local filesystem (or seed default)
+    return migrateLocalToFirestore();
+  }
+  return (snap.data()?.profiles ?? []) as Profile[];
 }
 
-export function getProfile(id?: string): Profile {
-  const profiles = getProfiles();
+export async function getProfile(id?: string): Promise<Profile> {
+  const profiles = await getProfiles();
   if (id) {
     const found = profiles.find((p) => p.id === id);
     if (found) return found;
   }
-  // Fall back to default or first
   return profiles.find((p) => p.isDefault) ?? profiles[0] ?? DEFAULT_PROFILE;
 }
 
-export function saveProfileToList(profile: Profile): void {
-  ensureDirs();
-  const profiles = getProfiles();
+export async function saveProfileToList(profile: Profile): Promise<void> {
+  const profiles = await getProfiles();
   const idx = profiles.findIndex((p) => p.id === profile.id);
   if (idx >= 0) profiles[idx] = profile;
   else profiles.push(profile);
-  fs.writeFileSync(PROFILES_PATH, JSON.stringify(profiles, null, 2));
+  await PROFILES_REF.set({ profiles });
 }
 
-export function deleteProfileFromList(id: string): void {
-  ensureDirs();
-  const profiles = getProfiles().filter((p) => p.id !== id);
-  fs.writeFileSync(PROFILES_PATH, JSON.stringify(profiles, null, 2));
+export async function deleteProfileFromList(id: string): Promise<void> {
+  const profiles = (await getProfiles()).filter((p) => p.id !== id);
+  await PROFILES_REF.set({ profiles });
 }
 
-// ── Workspaces ───────────────────────────────────────────────────────────────
+// ── Workspaces ────────────────────────────────────────────────────────────────
 
-export function getWorkspaces(): TripWorkspace[] {
-  ensureDirs();
-  const files = fs.readdirSync(WORKSPACES_DIR).filter((f) => f.endsWith(".json"));
-  return files
-    .map((f) => JSON.parse(fs.readFileSync(path.join(WORKSPACES_DIR, f), "utf-8")) as TripWorkspace)
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+export async function getWorkspaces(): Promise<TripWorkspace[]> {
+  // Ensure migration has run (profiles doc is the canary)
+  const profilesSnap = await PROFILES_REF.get();
+  if (!profilesSnap.exists) await migrateLocalToFirestore();
+
+  const snap = await WORKSPACES.orderBy("updatedAt", "desc").get();
+  return snap.docs.map((d) => d.data() as TripWorkspace);
 }
 
-export function getWorkspace(id: string): TripWorkspace | null {
-  ensureDirs();
-  const filePath = path.join(WORKSPACES_DIR, `${id}.json`);
-  if (!fs.existsSync(filePath)) return null;
-  return JSON.parse(fs.readFileSync(filePath, "utf-8")) as TripWorkspace;
+export async function getWorkspace(id: string): Promise<TripWorkspace | null> {
+  const doc = await WORKSPACES.doc(id).get();
+  return doc.exists ? (doc.data() as TripWorkspace) : null;
 }
 
-export function saveWorkspace(workspace: TripWorkspace): void {
-  ensureDirs();
+export async function saveWorkspace(workspace: TripWorkspace): Promise<void> {
   workspace.updatedAt = new Date().toISOString();
-  fs.writeFileSync(path.join(WORKSPACES_DIR, `${workspace.id}.json`), JSON.stringify(workspace, null, 2));
+  await WORKSPACES.doc(workspace.id).set(workspace);
 }
 
-export function deleteWorkspace(id: string): void {
-  ensureDirs();
-  const filePath = path.join(WORKSPACES_DIR, `${id}.json`);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+export async function deleteWorkspace(id: string): Promise<void> {
+  await WORKSPACES.doc(id).delete();
 }

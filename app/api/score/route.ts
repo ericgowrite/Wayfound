@@ -10,15 +10,15 @@ export async function POST(request: Request) {
   try {
     const { workspaceId, input, category } = await request.json();
 
-    const workspace = getWorkspace(workspaceId);
+    const workspace = await getWorkspace(workspaceId);
     if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
 
-    const allProfiles = getProfiles();
+    const allProfiles = await getProfiles();
     const travelerProfiles = workspace.travelers
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
-    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [getProfile()];
+    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [await getProfile()];
     const searchId = uuidv4();
 
     const raw = await scoreSpecific(input, category as SearchCategory, searchId, profiles);
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     };
 
     workspace.searches.unshift(search);
-    saveWorkspace(workspace);
+    await saveWorkspace(workspace);
 
     return NextResponse.json(search);
   } catch (e) {

@@ -8,18 +8,18 @@ export async function POST(request: Request) {
   try {
     const { workspaceId, searchId } = await request.json();
 
-    const workspace = getWorkspace(workspaceId);
+    const workspace = await getWorkspace(workspaceId);
     if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
 
     const search = workspace.searches.find((s) => s.id === searchId);
     if (!search) return NextResponse.json({ error: "Search not found" }, { status: 404 });
 
-    const allProfiles = getProfiles();
+    const allProfiles = await getProfiles();
     const travelerProfiles = workspace.travelers
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
-    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [getProfile()];
+    const profiles = travelerProfiles.length > 0 ? travelerProfiles : [await getProfile()];
 
     const alreadySeen = search.scoredResults.map((r) => r.name);
     const rawResults = await searchMoreOptions(
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       searches: workspace.searches.map((s) => (s.id === searchId ? updatedSearch : s)),
     };
 
-    saveWorkspace(updatedWorkspace);
+    await saveWorkspace(updatedWorkspace);
     return NextResponse.json(updatedSearch);
   } catch (e) {
     console.error("Search more error:", e);

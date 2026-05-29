@@ -19,11 +19,11 @@ export async function POST(request: Request) {
     }
 
     // Load traveler profiles from the workspace when available
-    let profiles = [getProfile()];
+    let profiles = [await getProfile()];
     if (workspaceId) {
-      const workspace = getWorkspace(workspaceId);
+      const workspace = await getWorkspace(workspaceId);
       if (workspace && workspace.travelers.length > 0) {
-        const allProfiles = getProfiles();
+        const allProfiles = await getProfiles();
         const travelerProfiles = workspace.travelers
           .map((id) => allProfiles.find((p) => p.id === id))
           .filter((p): p is NonNullable<typeof p> => !!p);

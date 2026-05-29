@@ -1,8 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Per-user data (future use)
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // App data — read/write only via server-side Admin SDK (rules never reached
+    // from the client). Deny all direct client access as a safety net.
+    match /workspaces/{docId} {
+      allow read, write: if false;
+    }
+    match /config/{docId} {
+      allow read, write: if false;
     }
   }
 }
