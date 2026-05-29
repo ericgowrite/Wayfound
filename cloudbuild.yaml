@@ -30,3 +30,6 @@ steps:
       - '--memory=512Mi'
       - '--min-instances=0'
       - '--max-instances=10'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
