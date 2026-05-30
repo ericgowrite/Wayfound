@@ -10,11 +10,11 @@ steps:
       - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=$_NEXT_PUBLIC_FIREBASE_APP_ID'
       - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/viyaway'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/viyaway']
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -22,7 +22,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'viyaway'
-      - '--image=gcr.io/$PROJECT_ID/viyaway'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
