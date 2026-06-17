@@ -6,6 +6,7 @@ import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
 import { validateUrl, reportBadUrl } from "@/lib/urlValidation";
 import AxisBar from "./AxisBar";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Props {
   option: ScoredOption;
@@ -86,7 +87,7 @@ export default function ResultCard({
     setChatLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetchWithAuth("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -197,7 +198,7 @@ export default function ResultCard({
     setLoadingDive(true);
     setDeepDiveError(false);
     try {
-      const res = await fetch("/api/deepdive", {
+      const res = await fetchWithAuth("/api/deepdive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ option, workspaceId: workspace.id }),

@@ -1,21 +1,25 @@
 import { NextResponse } from "next/server";
 import { getProfile, saveProfileToList } from "@/lib/storage";
+import { getUserId, AuthError } from "@/lib/serverAuth";
 
-// Legacy single-profile endpoint — returns the default profile
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    return NextResponse.json(await getProfile());
+    const userId = await getUserId(request);
+    return NextResponse.json(await getProfile(userId));
   } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
+    const userId = await getUserId(request);
     const profile = await request.json();
-    await saveProfileToList(profile);
+    await saveProfileToList(userId, profile);
     return NextResponse.json(profile);
   } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }

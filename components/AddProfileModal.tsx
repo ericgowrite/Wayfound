@@ -5,6 +5,7 @@ import { Profile, ProfileTemplate, AXIS_KEYS, AXIS_LABELS, AXIS_DESCRIPTIONS, Ax
 import { AssessmentResult } from "@/lib/assessment";
 import TravelAssessment from "./TravelAssessment";
 import templates from "@/src/data/profileTemplates.json";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const TEMPLATES = templates as ProfileTemplate[];
 
@@ -75,7 +76,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
     if (!draft.axisWeights) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/profiles", {
+      const res = await fetchWithAuth("/api/profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),

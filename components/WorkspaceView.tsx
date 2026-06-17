@@ -24,6 +24,7 @@ import {
 import ResultCard from "./ResultCard";
 import ComparisonView from "./ComparisonView";
 import CalibrationPrompt from "./CalibrationPrompt";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Props {
   workspace: TripWorkspace;
@@ -95,7 +96,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setSearchError("");
     setCategoryFilter(null);
     try {
-      const res = await fetch("/api/search", {
+      const res = await fetchWithAuth("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workspaceId: workspace.id, query, category }),
@@ -123,7 +124,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setSearching(true);
     setSearchError("");
     try {
-      const res = await fetch("/api/score", {
+      const res = await fetchWithAuth("/api/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workspaceId: workspace.id, input: scoreInput, category }),
@@ -151,7 +152,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setLoadingMore(true);
     setSearchError("");
     try {
-      const res = await fetch("/api/search/more", {
+      const res = await fetchWithAuth("/api/search/more", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workspaceId: workspace.id, searchId: activeSearchId }),
@@ -174,7 +175,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   async function updateWorkspace(updated: TripWorkspace) {
     try {
-      const res = await fetch(`/api/workspaces/${updated.id}`, {
+      const res = await fetchWithAuth(`/api/workspaces/${updated.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated),
@@ -256,7 +257,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   async function handleCalibrationAccept(newWeights: import("@/types").AxisWeights) {
     if (!primaryProfile || !pendingCalibration) return;
-    const res = await fetch(`/api/profiles/${primaryProfile.id}`, {
+    const res = await fetchWithAuth(`/api/profiles/${primaryProfile.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...primaryProfile, axisWeights: newWeights }),

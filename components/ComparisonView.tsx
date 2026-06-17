@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ScoredOption, AXIS_KEYS, AXIS_LABELS, AxisWeights } from "@/types";
 import { fitTier } from "@/lib/fitScore";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Props {
   options: ScoredOption[];
@@ -18,7 +19,7 @@ export default function ComparisonView({ options, profileWeights, workspaceId, o
   useEffect(() => {
     if (options.length < 2) return;
     setLoading(true);
-    fetch("/api/compare", {
+    fetchWithAuth("/api/compare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ options, workspaceId }),

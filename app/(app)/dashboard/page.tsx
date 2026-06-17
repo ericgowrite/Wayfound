@@ -10,6 +10,7 @@ import TravelAssessment from "@/components/TravelAssessment";
 import { AssessmentResult } from "@/lib/assessment";
 import { useTheme } from "@/lib/useTheme";
 import { useAuth } from "@/lib/AuthContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -30,12 +31,12 @@ export default function Home() {
   const [profilesLoaded, setProfilesLoaded] = useState(false);
 
   useEffect(() => {
-    fetch("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
+    fetchWithAuth("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
       setProfiles(ps);
       if (ps.length > 0) setNewTravelers([ps[0].id]);
       setProfilesLoaded(true);
     });
-    fetch("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
+    fetchWithAuth("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
       setWorkspaces(ws);
       if (ws.length > 0) setActiveWorkspaceId(ws[0].id);
     });
@@ -56,7 +57,7 @@ export default function Home() {
   async function createWorkspace() {
     if (!newName.trim()) return;
     const travelers = newTravelers.length > 0 ? newTravelers : [profiles[0]?.id].filter(Boolean);
-    const res = await fetch("/api/workspaces", {
+    const res = await fetchWithAuth("/api/workspaces", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, destination: newDest, travelers }),
@@ -70,7 +71,7 @@ export default function Home() {
   }
 
   async function deleteWorkspace(id: string) {
-    await fetch(`/api/workspaces/${id}`, { method: "DELETE" });
+    await fetchWithAuth(`/api/workspaces/${id}`, { method: "DELETE" });
     const updated = workspaces.filter((w) => w.id !== id);
     setWorkspaces(updated);
     if (activeWorkspaceId === id) setActiveWorkspaceId(updated[0]?.id ?? null);
@@ -78,7 +79,7 @@ export default function Home() {
   }
 
   async function deleteProfile(id: string) {
-    await fetch(`/api/profiles/${id}`, { method: "DELETE" });
+    await fetchWithAuth(`/api/profiles/${id}`, { method: "DELETE" });
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     setDeleteProfileId(null);
   }
@@ -89,7 +90,7 @@ export default function Home() {
 
   async function handleFirstRunAssessment(result: AssessmentResult, name: string) {
     const typeKey = String(result.type);
-    const res = await fetch("/api/profiles", {
+    const res = await fetchWithAuth("/api/profiles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

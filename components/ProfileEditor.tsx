@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Profile, AXIS_KEYS, AXIS_LABELS, AXIS_DESCRIPTIONS, AxisWeights } from "@/types";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Props {
   profile: Profile;
@@ -40,7 +41,7 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
-      const res = await fetch(`/api/profiles/${draft.id}`, {
+      const res = await fetchWithAuth(`/api/profiles/${draft.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
