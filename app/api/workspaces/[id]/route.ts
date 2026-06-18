@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { getWorkspace, saveWorkspace, deleteWorkspace } from "@/lib/storage";
 import { getUserId, AuthError } from "@/lib/serverAuth";
