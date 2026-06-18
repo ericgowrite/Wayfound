@@ -7,7 +7,7 @@ import { ScoredOption } from "@/types";
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     const { option, workspaceId } = await request.json() as { option: ScoredOption; workspaceId?: string };
 
     const defaultProfile = await getProfile(userId);

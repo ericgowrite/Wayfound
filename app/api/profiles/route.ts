@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const hasAuth = !!request.headers.get("Authorization");
   console.log(`[profiles GET] auth header present: ${hasAuth}`);
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     const profiles = await getProfiles(userId);
     console.log(`[profiles GET] uid=${userId} profiles=${profiles.length}`);
     const res = NextResponse.json(profiles);
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     const body = await request.json();
     const profile: Profile = {
       id: uuidv4(),

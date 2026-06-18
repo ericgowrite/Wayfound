@@ -7,7 +7,7 @@ import { friendlyError } from "@/lib/errorMessages";
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     const { workspaceId, searchId } = await request.json();
 
     const workspace = await getWorkspace(userId, workspaceId);

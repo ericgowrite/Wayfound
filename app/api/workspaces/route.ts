@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     return NextResponse.json(await getWorkspaces(userId));
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
     const body = await request.json();
     const defaultProfile = await getProfile(userId);
     const workspace: TripWorkspace = {
