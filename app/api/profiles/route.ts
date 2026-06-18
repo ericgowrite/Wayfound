@@ -7,11 +7,19 @@ import { Profile } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: Request) {
+  const hasAuth = !!request.headers.get("Authorization");
+  console.log(`[profiles GET] auth header present: ${hasAuth}`);
   try {
     const userId = await getUserId(request);
-    return NextResponse.json(await getProfiles(userId));
+    const profiles = await getProfiles(userId);
+    console.log(`[profiles GET] uid=${userId} profiles=${profiles.length}`);
+    return NextResponse.json(profiles);
   } catch (e) {
-    if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (e instanceof AuthError) {
+      console.log("[profiles GET] → 401 Unauthorized");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("[profiles GET] error:", e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }
