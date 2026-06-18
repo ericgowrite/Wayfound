@@ -13,7 +13,9 @@ export async function GET(request: Request) {
     const userId = await getUserId(request);
     const profiles = await getProfiles(userId);
     console.log(`[profiles GET] uid=${userId} profiles=${profiles.length}`);
-    return NextResponse.json(profiles);
+    const res = NextResponse.json(profiles);
+    res.headers.set("Cache-Control", "no-store, private");
+    return res;
   } catch (e) {
     if (e instanceof AuthError) {
       console.log("[profiles GET] → 401 Unauthorized");
