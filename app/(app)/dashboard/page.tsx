@@ -14,7 +14,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [workspaces, setWorkspaces] = useState<TripWorkspace[]>([]);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
@@ -30,17 +30,22 @@ export default function Home() {
   const [profilesOpen, setProfilesOpen] = useState(true);
   const [profilesLoaded, setProfilesLoaded] = useState(false);
 
+  // Wait for the Firebase user to be confirmed before fetching — ensures
+  // the ID token is available when fetchWithAuth runs.
   useEffect(() => {
+    if (!user) return;
     fetchWithAuth("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
+      if (!Array.isArray(ps)) { setProfilesLoaded(true); return; }
       setProfiles(ps);
       if (ps.length > 0) setNewTravelers([ps[0].id]);
       setProfilesLoaded(true);
     });
     fetchWithAuth("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
+      if (!Array.isArray(ws)) return;
       setWorkspaces(ws);
       if (ws.length > 0) setActiveWorkspaceId(ws[0].id);
     });
-  }, []);
+  }, [user]);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) ?? null;
   const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;
