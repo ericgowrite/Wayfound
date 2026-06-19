@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { adminAuth } from "@/lib/firebase-admin";
 
 export class AuthError extends Error {
@@ -9,17 +8,21 @@ export class AuthError extends Error {
 }
 
 /**
- * Extract and verify the Firebase ID token from the Authorization header.
- * Uses next/headers so every route calling this is automatically dynamic
- * (never statically pre-rendered by Next.js at build time).
+ * Extract and verify the Firebase ID token from the incoming Request object.
+ * Reads directly from request.headers — NOT from next/headers — to avoid the
+ * async-context leak that can occur between concurrent requests on Cloud Run,
+ * where headers() from next/headers may return headers belonging to a
+ * different in-flight request.
  * Returns the caller's UID. Throws AuthError if missing or invalid.
  */
-export async function getUserId(): Promise<string> {
-  const h = await headers();
-  const authorization = h.get("Authorization");
+export async function getUserId(request: Request): Promise<string> {
+  const authorization = request.headers.get("Authorization");
   if (!authorization?.startsWith("Bearer ")) throw new AuthError();
-  const decoded = await adminAuth.verifyIdToken(authorization.slice(7));
-  // Log uid in Cloud Run so we can verify per-user isolation in production.
-  console.log(`[serverAuth] verified uid=${decoded.uid} email=${decoded.email ?? "n/a"}`);
-  return decoded.uid;
+  try {
+    const decoded = await adminAuth.verifyIdToken(authorization.slice(7));
+    console.log(`[serverAuth] uid=${decoded.uid} email=${decoded.email ?? "n/a"}`);
+    return decoded.uid;
+  } catch {
+    throw new AuthError();
+  }
 }
