@@ -7,7 +7,10 @@ if (getApps().length === 0) {
   if (serviceAccount) {
     initializeApp({ credential: cert(JSON.parse(serviceAccount)) });
   } else {
-    initializeApp();
+    // On Cloud Run, fall back to Application Default Credentials.
+    // Explicitly passing the projectId ensures the Admin SDK targets the
+    // correct Firebase project even when credentials are inferred from ADC.
+    initializeApp({ projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID });
   }
 }
 

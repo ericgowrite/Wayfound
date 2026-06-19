@@ -32,8 +32,18 @@ export default function Home() {
 
   // Wait for the Firebase user to be confirmed before fetching — ensures
   // the ID token is available when fetchWithAuth runs.
+  // Use user?.uid (not the full User object) so this only re-runs when the
+  // actual identity changes, not on token refreshes. Explicitly reset all
+  // user-specific state first so stale data from a previous session is never
+  // visible while the new fetch is in-flight.
   useEffect(() => {
+    setProfiles([]);
+    setWorkspaces([]);
+    setActiveWorkspaceId(null);
+    setProfilesLoaded(false);
+
     if (!user) return;
+
     fetchWithAuth("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
       if (!Array.isArray(ps)) { setProfilesLoaded(true); return; }
       setProfiles(ps);
@@ -45,7 +55,8 @@ export default function Home() {
       setWorkspaces(ws);
       if (ws.length > 0) setActiveWorkspaceId(ws[0].id);
     });
-  }, [user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) ?? null;
   const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;

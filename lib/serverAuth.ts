@@ -19,5 +19,7 @@ export async function getUserId(): Promise<string> {
   const authorization = h.get("Authorization");
   if (!authorization?.startsWith("Bearer ")) throw new AuthError();
   const decoded = await adminAuth.verifyIdToken(authorization.slice(7));
+  // Log uid in Cloud Run so we can verify per-user isolation in production.
+  console.log(`[serverAuth] verified uid=${decoded.uid} email=${decoded.email ?? "n/a"}`);
   return decoded.uid;
 }

@@ -24,5 +24,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  return <>{children}</>;
+  // key={user.uid} forces a full remount of all child components (including
+  // the dashboard) whenever the signed-in identity changes. This guarantees
+  // no stale state from a previous user session can leak through.
+  return <div key={user.uid} className="contents">{children}</div>;
 }
