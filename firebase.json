@@ -1,4 +1,15 @@
 {
+  "hosting": {
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "viyaway",
+          "region": "us-central1"
+        }
+      }
+    ]
+  },
   "firestore": {
     "rules": "firestore.rules"
   }
