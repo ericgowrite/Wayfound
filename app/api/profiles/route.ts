@@ -7,8 +7,12 @@ import { Profile } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: Request) {
-  const hasAuth = !!request.headers.get("Authorization");
-  console.log(`[profiles GET] auth header present: ${hasAuth}`);
+  const authorization = request.headers.get("Authorization");
+  console.log(`[profiles GET] auth=${authorization ? "yes" : "no"}`);
+  if (!authorization?.startsWith("Bearer ")) {
+    console.log("[profiles GET] → 401 early (no bearer)");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const userId = await getUserId();
     const profiles = await getProfiles(userId);
