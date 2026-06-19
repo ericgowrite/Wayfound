@@ -1,0 +1,12 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+.next
+.firebase
+.env
+.env*
+/data/
+coverage
+*.tsbuildinfo
+next-env.d.ts
