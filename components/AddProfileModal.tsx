@@ -19,12 +19,12 @@ type Step = "info" | "know-type" | "assess" | "type-select" | "review";
 export default function AddProfileModal({ onSave, onClose }: Props) {
   const [step, setStep] = useState<Step>("info");
   const [name, setName] = useState("");
-  const [selectedType, setSelectedType] = useState("9w8");
+  const [selectedType, setSelectedType] = useState("");
   const [draft, setDraft] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
 
-  const template = TEMPLATES.find((t) => t.type === selectedType) ?? TEMPLATES[0];
+  const template = TEMPLATES.find((t) => t.type === selectedType);
 
   function handleNameNext() {
     if (!name.trim()) return;
@@ -32,6 +32,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
   }
 
   function handleTypeConfirmed() {
+    if (!template) return;
     setDraft({
       name: name.trim(),
       enneagramType: selectedType,
@@ -191,7 +192,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
                   })}
                 </div>
               </div>
-              {selectedType && (
+              {selectedType && template && (
                 <div className="bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-3">
                   <p className="text-xs text-[#6B8299] uppercase mb-1">Selected</p>
                   <p className="text-[#2C3E50] dark:text-white font-medium text-sm">Type {selectedType}</p>
