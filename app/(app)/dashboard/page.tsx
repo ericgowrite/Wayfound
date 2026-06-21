@@ -78,6 +78,7 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, destination: newDest, travelers }),
     });
+    if (!res.ok) { console.error("[createWorkspace] failed:", await res.text()); return; }
     const ws: TripWorkspace = await res.json();
     setWorkspaces((prev) => [ws, ...prev]);
     setActiveWorkspaceId(ws.id);
@@ -261,8 +262,8 @@ export default function Home() {
               <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] px-2 py-1">No trips yet</p>
             ) : (
               workspaces.map((w) => {
-                const primaryProfile = profiles.find((p) => p.id === w.travelers[0]);
-                const extraCount = w.travelers.length - 1;
+                const primaryProfile = profiles.find((p) => p.id === (w.travelers ?? [])[0]);
+                const extraCount = (w.travelers?.length ?? 1) - 1;
                 return (
                   <div
                     key={w.id}
