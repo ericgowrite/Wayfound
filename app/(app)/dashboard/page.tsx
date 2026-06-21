@@ -74,24 +74,29 @@ export default function Home() {
   async function createWorkspace() {
     if (!newName.trim()) return;
     const travelers = newTravelers.length > 0 ? newTravelers : [profiles[0]?.id].filter(Boolean);
-    const res = await fetchWithAuth("/api/workspaces", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName, destination: newDest, travelers }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("[createWorkspace] failed:", err);
-      setWorkspaceError(`Failed to create trip (${res.status}). Please try again.`);
-      return;
+    try {
+      const res = await fetchWithAuth("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, destination: newDest, travelers }),
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("[createWorkspace] failed:", err);
+        setWorkspaceError(`Failed to create trip (${res.status}). Please try again.`);
+        return;
+      }
+      const ws: TripWorkspace = await res.json();
+      setWorkspaceError("");
+      setWorkspaces((prev) => [ws, ...prev]);
+      setActiveWorkspaceId(ws.id);
+      setShowNewWorkspace(false);
+      setNewName("");
+      setNewDest("");
+    } catch (e) {
+      console.error("[createWorkspace] threw:", e);
+      setWorkspaceError("Network error — please check your connection and try again.");
     }
-    setWorkspaceError("");
-    const ws: TripWorkspace = await res.json();
-    setWorkspaces((prev) => [ws, ...prev]);
-    setActiveWorkspaceId(ws.id);
-    setShowNewWorkspace(false);
-    setNewName("");
-    setNewDest("");
   }
 
   async function deleteWorkspace(id: string) {
