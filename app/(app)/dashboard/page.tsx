@@ -21,6 +21,7 @@ export default function Home() {
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState("");
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
@@ -78,7 +79,13 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName, destination: newDest, travelers }),
     });
-    if (!res.ok) { console.error("[createWorkspace] failed:", await res.text()); return; }
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("[createWorkspace] failed:", err);
+      setWorkspaceError(`Failed to create trip (${res.status}). Please try again.`);
+      return;
+    }
+    setWorkspaceError("");
     const ws: TripWorkspace = await res.json();
     setWorkspaces((prev) => [ws, ...prev]);
     setActiveWorkspaceId(ws.id);
@@ -416,10 +423,13 @@ export default function Home() {
                 </div>
               )}
             </div>
+            {workspaceError && (
+              <p className="text-red-500 text-xs mt-3">{workspaceError}</p>
+            )}
             <div className="flex gap-2 justify-end mt-4">
               <button
                 className={`px-4 py-2 text-sm rounded ${btnSecondary}`}
-                onClick={() => setShowNewWorkspace(false)}
+                onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); }}
               >
                 Cancel
               </button>
