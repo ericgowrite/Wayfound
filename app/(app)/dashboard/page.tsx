@@ -22,6 +22,7 @@ export default function Home() {
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showNewWorkspace, setShowNewWorkspace] = useState(false);
   const [workspaceError, setWorkspaceError] = useState("");
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
@@ -73,6 +74,7 @@ export default function Home() {
 
   async function createWorkspace() {
     if (!newName.trim()) return;
+    setCreatingWorkspace(true);
     const travelers = newTravelers.length > 0 ? newTravelers : [profiles[0]?.id].filter(Boolean);
     try {
       const res = await fetchWithAuth("/api/workspaces", {
@@ -95,7 +97,9 @@ export default function Home() {
       setNewDest("");
     } catch (e) {
       console.error("[createWorkspace] threw:", e);
-      setWorkspaceError("Network error — please check your connection and try again.");
+      setWorkspaceError(`Error: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setCreatingWorkspace(false);
     }
   }
 
@@ -441,9 +445,9 @@ export default function Home() {
               <button
                 className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={createWorkspace}
-                disabled={!newName.trim()}
+                disabled={!newName.trim() || creatingWorkspace}
               >
-                Create Trip
+                {creatingWorkspace ? "Creating…" : "Create Trip"}
               </button>
             </div>
           </div>
