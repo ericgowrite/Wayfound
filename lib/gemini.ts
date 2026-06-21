@@ -4,8 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 import { combineProfiles } from "@/lib/scoring";
 
-// Singleton client — one instance for the process lifetime
-const client = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+// Lazy singleton — initialized on first call so a missing env var surfaces as
+// a runtime 500 from the route handler rather than crashing the build.
+let _client: GoogleGenerativeAI | null = null;
+function getClient(): GoogleGenerativeAI {
+  if (!_client) {
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) throw new Error("[VIYA] GOOGLE_API_KEY environment variable is not set");
+    _client = new GoogleGenerativeAI(apiKey);
+  }
+  return _client;
+}
 
 // ── Retry logic ───────────────────────────────────────────────────────────────
 
@@ -42,7 +51,7 @@ async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<string> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const m = client.getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
+    const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
     const result = await m.generateContent(userPrompt);
     return result.response.text();
   });
@@ -50,7 +59,7 @@ async function callWithSearch(systemPrompt: string, userPrompt: string): Promise
 
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
   return withRetry(async (model) => {
-    const m = client.getGenerativeModel({ model, systemInstruction: systemPrompt });
+    const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt });
     const result = await m.generateContent(userPrompt);
     return result.response.text();
   });
@@ -100,12 +109,26 @@ function extractUserUrl(input: string): string | null {
   return null;
 }
 
+const DEFAULT_AXIS_SCORES = {
+  calm: 0.5, designSincerity: 0.5, valueIntegrity: 0.5,
+  socialPermeability: 0.5, autonomy: 0.5, novelty: 0.5, locationFriction: 0.5,
+};
+
 function hydrate(
   item: Omit<ScoredOption, "id" | "searchId" | "status" | "notes">,
   searchId: string
 ): ScoredOption {
   return {
+    // Spread first so explicit overrides below take precedence
     ...item,
+    // Guard every field Gemini might omit on degraded responses
+    name: item.name ?? "Unknown",
+    description: item.description ?? "",
+    price: item.price ?? "",
+    alignmentScore: typeof item.alignmentScore === "number" ? item.alignmentScore : 0,
+    fitExplanation: item.fitExplanation ?? "",
+    axisScores: item.axisScores ?? DEFAULT_AXIS_SCORES,
+    // Injected fields
     id: uuidv4(),
     searchId,
     status: "new" as const,
