@@ -16,3 +16,4 @@ if (getApps().length === 0) {
 
 export const adminAuth = getAuth();
 export const adminDb = getFirestore();
+adminDb.settings({ ignoreUndefinedProperties: true });
