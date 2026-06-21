@@ -7,7 +7,7 @@ import { ScoredOption, ChatMessage } from "@/types";
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const { option, workspaceId, history, message, searchQuery } = await request.json() as {
       option: ScoredOption;
       workspaceId?: string;

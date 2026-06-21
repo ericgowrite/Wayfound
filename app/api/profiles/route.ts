@@ -7,24 +7,15 @@ import { Profile } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 export async function GET(request: Request) {
-  const authorization = request.headers.get("Authorization");
-  console.log(`[profiles GET] auth=${authorization ? "yes" : "no"}`);
-  if (!authorization?.startsWith("Bearer ")) {
-    console.log("[profiles GET] → 401 early (no bearer)");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const profiles = await getProfiles(userId);
-    console.log(`[profiles GET] uid=${userId} profiles=${profiles.length}`);
+    console.log(`[profiles GET] uid=${userId} count=${profiles.length}`);
     const res = NextResponse.json(profiles);
     res.headers.set("Cache-Control", "no-store, private");
     return res;
   } catch (e) {
-    if (e instanceof AuthError) {
-      console.log("[profiles GET] → 401 Unauthorized");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("[profiles GET] error:", e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
@@ -32,7 +23,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const body = await request.json();
     const profile: Profile = {
       id: uuidv4(),

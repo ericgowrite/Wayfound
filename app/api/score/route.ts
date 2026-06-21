@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const { workspaceId, input, category } = await request.json();
 
     const workspace = await getWorkspace(userId, workspaceId);

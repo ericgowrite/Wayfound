@@ -6,7 +6,7 @@ import { getUserId, AuthError } from "@/lib/serverAuth";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const { id } = await params;
     const profile = await getProfile(userId, id);
     if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const { id } = await params;
     const profile = await request.json();
     if (profile.id !== id) return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const userId = await getUserId();
+    const userId = await getUserId(request);
     const { id } = await params;
     await deleteProfileFromList(userId, id);
     return NextResponse.json({ ok: true });
