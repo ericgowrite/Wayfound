@@ -38,16 +38,26 @@ export async function getProfile(userId: string, id?: string): Promise<Profile |
 }
 
 export async function saveProfileToList(userId: string, profile: Profile): Promise<void> {
-  const profiles = await getProfiles(userId);
-  const idx = profiles.findIndex((p) => p.id === profile.id);
-  if (idx >= 0) profiles[idx] = profile;
-  else profiles.push(profile);
-  await profilesRef(userId).set({ profiles });
+  const ref = profilesRef(userId);
+  // Use a transaction to prevent a read-modify-write race when two profile
+  // saves arrive concurrently (e.g. calibration accept + profile editor save).
+  await adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const profiles: Profile[] = snap.exists ? ((snap.data()?.profiles ?? []) as Profile[]) : [];
+    const idx = profiles.findIndex((p) => p.id === profile.id);
+    if (idx >= 0) profiles[idx] = profile;
+    else profiles.push(profile);
+    tx.set(ref, { profiles });
+  });
 }
 
 export async function deleteProfileFromList(userId: string, id: string): Promise<void> {
-  const profiles = (await getProfiles(userId)).filter((p) => p.id !== id);
-  await profilesRef(userId).set({ profiles });
+  const ref = profilesRef(userId);
+  await adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const profiles: Profile[] = snap.exists ? ((snap.data()?.profiles ?? []) as Profile[]) : [];
+    tx.set(ref, { profiles: profiles.filter((p) => p.id !== id) });
+  });
 }
 
 // ── Workspaces ────────────────────────────────────────────────────────────────
@@ -64,7 +74,9 @@ export async function getWorkspace(userId: string, id: string): Promise<TripWork
 
 export async function saveWorkspace(userId: string, workspace: TripWorkspace): Promise<void> {
   workspace.updatedAt = new Date().toISOString();
-  await workspacesCol(userId).doc(workspace.id).set(workspace);
+  // JSON round-trip removes undefined fields that Firestore rejects
+  const data = JSON.parse(JSON.stringify(workspace));
+  await workspacesCol(userId).doc(workspace.id).set(data);
 }
 
 export async function deleteWorkspace(userId: string, id: string): Promise<void> {

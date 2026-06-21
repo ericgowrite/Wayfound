@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       id: uuidv4(),
       name: body.name,
       destination: body.destination || "",
-      dates: body.dates ?? "",
+      ...(body.dates ? { dates: body.dates } : {}),
       travelers: body.travelers?.length ? body.travelers : [defaultProfile?.id].filter(Boolean),
       searches: [],
       savedOptions: [],
