@@ -26,19 +26,27 @@ export default function Home() {
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
+  const [newStartDate, setNewStartDate] = useState("");
+  const [newEndDate, setNewEndDate] = useState("");
+  const [newPartySize, setNewPartySize] = useState<number>(2);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
   const [showFitLegend, setShowFitLegend] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profilesOpen, setProfilesOpen] = useState(true);
   const [profilesLoaded, setProfilesLoaded] = useState(false);
+  const [firstRunError, setFirstRunError] = useState("");
 
   // Wait for the Firebase user to be confirmed before fetching — ensures
   // the ID token is available when fetchWithAuth runs.
   // Use user?.uid (not the full User object) so this only re-runs when the
   // actual identity changes, not on token refreshes. Explicitly reset all
   // user-specific state first so stale data from a previous session is never
-  // visible while the new fetch is in-flight.
+  // visible while the new fetch is in-flight. This is a multi-field reset
+  // tied to identity change + kicks off async fetches right after — a
+  // legitimate effect, not state derived from a single prop.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfiles([]);
     setWorkspaces([]);
     setActiveWorkspaceId(null);
@@ -80,7 +88,13 @@ export default function Home() {
       const res = await fetchWithAuth("/api/workspaces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, destination: newDest, travelers }),
+        body: JSON.stringify({
+          name: newName,
+          destination: newDest,
+          travelers,
+          ...(newStartDate && newEndDate ? { dates: { start: newStartDate, end: newEndDate } } : {}),
+          partySize: newPartySize,
+        }),
       });
       if (!res.ok) {
         const err = await res.text();
@@ -95,6 +109,9 @@ export default function Home() {
       setShowNewWorkspace(false);
       setNewName("");
       setNewDest("");
+      setNewStartDate("");
+      setNewEndDate("");
+      setNewPartySize(2);
     } catch (e) {
       console.error("[createWorkspace] threw:", e);
       setWorkspaceError(`Error: ${e instanceof Error ? e.message : String(e)}`);
@@ -122,23 +139,35 @@ export default function Home() {
   }
 
   async function handleFirstRunAssessment(result: AssessmentResult, name: string) {
+    setFirstRunError("");
     const typeKey = String(result.type);
-    const res = await fetchWithAuth("/api/profiles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name.trim() || "Traveler",
-        enneagramType: typeKey,
-        description: result.description,
-        axisWeights: result.axisWeights,
-        thresholds: {},
-        dealbreakers: [],
-        isDefault: true,
-      }),
-    });
-    const profile: Profile = await res.json();
-    setProfiles([profile]);
-    setNewTravelers([profile.id]);
+    try {
+      const res = await fetchWithAuth("/api/profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim() || "Traveler",
+          enneagramType: typeKey,
+          description: result.description,
+          axisWeights: result.axisWeights,
+          thresholds: {},
+          dealbreakers: [],
+          isDefault: true,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        console.error("[handleFirstRunAssessment] profile creation failed:", res.status, body);
+        setFirstRunError(body.error || `Couldn't save your profile (${res.status}). Please try again.`);
+        return;
+      }
+      const profile: Profile = await res.json();
+      setProfiles([profile]);
+      setNewTravelers([profile.id]);
+    } catch (e) {
+      console.error("[handleFirstRunAssessment] threw:", e);
+      setFirstRunError(e instanceof Error ? e.message : "Something went wrong saving your profile.");
+    }
   }
 
   function handleProfileUpdate(updated: Profile) {
@@ -185,6 +214,9 @@ export default function Home() {
               <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Welcome</span>
             </div>
           </div>
+          {firstRunError && (
+            <p className="text-red-500 text-xs px-6 pt-3">{firstRunError}</p>
+          )}
           <div style={{ minHeight: 520 }}>
             <TravelAssessment
               onComplete={handleFirstRunAssessment}
@@ -193,7 +225,7 @@ export default function Home() {
           </div>
         </div>
         {showAddProfile && (
-          <AddProfileModal onSave={handleProfileSaved} onClose={() => setShowAddProfile(false)} />
+          <AddProfileModal isSelf onSave={handleProfileSaved} onClose={() => setShowAddProfile(false)} />
         )}
       </div>
     );
@@ -201,12 +233,28 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#2C3E50] dark:text-[#B8D4E3] overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-56 flex-shrink-0 bg-white dark:bg-[#1e2d3d] border-r border-[#E0E8ED] dark:border-[#2a3f52] flex flex-col">
+      {/* Mobile backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — fixed drawer on mobile, static column on desktop */}
+      <div className={`${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out fixed md:relative inset-y-0 left-0 z-50 w-72 md:w-56 flex-shrink-0 bg-white dark:bg-[#1e2d3d] border-r border-[#E0E8ED] dark:border-[#2a3f52] flex flex-col`}>
         {/* App header */}
-        <div className="px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
-          <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
-          <p className="text-xs text-[#6B8299] mt-0.5">Your true path to travel</p>
+        <div className="flex items-start justify-between px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+          <div>
+            <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
+            <p className="text-xs text-[#6B8299] mt-0.5">Your true path to travel</p>
+          </div>
+          <button
+            className="md:hidden text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-white text-xl leading-none mt-0.5 transition-colors"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            ×
+          </button>
         </div>
 
         <div className="flex-1 overflow-auto">
@@ -231,7 +279,9 @@ export default function Home() {
 
             {profilesOpen && (
               <div className="px-2 pb-2">
-                {profiles.map((p) => (
+                {/* Defensive filter: a malformed entry (e.g. an error payload that
+                    slipped through a failed API call) should never crash this list */}
+                {profiles.filter((p) => p && typeof p.name === "string" && p.name.length > 0).map((p) => (
                   <div
                     key={p.id}
                     className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] transition-colors"
@@ -356,7 +406,22 @@ export default function Home() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* Mobile top bar — hamburger + current trip name */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] flex-shrink-0">
+          <button
+            className="text-[#3D5A6E] dark:text-[#B8D4E3] text-xl leading-none"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+          <span className="text-sm font-bold text-[#3D5A6E] dark:text-white">ViyaWay</span>
+          {activeWorkspace && (
+            <span className="text-sm text-[#6B8299] dark:text-[#9BB0C1] truncate">· {activeWorkspace.name}</span>
+          )}
+        </div>
+        <div className="flex-1 overflow-hidden">
         {activeWorkspace && travelerProfiles.length > 0 ? (
           <WorkspaceView
             key={activeWorkspace.id}
@@ -378,6 +443,7 @@ export default function Home() {
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {/* New workspace modal */}
@@ -406,6 +472,45 @@ export default function Home() {
                   onChange={(e) => setNewDest(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
                 />
+              </div>
+              {/* Dates — two equal columns */}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="text-[#6B8299] text-xs uppercase block mb-1">Check In</label>
+                  <input
+                    type="date"
+                    className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
+                    value={newStartDate}
+                    onChange={(e) => setNewStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[#6B8299] text-xs uppercase block mb-1">Check Out</label>
+                  <input
+                    type="date"
+                    className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
+                    value={newEndDate}
+                    min={newStartDate}
+                    onChange={(e) => setNewEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+              {/* Guests — stepper on its own row */}
+              <div className="flex items-center justify-between">
+                <label className="text-[#6B8299] text-xs uppercase">Guests</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="w-8 h-8 rounded-full border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] flex items-center justify-center text-lg leading-none transition-colors"
+                    onClick={() => setNewPartySize(Math.max(1, newPartySize - 1))}
+                  >−</button>
+                  <span className="text-sm font-medium text-[#2C3E50] dark:text-white w-6 text-center">{newPartySize}</span>
+                  <button
+                    type="button"
+                    className="w-8 h-8 rounded-full border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] flex items-center justify-center text-lg leading-none transition-colors"
+                    onClick={() => setNewPartySize(Math.min(20, newPartySize + 1))}
+                  >+</button>
+                </div>
               </div>
               {profiles.length > 1 && (
                 <div>

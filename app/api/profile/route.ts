@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getProfile, saveProfileToList } from "@/lib/storage";
 import { getUserId, AuthError } from "@/lib/serverAuth";
+import { friendlyError } from "@/lib/errorMessages";
 
 export async function GET(request: Request) {
   try {
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
     return NextResponse.json(await getProfile(userId));
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }
 
@@ -22,6 +23,6 @@ export async function PUT(request: Request) {
     return NextResponse.json(profile);
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }

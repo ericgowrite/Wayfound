@@ -6,6 +6,8 @@ export function useTheme() {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
+    // Read the class that the inline layout script already applied —
+    // this respects both localStorage setting and system preference.
     setDark(document.documentElement.classList.contains("dark"));
   }, []);
 

@@ -55,7 +55,8 @@ export async function validateUrl(url: string): Promise<ValidateResult> {
 
   // 3. API call
   try {
-    const res = await fetch("/api/validate-url", {
+    const { fetchWithAuth } = await import("@/lib/fetchWithAuth");
+    const res = await fetchWithAuth("/api/validate-url", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),

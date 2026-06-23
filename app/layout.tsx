@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   description: "Travel recommendations matched to your personality. No more endless scrolling or relying on reviews that aren't right for you.",
 };
 
+// Explicit viewport config — without this, mobile browsers may fall back to
+// rendering at a virtual desktop width and scaling down, which breaks every
+// responsive Tailwind breakpoint in the app.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,7 +39,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
           }}
         />
       </head>

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage } from "@/types";
+import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage, PropertyFeedback } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
 import { validateUrl, reportBadUrl } from "@/lib/urlValidation";
+import { isFeedbackEligible, relevantFeedbackAxes, AXIS_FEEDBACK_FLAGS } from "@/lib/feedback";
 import AxisBar from "./AxisBar";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
@@ -22,6 +23,8 @@ interface Props {
   onNotesChange: (notes: string) => void;
   onChatUpdate: (messages: ChatMessage[]) => void;
   onDeepDive: () => void;
+  onFeedbackSubmit: (feedback: PropertyFeedback) => void;
+  onExpandedChange?: (expanded: boolean) => void;
 }
 
 const AVATAR_COLORS = [
@@ -46,10 +49,16 @@ export default function ResultCard({
   onNotesChange,
   onChatUpdate,
   onDeepDive,
+  onFeedbackSubmit,
+  onExpandedChange,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [showFullExplanation, setShowFullExplanation] = useState(false);
   const [notes, setNotes] = useState(option.notes);
+  const [feedbackDismissed, setFeedbackDismissed] = useState(false);
+  const [metExpectations, setMetExpectations] = useState<PropertyFeedback["metExpectations"] | null>(null);
+  const [flaggedAxes, setFlaggedAxes] = useState<Set<keyof AxisWeights>>(new Set());
+  const [feedbackNote, setFeedbackNote] = useState("");
   const [deepDive, setDeepDive] = useState<DeepDiveResult | null>(null);
   const [loadingDive, setLoadingDive] = useState(false);
   const [deepDiveError, setDeepDiveError] = useState(false);
@@ -129,11 +138,14 @@ export default function ResultCard({
   const [resolvedUrl, setResolvedUrl] = useState<string>(option.source ?? "");
   const [reportSent, setReportSent] = useState(false);
 
-  // Trigger validation the first time the card expands
+  // Trigger validation the first time the card expands.
+  // This genuinely belongs in an effect (it kicks off an async network call via
+  // validateUrl), so the setState-in-effect lint rule is suppressed at each call site.
   useEffect(() => {
     if (!expanded || urlStatus !== "idle") return;
     const raw = option.source?.trim();
     if (!raw || !/^https?:\/\//i.test(raw)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUrlStatus("invalid");
       return;
     }
@@ -187,6 +199,29 @@ export default function ResultCard({
 
   const borderColor = tier.border;
 
+  // Post-trip feedback — personal, low-energy (MVP backlog #1/#2)
+  const feedbackEligible = isFeedbackEligible(option, workspace);
+  const feedbackAxes = relevantFeedbackAxes(profileWeights ?? travelers[0]?.axisWeights ?? option.axisScores);
+
+  function toggleAxisFlag(axis: keyof AxisWeights) {
+    setFlaggedAxes((prev) => {
+      const next = new Set(prev);
+      if (next.has(axis)) next.delete(axis);
+      else next.add(axis);
+      return next;
+    });
+  }
+
+  function handleFeedbackSubmit() {
+    if (!metExpectations) return;
+    onFeedbackSubmit({
+      metExpectations,
+      axisFlags: Array.from(flaggedAxes),
+      note: feedbackNote.trim(),
+      submittedAt: new Date().toISOString(),
+    });
+  }
+
   const statusEmoji: Record<ScoredOption["status"], string> = {
     new: "",
     interested: "⭐",
@@ -239,7 +274,7 @@ export default function ResultCard({
       {/* Header */}
       <div
         className="flex items-start gap-3 p-4 cursor-pointer select-none"
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => { const next = !expanded; setExpanded(next); onExpandedChange?.(next); }}
       >
         <input
           type="checkbox"
@@ -358,7 +393,10 @@ export default function ResultCard({
       {/* Expanded details */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Inner split deliberately waits for xl (not md) — these cards sit inside a
+              2-column results grid on large screens, so a md breakpoint would split this
+              into a third-level column squeeze. xl gives the card room to actually have it. */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Left: axis bars */}
             <div>
               <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-2">
@@ -686,6 +724,86 @@ export default function ResultCard({
               onBlur={() => onNotesChange(notes)}
             />
           </div>
+
+          {/* Post-trip feedback — low energy, personal (not shared across users yet) */}
+          {option.feedback ? (
+            <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] bg-[#F8FAFB] dark:bg-[#2a3f52]/60 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Your feedback</p>
+              <p className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]">
+                {option.feedback.metExpectations === "yes" ? "Met expectations ✓" : option.feedback.metExpectations === "no" ? "Didn't meet expectations ✗" : "Mixed — partly met expectations"}
+              </p>
+              {option.feedback.axisFlags.length > 0 && (
+                <ul className="mt-1.5 space-y-1">
+                  {option.feedback.axisFlags.map((axis) => (
+                    <li key={axis} className="text-xs text-amber-600 dark:text-amber-400">⚠ {AXIS_FEEDBACK_FLAGS[axis]}</li>
+                  ))}
+                </ul>
+              )}
+              {option.feedback.note && (
+                <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 italic">&quot;{option.feedback.note}&quot;</p>
+              )}
+            </div>
+          ) : feedbackEligible && !feedbackDismissed ? (
+            <div className="rounded-xl border border-[#5B8BA0]/40 dark:border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 px-4 py-3 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">How was {option.name}?</p>
+                <button
+                  className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] flex-shrink-0"
+                  onClick={() => setFeedbackDismissed(true)}
+                >
+                  Not now
+                </button>
+              </div>
+
+              <div className="flex gap-1.5">
+                {(["yes", "mixed", "no"] as PropertyFeedback["metExpectations"][]).map((v) => (
+                  <button
+                    key={v}
+                    className={`px-3 py-1 text-xs rounded-lg capitalize transition-colors ${
+                      metExpectations === v
+                        ? "bg-[#5B8BA0] text-white font-medium"
+                        : "bg-white dark:bg-[#1e2d3d] text-[#6B8299] dark:text-[#9BB0C1] border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0]"
+                    }`}
+                    onClick={() => setMetExpectations(v)}
+                  >
+                    {v === "yes" ? "Met expectations" : v === "no" ? "Didn't meet expectations" : "Mixed"}
+                  </button>
+                ))}
+              </div>
+
+              {feedbackAxes.length > 0 && (
+                <div className="space-y-1">
+                  {feedbackAxes.map((axis) => (
+                    <label key={axis} className="flex items-center gap-2 text-xs text-[#3D5A6E] dark:text-[#B8D4E3] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="accent-[#5B8BA0]"
+                        checked={flaggedAxes.has(axis)}
+                        onChange={() => toggleAxisFlag(axis)}
+                      />
+                      {AXIS_FEEDBACK_FLAGS[axis]}
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              <textarea
+                className="w-full bg-white dark:bg-[#1e2d3d] text-[#2C3E50] dark:text-[#B8D4E3] text-xs rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
+                rows={2}
+                placeholder="Anything worth remembering for next time? (optional)"
+                value={feedbackNote}
+                onChange={(e) => setFeedbackNote(e.target.value)}
+              />
+
+              <button
+                className="px-3 py-1.5 text-xs rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                onClick={handleFeedbackSubmit}
+                disabled={!metExpectations}
+              >
+                Save feedback
+              </button>
+            </div>
+          ) : null}
 
           {/* Actions */}
           <div className="flex gap-2 flex-wrap">

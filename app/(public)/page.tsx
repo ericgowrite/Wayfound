@@ -86,10 +86,10 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link
-            href="/signup"
+            href="/dashboard"
             className="text-sm px-5 py-2 bg-[#5B8BA0] text-white rounded-full hover:bg-[#4A7A8F] transition-colors font-medium"
           >
-            Sign Up Free
+            Get Started Free
           </Link>
         </div>
       </nav>
@@ -107,7 +107,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-8">
               <Link
-                href="/signup"
+                href="/dashboard"
                 className="inline-block px-8 py-3.5 bg-[#5B8BA0] text-white rounded-full hover:bg-[#4A7A8F] transition-colors text-base font-semibold shadow-lg shadow-[#5B8BA0]/20"
               >
                 Get started — it&apos;s free
@@ -186,7 +186,7 @@ export default function LandingPage() {
             Ready to find your path?
           </h2>
           <Link
-            href="/signup"
+            href="/dashboard"
             className="inline-block px-8 py-3.5 bg-[#5B8BA0] text-white rounded-full hover:bg-[#4A7A8F] transition-colors text-base font-semibold shadow-lg shadow-[#5B8BA0]/20"
           >
             Start your journey

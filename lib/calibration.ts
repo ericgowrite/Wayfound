@@ -176,6 +176,7 @@ export function logCalibrationEvent(event: CalibrationEvent): void {
   try {
     const log = getCalibrationLog();
     log.push(event);
-    localStorage.setItem(CAL_LOG_KEY, JSON.stringify(log));
+    // Cap at 100 entries to prevent localStorage quota exhaustion
+    localStorage.setItem(CAL_LOG_KEY, JSON.stringify(log.slice(-100)));
   } catch {}
 }

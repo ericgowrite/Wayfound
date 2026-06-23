@@ -48,13 +48,58 @@ async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
 
 // ── Transport helpers ─────────────────────────────────────────────────────────
 
-async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<string> {
+/**
+ * Pull domains out of Gemini's search-grounding citations.
+ * Note: groundingChunks[].web.uri is typically a Google redirect link
+ * (vertexaisearch.cloud.google.com/grounding-api-redirect/...), not the
+ * destination domain — so this reads .title instead, which is usually the
+ * source's display name or domain. Best-effort signal, not a guarantee.
+ */
+function extractCitedDomains(candidate: { groundingMetadata?: { groundingChunks?: { web?: { uri?: string; title?: string } }[] } } | undefined): Set<string> {
+  const domains = new Set<string>();
+  const chunks = candidate?.groundingMetadata?.groundingChunks ?? [];
+  for (const chunk of chunks) {
+    const title = chunk.web?.title?.toLowerCase().trim();
+    if (title) domains.add(title);
+    const uri = chunk.web?.uri;
+    if (uri) {
+      try {
+        const host = new URL(uri).hostname.replace(/^www\./, "");
+        if (!host.includes("vertexaisearch") && !host.includes("google.com")) domains.add(host);
+      } catch {
+        // not a parseable URL — skip
+      }
+    }
+  }
+  return domains;
+}
+
+async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string; citedDomains: Set<string> }> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
     const result = await m.generateContent(userPrompt);
-    return result.response.text();
+    const citedDomains = extractCitedDomains(result.response.candidates?.[0]);
+    return { text: result.response.text(), citedDomains };
   });
+}
+
+/**
+ * Best-effort cross-check: log a warning when a result's claimed source
+ * domain has zero corroboration from any search-grounding citation. This is
+ * a soft signal (titles aren't always clean domains) — it informs, doesn't block.
+ */
+function auditCitedDomain(resultName: string, sourceUrl: string | undefined, citedDomains: Set<string>): void {
+  if (!sourceUrl || citedDomains.size === 0) return;
+  try {
+    const host = new URL(sourceUrl).hostname.replace(/^www\./, "");
+    const corroborated = Array.from(citedDomains).some((d) => d.includes(host) || host.includes(d));
+    if (!corroborated) {
+      console.warn(`[VIYA-AI] source domain "${host}" for "${resultName}" not found in search citations — relying on server-side URL validation as the real check`);
+    }
+  } catch {
+    // unparseable URL — server-side validation will catch it regardless
+  }
 }
 
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
@@ -99,7 +144,7 @@ function sanitizeSourceUrl(raw: string | undefined): string {
  * Matches full https?:// URLs or bare domains (e.g. "aromacoffeeandtea.com").
  * Returns a normalised https:// URL, or null if none found.
  */
-function extractUserUrl(input: string): string | null {
+export function extractUserUrl(input: string): string | null {
   const fullMatch = input.match(/https?:\/\/[^\s,)]+/);
   if (fullMatch) return fullMatch[0].replace(/[.,;)]+$/, "");
 
@@ -222,11 +267,36 @@ ${travelerSummaries}`,
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+// Trip context (destination, dates, party size) is given as default context.
+// The query string overrides destination whenever it already names a different place.
+function tripContextLine(
+  destination?: string,
+  dates?: { start: string; end: string },
+  partySize?: number
+): string {
+  const lines: string[] = [];
+  if (destination?.trim()) {
+    lines.push(
+      `TRIP DESTINATION: ${destination.trim()} — If the query does not already name a different location, search within or near this destination. If the query does name a different location, defer to the query.`
+    );
+  }
+  if (dates?.start && dates?.end) {
+    lines.push(`TRIP DATES: ${dates.start} to ${dates.end} — factor this into availability and seasonal relevance when scoring.`);
+  }
+  if (partySize && partySize > 1) {
+    lines.push(`PARTY SIZE: ${partySize} people — factor this into capacity, pricing tier, and suitability.`);
+  }
+  return lines.length > 0 ? "\n" + lines.join("\n") : "";
+}
+
 export async function searchAndScore(
   query: string,
   category: SearchCategory,
   searchId: string,
-  profiles: Profile[]
+  profiles: Profile[],
+  destination?: string,
+  dates?: { start: string; end: string },
+  partySize?: number
 ): Promise<ScoredOption[]> {
   const systemPrompt = buildSystemPrompt("search");
   const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
@@ -235,6 +305,7 @@ export async function searchAndScore(
 ${profileSection}
 
 QUERY: "${query}" (category: ${category})
+${tripContextLine(destination, dates, partySize)}
 
 Search the web for this query, then score each result against the profile.
 
@@ -259,9 +330,11 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const raw = await callWithSearch(systemPrompt, prompt);
+  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "search");
-  return parseArray(raw).map((item) => hydrate(item, searchId));
+  const items = parseArray(raw);
+  for (const item of items) auditCitedDomain(item.name, item.source, citedDomains);
+  return items.map((item) => hydrate(item, searchId));
 }
 
 export async function searchMoreOptions(
@@ -269,7 +342,10 @@ export async function searchMoreOptions(
   category: SearchCategory,
   searchId: string,
   profiles: Profile[],
-  alreadySeen: string[]
+  alreadySeen: string[],
+  destination?: string,
+  dates?: { start: string; end: string },
+  partySize?: number
 ): Promise<ScoredOption[]> {
   const systemPrompt = buildSystemPrompt("moreOptions");
   const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
@@ -279,6 +355,7 @@ export async function searchMoreOptions(
 ${profileSection}
 
 QUERY: "${query}" (category: ${category})
+${tripContextLine(destination, dates, partySize)}
 
 ALREADY SHOWN TO USER — do NOT return these again:
 ${avoidList}
@@ -308,9 +385,11 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const raw = await callWithSearch(systemPrompt, prompt);
+  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
-  return parseArray(raw).map((item) => hydrate(item, searchId));
+  const items = parseArray(raw);
+  for (const item of items) auditCitedDomain(item.name, item.source, citedDomains);
+  return items.map((item) => hydrate(item, searchId));
 }
 
 export async function generateComparison(
@@ -391,7 +470,7 @@ Return ONLY a valid JSON object with exactly these fields (no markdown, no extra
 
 Each array item should be a single concise bullet (1-2 lines max). Be specific and honest. Never include axis names (calm, designSincerity, valueIntegrity, etc.) or numeric scores in any field.`;
 
-  const raw = await callWithSearch(systemPrompt, prompt);
+  const { text: raw } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "deepDive");
 
   try {
@@ -425,7 +504,10 @@ export async function scoreSpecific(
   input: string,
   category: SearchCategory,
   searchId: string,
-  profiles: Profile[]
+  profiles: Profile[],
+  destination?: string,
+  dates?: { start: string; end: string },
+  partySize?: number
 ): Promise<ScoredOption> {
   const systemPrompt = buildSystemPrompt("scoreSpecific");
   const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
@@ -440,6 +522,7 @@ ${profileSection}
 OPTION TO SCORE:
 ${userProvidedUrl ? `URL: ${userProvidedUrl}` : `"${input}"`}
 Category: ${category}
+${!isUrl ? tripContextLine(destination, dates, partySize) : ""}
 
 ${isUrl ? "Fetch the page and use that content to score this option." : "Search the web for more details about this specific option, then score it."}
 
@@ -464,10 +547,11 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const raw = await callWithSearch(systemPrompt, prompt);
+  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "scoreSpecific", { userProvidedUrl });
 
   const parsed = parseObject(raw);
+  if (!userProvidedUrl) auditCitedDomain(parsed.name, parsed.source, citedDomains);
 
   // Sacred Rule 1: Always restore user-provided URL — never let Gemini overwrite it.
   if (userProvidedUrl) {

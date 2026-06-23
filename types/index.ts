@@ -35,6 +35,7 @@ export interface TripWorkspace {
   name: string;
   destination: string;
   dates?: { start: string; end: string };
+  partySize?: number;
   travelers: string[];
   searches: Search[];
   savedOptions: SavedOption[];
@@ -73,6 +74,17 @@ export interface TravelerScore {
   thresholdViolations: string[];
 }
 
+// Low-energy post-trip feedback — personal to the submitting user (Phase 1 of
+// the feedback/memory system; not yet shared across users — see MVP backlog #1/#6).
+export interface PropertyFeedback {
+  metExpectations: "yes" | "no" | "mixed";
+  // Axis keys the traveler flagged as notably off from what was expected —
+  // e.g. ["calm"] for "noisier than I expected."
+  axisFlags: (keyof AxisWeights)[];
+  note: string;
+  submittedAt: string;
+}
+
 export interface ScoredOption {
   id: string;
   searchId: string;
@@ -93,6 +105,8 @@ export interface ScoredOption {
   travelerScores?: Record<string, TravelerScore>;
   // Inline chat history persisted per option
   chatHistory?: ChatMessage[];
+  // Set once the traveler has answered the post-trip feedback prompt
+  feedback?: PropertyFeedback;
 }
 
 export interface SavedOption extends ScoredOption {

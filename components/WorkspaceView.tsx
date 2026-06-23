@@ -8,8 +8,9 @@ import {
   ScoredOption,
   SavedOption,
   SearchCategory,
+  PropertyFeedback,
 } from "@/types";
-import { sortByAlignment, sortByGroupFit } from "@/lib/scoring";
+import { sortByAlignment, sortByGroupFit, attachTravelerScores } from "@/lib/scoring";
 import { CATEGORY_META } from "@/lib/categories";
 import CategorySelect from "@/components/CategorySelect";
 import {
@@ -24,7 +25,9 @@ import {
 import ResultCard from "./ResultCard";
 import ComparisonView from "./ComparisonView";
 import CalibrationPrompt from "./CalibrationPrompt";
+import UpgradePrompt from "./UpgradePrompt";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Props {
   workspace: TripWorkspace;
@@ -36,6 +39,7 @@ interface Props {
 type SortMode = "fit" | "group";
 
 export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate }: Props) {
+  const { isAnonymous } = useAuth();
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
 
@@ -51,23 +55,39 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showComparison, setShowComparison] = useState(false);
   const [workspaceNotes, setWorkspaceNotes] = useState(workspace.notes);
+  // Keep notes in sync when the workspace prop is refreshed from the server.
+  // Computed during render (React's recommended "adjusting state when a prop
+  // changes" pattern) rather than in an effect — avoids an extra post-commit
+  // render and the react-hooks/set-state-in-effect lint error.
+  const [prevWorkspaceNotes, setPrevWorkspaceNotes] = useState(workspace.notes);
+  if (workspace.notes !== prevWorkspaceNotes) {
+    setPrevWorkspaceNotes(workspace.notes);
+    setWorkspaceNotes(workspace.notes);
+  }
   const [activeSearchId, setActiveSearchId] = useState<string | null>(
     workspace.searches[0]?.id ?? null
   );
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
   const [showFitCallout, setShowFitCallout] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [rescoring, setRescoring] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   useEffect(() => {
+    // localStorage requires browser access — checking it during render would
+    // cause an SSR/hydration mismatch, so an effect is the correct tool here
+    // despite the lint rule's general preference against setState-in-effect.
     if (
       !showFitCallout &&
       workspace.searches.length > 0 &&
       workspace.searches[0].scoredResults.length > 0 &&
       !localStorage.getItem("hasSeenFitLegend")
     ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowFitCallout(true);
     }
-  }, [workspace.searches]);
+  }, [workspace.searches]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeSearch = workspace.searches.find((s) => s.id === activeSearchId) ?? null;
 
@@ -103,6 +123,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
       if (!res.ok) {
         const err = await res.json();
+        if (err.code === "ANON_LIMIT") { setShowUpgradePrompt(true); return; }
         throw new Error(err.error || "Search failed");
       }
       const search: Search = await res.json();
@@ -131,6 +152,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
       if (!res.ok) {
         const err = await res.json();
+        if (err.code === "ANON_LIMIT") { setShowUpgradePrompt(true); return; }
         throw new Error(err.error || "Scoring failed");
       }
       const search: Search = await res.json();
@@ -159,6 +181,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
       if (!res.ok) {
         const err = await res.json();
+        if (err.code === "ANON_LIMIT") { setShowUpgradePrompt(true); return; }
         throw new Error(err.error || "Failed to fetch more options");
       }
       const updatedSearch: Search = await res.json();
@@ -243,6 +266,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     });
   }
 
+  function handleFeedbackSubmit(searchId: string, optionId: string, feedback: PropertyFeedback) {
+    updateWorkspace({
+      ...workspace,
+      searches: workspace.searches.map((s) =>
+        s.id === searchId
+          ? { ...s, scoredResults: s.scoredResults.map((o) => (o.id === optionId ? { ...o, feedback } : o)) }
+          : s
+      ),
+      savedOptions: workspace.savedOptions.map((o) => (o.id === optionId ? { ...o, feedback } : o)),
+    });
+  }
+
   function handleChatUpdate(searchId: string, optionId: string, chatHistory: import("@/types").ChatMessage[]) {
     updateWorkspace({
       ...workspace,
@@ -257,23 +292,33 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   async function handleCalibrationAccept(newWeights: import("@/types").AxisWeights) {
     if (!primaryProfile || !pendingCalibration) return;
-    const res = await fetchWithAuth(`/api/profiles/${primaryProfile.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...primaryProfile, axisWeights: newWeights }),
-    });
-    const saved = await res.json();
-    logCalibrationEvent({
-      timestamp: new Date().toISOString(),
-      profileId: primaryProfile.id,
-      savesCount: 0,
-      suggestions: pendingCalibration,
-      accepted: true,
-      previousWeights: primaryProfile.axisWeights,
-      newWeights,
-    });
-    onProfileUpdate(saved);
-    setPendingCalibration(null);
+    try {
+      const res = await fetchWithAuth(`/api/profiles/${primaryProfile.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...primaryProfile, axisWeights: newWeights }),
+      });
+      if (!res.ok) {
+        console.error("[calibration] profile save failed:", res.status, await res.text());
+        setPendingCalibration(null);
+        return;
+      }
+      const saved = await res.json();
+      logCalibrationEvent({
+        timestamp: new Date().toISOString(),
+        profileId: primaryProfile.id,
+        savesCount: 0,
+        suggestions: pendingCalibration,
+        accepted: true,
+        previousWeights: primaryProfile.axisWeights,
+        newWeights,
+      });
+      onProfileUpdate(saved);
+    } catch (e) {
+      console.error("[calibration] network error:", e);
+    } finally {
+      setPendingCalibration(null);
+    }
   }
 
   function handleCalibrationDismiss() {
@@ -288,6 +333,36 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       newWeights: null,
     });
     setPendingCalibration(null);
+  }
+
+  // Rescore all existing searches against the current traveler set.
+  // Runs client-side (scoring.ts is pure computation) — no round-trip to AI needed.
+  async function handleRescore() {
+    setRescoring(true);
+    const rescored = {
+      ...workspace,
+      searches: workspace.searches.map((s) => ({
+        ...s,
+        scoredResults: attachTravelerScores(s.scoredResults, travelers),
+      })),
+    };
+    await updateWorkspace(rescored);
+    setRescoring(false);
+  }
+
+  // Detect if any search results are missing scores for one or more current travelers.
+  const needsRescore =
+    travelers.length > 1 &&
+    workspace.searches.some((s) =>
+      s.scoredResults.some((r) =>
+        travelers.some((t) => !r.travelerScores?.[t.id])
+      )
+    );
+
+  function formatDate(iso: string): string {
+    try {
+      return new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    } catch { return iso; }
   }
 
   function toggleSelect(id: string) {
@@ -306,15 +381,38 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   return (
     <div className="flex flex-col h-full">
+      {/* Anonymous nudge — subtle banner encouraging sign-up */}
+      {isAnonymous && (
+        <div className="bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/15 border-b border-[#5B8BA0]/20 px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
+          <p className="text-xs text-[#3D5A6E] dark:text-[#9BB0C1]">
+            You have 2 free searches. <span className="font-medium">Sign in to save your trips and keep searching.</span>
+          </p>
+          <button
+            className="text-xs font-medium text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline flex-shrink-0"
+            onClick={() => setShowUpgradePrompt(true)}
+          >
+            Sign in →
+          </button>
+        </div>
+      )}
+
       {/* Workspace header */}
-      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-6 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-[#2C3E50] dark:text-white">{workspace.name}</h1>
-            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold text-[#2C3E50] dark:text-white truncate">{workspace.name}</h1>
+            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm flex flex-wrap items-center gap-x-2">
               {workspace.destination}
+              {workspace.dates?.start && workspace.dates?.end && (
+                <span className="text-[#9BB0C1] dark:text-[#6B8299]">
+                  · {formatDate(workspace.dates.start)} – {formatDate(workspace.dates.end)}
+                </span>
+              )}
+              {workspace.partySize && workspace.partySize > 0 && (
+                <span className="text-[#9BB0C1] dark:text-[#6B8299]">· {workspace.partySize} guests</span>
+              )}
               {travelers.length > 0 && (
-                <span className="ml-2 text-[#9BB0C1] dark:text-[#6B8299]">
+                <span className="text-[#9BB0C1] dark:text-[#6B8299]">
                   · {travelers.map((t) => t.name).join(", ")}
                 </span>
               )}
@@ -322,7 +420,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           </div>
           {/* Group sort toggle — only visible when 2+ travelers */}
           {travelers.length > 1 && (
-            <div className="flex items-center gap-0.5 bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-0.5 text-xs flex-shrink-0">
+            <div className="flex items-center gap-0.5 bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-0.5 text-xs flex-shrink-0 self-start">
               <button
                 className={`px-2.5 py-1 rounded-md transition-colors ${
                   sortMode === "fit"
@@ -349,7 +447,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       </div>
 
       {/* Search / Score bar */}
-      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-6 py-3 space-y-2">
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-3 space-y-2">
         {/* Mode toggle */}
         <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 w-fit">
           <button
@@ -385,28 +483,30 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         </div>
 
         {mode === "search" ? (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
-              className={`flex-1 ${inputCls} rounded-lg border px-3 py-2 text-sm focus:outline-none transition-colors`}
+              className={`flex-1 min-w-0 ${inputCls} rounded-lg border px-3 py-2 text-sm focus:outline-none transition-colors`}
               placeholder={`Search ${workspace.destination || "any destination"}…`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <CategorySelect value={category} onChange={setCategory} />
-            <button
-              className="px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              onClick={handleSearch}
-              disabled={searching || !query.trim()}
-            >
-              {searching ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="inline-block animate-spin">⟳</span> Searching…
-                </span>
-              ) : (
-                "Search"
-              )}
-            </button>
+            <div className="flex gap-2">
+              <CategorySelect value={category} onChange={setCategory} />
+              <button
+                className="flex-1 sm:flex-initial px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
+                onClick={handleSearch}
+                disabled={searching || !query.trim()}
+              >
+                {searching ? (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <span className="inline-block animate-spin">⟳</span> Searching…
+                  </span>
+                ) : (
+                  "Search"
+                )}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
@@ -420,12 +520,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             <div className="flex gap-2">
               <CategorySelect value={category} onChange={setCategory} />
               <button
-                className="px-4 py-1.5 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                className="flex-1 sm:flex-initial px-4 py-1.5 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
                 onClick={handleScore}
                 disabled={searching || !scoreInput.trim()}
               >
                 {searching ? (
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center justify-center gap-1.5">
                     <span className="inline-block animate-spin">⟳</span> Scoring…
                   </span>
                 ) : (
@@ -453,7 +553,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-6">
+      <div className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-4 sm:px-6">
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "search"
@@ -600,6 +700,23 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             )}
 
+            {/* Rescore banner — shown when results predate a traveler being added */}
+            {!searching && needsRescore && (
+              <div className="mb-3 flex items-center gap-3 bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800/40 rounded-xl px-4 py-2.5">
+                <span className="text-violet-500 text-sm flex-shrink-0">👥</span>
+                <p className="text-xs text-[#3D5A6E] dark:text-[#B8D4E3] flex-1">
+                  Some results were scored before all travelers were added. Rescore to see how options fit everyone.
+                </p>
+                <button
+                  className="text-xs px-3 py-1 bg-violet-600 text-white rounded-lg hover:bg-violet-500 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  onClick={handleRescore}
+                  disabled={rescoring}
+                >
+                  {rescoring ? "Rescoring…" : `Rescore for ${travelers.map((t) => t.name).join(" & ")} →`}
+                </button>
+              </div>
+            )}
+
             {/* Results */}
             {!searching && sortedResults.length > 0 && (
               <div className="space-y-3">
@@ -608,24 +725,30 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
                   {" · "}&quot;{displayedSearch!.query}&quot;
                 </p>
-                {sortedResults.map((option) => (
-                  <ResultCard
-                    key={option.id}
-                    option={option}
-                    workspace={workspace}
-                    travelers={travelers}
-                    profileWeights={profileWeights}
-                    isSelected={selectedIds.has(option.id)}
-                    category={displayedSearch!.category}
-                    searchQuery={displayedSearch!.query}
-                    onToggleSelect={() => toggleSelect(option.id)}
-                    onSave={() => handleSaveOption(option)}
-                    onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
-                    onNotesChange={(n) => handleNotesChange(displayedSearch!.id, option.id, n)}
-                    onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, option.id, msgs)}
-                    onDeepDive={() => {}}
-                  />
-                ))}
+                {/* Grid on desktop (more visible at a glance, less scrolling), single column on mobile */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {sortedResults.map((option) => (
+                    <div key={option.id} className={expandedCardId === option.id ? "lg:col-span-2" : ""}>
+                      <ResultCard
+                        option={option}
+                        workspace={workspace}
+                        travelers={travelers}
+                        profileWeights={profileWeights}
+                        isSelected={selectedIds.has(option.id)}
+                        category={displayedSearch!.category}
+                        searchQuery={displayedSearch!.query}
+                        onToggleSelect={() => toggleSelect(option.id)}
+                        onSave={() => handleSaveOption(option)}
+                        onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
+                        onNotesChange={(n) => handleNotesChange(displayedSearch!.id, option.id, n)}
+                        onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, option.id, msgs)}
+                        onDeepDive={() => {}}
+                        onFeedbackSubmit={(fb) => handleFeedbackSubmit(displayedSearch!.id, option.id, fb)}
+                        onExpandedChange={(exp) => setExpandedCardId(exp ? option.id : null)}
+                      />
+                    </div>
+                  ))}
+                </div>
 
                 {/* Find more */}
                 <div className="pt-2 pb-4 flex justify-center">
@@ -636,11 +759,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     </div>
                   ) : (
                     <button
-                      className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
+                      className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
                       onClick={handleMore}
                     >
                       <span>Find more options</span>
-                      <span className="text-xs text-white/70">aligned to your profile</span>
+                      <span className="hidden sm:inline text-xs text-white/70">aligned to your profile</span>
                       <span>→</span>
                     </button>
                   )}
@@ -673,26 +796,29 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 <p className="text-sm text-[#6B8299] mt-1">Save results from your searches to compare later</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {workspace.savedOptions.map((option) => {
                   const sourceSearch = workspace.searches.find((s) => s.id === option.searchId);
                   return (
-                    <ResultCard
-                      key={option.id}
-                      option={option}
-                      workspace={workspace}
-                      travelers={travelers}
-                      profileWeights={profileWeights}
-                      isSelected={false}
-                      category={sourceSearch?.category}
-                      searchQuery={sourceSearch?.query}
-                      onToggleSelect={() => {}}
-                      onSave={() => handleSaveOption(option)}
-                      onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
-                      onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
-                      onChatUpdate={(msgs) => handleChatUpdate(option.searchId, option.id, msgs)}
-                      onDeepDive={() => {}}
-                    />
+                    <div key={option.id} className={expandedCardId === option.id ? "lg:col-span-2" : ""}>
+                      <ResultCard
+                        option={option}
+                        workspace={workspace}
+                        travelers={travelers}
+                        profileWeights={profileWeights}
+                        isSelected={false}
+                        category={sourceSearch?.category}
+                        searchQuery={sourceSearch?.query}
+                        onToggleSelect={() => {}}
+                        onSave={() => handleSaveOption(option)}
+                        onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
+                        onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
+                        onChatUpdate={(msgs) => handleChatUpdate(option.searchId, option.id, msgs)}
+                        onDeepDive={() => {}}
+                        onFeedbackSubmit={(fb) => handleFeedbackSubmit(option.searchId, option.id, fb)}
+                        onExpandedChange={(exp) => setExpandedCardId(exp ? option.id : null)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -731,6 +857,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           onAccept={handleCalibrationAccept}
           onDismiss={handleCalibrationDismiss}
         />
+      )}
+
+      {showUpgradePrompt && (
+        <UpgradePrompt onClose={() => setShowUpgradePrompt(false)} />
       )}
     </div>
   );

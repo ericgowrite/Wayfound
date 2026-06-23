@@ -12,11 +12,14 @@ const TEMPLATES = templates as ProfileTemplate[];
 interface Props {
   onSave: (p: Profile) => void;
   onClose: () => void;
+  /** True when the current user is setting up their own profile (first-run or self-edit).
+   *  Switches copy from third-person ("Does Eric know their type?") to first-person ("Do you know your type?"). */
+  isSelf?: boolean;
 }
 
 type Step = "info" | "know-type" | "assess" | "type-select" | "review";
 
-export default function AddProfileModal({ onSave, onClose }: Props) {
+export default function AddProfileModal({ onSave, onClose, isSelf = false }: Props) {
   const [step, setStep] = useState<Step>("info");
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -100,9 +103,9 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
         <div className="flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]">
           <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">
             {step === "info" && "Add Traveler Profile"}
-            {step === "know-type" && `Find ${name ? name + "'s" : "Their"} Travel Style`}
+            {step === "know-type" && (isSelf ? "Find Your Travel Style" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
             {step === "assess" && "Travel Style Assessment"}
-            {step === "type-select" && `Select ${name ? name + "'s" : "Their"} Type`}
+            {step === "type-select" && (isSelf ? "Select Your Type" : `Select ${name ? name + "'s" : "Their"} Type`)}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
           <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
@@ -130,24 +133,31 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
           {step === "know-type" && (
             <div className="space-y-3">
               <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed">
-                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name}</span>.
+                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for{" "}
+                {isSelf
+                  ? <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">you</span>
+                  : <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name}</span>
+                }.
               </p>
               <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm pt-1">
-                Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their Enneagram type?
+                {isSelf
+                  ? "Do you already know your Enneagram type?"
+                  : <>Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their Enneagram type?</>
+                }
               </p>
               <div className="flex flex-col gap-2 pt-1">
                 <button
                   className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("type-select")}
                 >
-                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">Yes, I know their type</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">{isSelf ? "Yes, I know my type" : "Yes, I know their type"}</p>
                   <p className="text-[#6B8299] text-xs mt-0.5">I&apos;ll pick from the list</p>
                 </button>
                 <button
                   className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors"
                   onClick={() => setStep("assess")}
                 >
-                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">No, help them find out</p>
+                  <p className="text-[#2C3E50] dark:text-white text-sm font-medium">{isSelf ? "No, help me find out" : "No, help them find out"}</p>
                   <p className="text-[#6B8299] text-xs mt-0.5">Take a quick in-app travel style assessment</p>
                 </button>
               </div>
@@ -159,7 +169,7 @@ export default function AddProfileModal({ onSave, onClose }: Props) {
             <div className="-mx-4 -mb-4" style={{ minHeight: 460 }}>
               <TravelAssessment
                 prefilledName={name.trim()}
-                isSelf={false}
+                isSelf={isSelf}
                 onComplete={handleAssessmentComplete}
                 onSkip={() => setStep("type-select")}
               />

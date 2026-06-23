@@ -27,5 +27,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/:path*",
+  // Exclude public endpoints from auth requirement:
+  //   /api/ping        — GCP Cloud Run health checks (no credentials available)
+  //   /api/validate-url — called client-side via fetchWithAuth but exempted at
+  //                       middleware level so the route itself controls auth
+  matcher: "/api/((?!ping|validate-url).+)",
 };
