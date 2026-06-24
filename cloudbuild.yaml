@@ -25,6 +25,7 @@ steps:
       - 'viyaway'
       - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app'
       - '--region=us-central1'
+      - '--project=viyaway'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--port=8080'
