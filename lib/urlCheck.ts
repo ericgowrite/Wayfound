@@ -3,7 +3,64 @@
  *  - app/api/validate-url/route.ts (client-triggered, lazy check on card expand)
  *  - app/api/search|score routes (synchronous check before a result is ever
  *    returned to the client — MVP backlog #4, link accuracy)
+ *
+ * CACHING: checkUrlWithVariants() is cache-first. Results are stored in the
+ * urlValidationCache Firestore collection keyed by hostname for 30 days.
+ * Cache hits skip all outbound HTTP — this is the primary cost-reduction
+ * mechanism for URL validation egress.
+ *
+ * LAZY VALIDATION (separate change, not yet implemented):
+ * Removing validateResultLinks() from api/search and api/search/more routes
+ * and relying solely on the client calling /api/validate-url on card expand
+ * would eliminate all synchronous validation egress. The infrastructure
+ * (/api/validate-url route + this cache) is already in place. Deferring
+ * until product sign-off on showing unvalidated links in initial results.
  */
+
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
+
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const CACHE_COLLECTION = "urlValidationCache";
+
+/** Hostname-based cache key — strips www, ignores path/query so all
+ *  paths under the same host share one entry. */
+function domainCacheKey(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url.slice(0, 200); // unparseable: use raw string, truncated
+  }
+}
+
+async function getCachedValidation(url: string): Promise<ValidateResult | null> {
+  try {
+    const doc = await adminDb.collection(CACHE_COLLECTION).doc(domainCacheKey(url)).get();
+    if (!doc.exists) return null;
+    const d = doc.data()!;
+    if ((d.expiresAt as Timestamp).toMillis() < Date.now()) return null;
+    return { valid: d.isValid, finalUrl: d.finalUrl ?? null, status: d.status ?? 0, reason: "cached" };
+  } catch {
+    return null; // cache read failure is non-fatal — fall through to live check
+  }
+}
+
+async function setCachedValidation(url: string, result: ValidateResult): Promise<void> {
+  try {
+    const now = Timestamp.now();
+    await adminDb.collection(CACHE_COLLECTION).doc(domainCacheKey(url)).set({
+      domain: domainCacheKey(url),
+      isValid: result.valid,
+      finalUrl: result.finalUrl,
+      status: result.status,
+      reason: result.reason,
+      lastChecked: now,
+      expiresAt: Timestamp.fromMillis(Date.now() + CACHE_TTL_MS),
+    });
+  } catch {
+    // cache write failure is non-fatal
+  }
+}
 
 export interface ValidateResult {
   valid: boolean;
@@ -129,7 +186,8 @@ export function generateUrlVariants(url: string): string[] {
   }
 }
 
-/** Full check: original URL, then name-variant fallbacks. Mirrors the route's logic. */
+/** Full check: cache first, then original URL, then name-variant fallbacks.
+ *  Results (valid or invalid) are cached for 30 days by hostname. */
 export async function checkUrlWithVariants(url: string): Promise<ValidateResult> {
   if (!url || !/^https?:\/\//i.test(url)) {
     return { valid: false, finalUrl: null, status: 0, reason: "invalid_url" };
@@ -138,14 +196,25 @@ export async function checkUrlWithVariants(url: string): Promise<ValidateResult>
     return { valid: false, finalUrl: null, status: 0, reason: "private_address" };
   }
 
+  const cached = await getCachedValidation(url);
+  if (cached) return cached;
+
   const primary = await checkUrl(url);
-  if (primary.valid) return primary;
+  if (primary.valid) {
+    await setCachedValidation(url, primary);
+    return primary;
+  }
 
   for (const variant of generateUrlVariants(url)) {
     const result = await checkUrl(variant);
-    if (result.valid) return result;
+    if (result.valid) {
+      await setCachedValidation(url, result);
+      return result;
+    }
   }
 
+  // Cache invalid results too — avoids hammering permanently dead domains.
+  await setCachedValidation(url, primary);
   return primary;
 }
 

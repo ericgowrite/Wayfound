@@ -14,5 +14,9 @@ service cloud.firestore {
     match /config/{docId} {
       allow read, write: if false;
     }
+    // URL validation cache — Admin SDK only, no direct client access.
+    match /urlValidationCache/{domain} {
+      allow read, write: if false;
+    }
   }
 }
