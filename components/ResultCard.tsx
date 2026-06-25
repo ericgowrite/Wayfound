@@ -866,19 +866,26 @@ export default function ResultCard({
             >
               {isSaved ? "Saved ✓" : "Save"}
             </button>
-            {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => (
-              <button
-                key={s}
-                className={`px-3 py-1.5 text-sm rounded-lg capitalize transition-colors ${
-                  option.status === s
-                    ? "bg-[#E0E8ED] dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white font-medium"
-                    : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
-                }`}
-                onClick={() => onStatusChange(s)}
-              >
-                {s === "interested" ? "⭐ Interested" : s === "rejected" ? "✗ Reject" : "✅ Booked"}
-              </button>
-            ))}
+            {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => {
+              const isActive = option.status === s;
+              const activeClass =
+                s === "booked"
+                  ? "bg-emerald-500 dark:bg-emerald-600 text-white font-semibold shadow-sm"
+                  : s === "interested"
+                  ? "bg-amber-400 dark:bg-amber-500 text-amber-900 dark:text-white font-semibold shadow-sm"
+                  : "bg-red-400 dark:bg-red-600 text-white font-semibold shadow-sm";
+              const inactiveClass =
+                "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]";
+              return (
+                <button
+                  key={s}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-all active:scale-95 ${isActive ? activeClass : inactiveClass}`}
+                  onClick={() => onStatusChange(s)}
+                >
+                  {s === "interested" ? "⭐ Interested" : s === "rejected" ? "✗ Reject" : "✅ Booked"}
+                </button>
+              );
+            })}
             <div className="ml-auto flex items-center gap-2">
               {deepDiveError && (
                 <span className="text-xs text-red-500 dark:text-red-400">Research failed — try again</span>
