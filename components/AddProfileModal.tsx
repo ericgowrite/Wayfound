@@ -9,6 +9,99 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const TEMPLATES = templates as ProfileTemplate[];
 
+const TYPE_INFO: Record<string, { name: string; descriptor: string; bullets: string[] }> = {
+  "1": {
+    name: "The Reformer",
+    descriptor: "Values doing things right — seeks well-crafted, purposeful experiences with no wasted moments",
+    bullets: [
+      "You notice when things are done well — and when they're not",
+      "You travel with intention; aimless wandering frustrates you",
+      "You're drawn to places with craftsmanship, quality, and purpose",
+      "A perfect day feels earned, not accidental",
+    ],
+  },
+  "2": {
+    name: "The Helper",
+    descriptor: "Warmth-driven — drawn to places that feel welcoming, personal, and human",
+    bullets: [
+      "You're energized by warm, personal interactions with locals and staff",
+      "You'd rather share a great experience than have it alone",
+      "The feeling of being genuinely welcomed matters more than luxury",
+      "You tend to remember how a place made you feel, not what it looked like",
+    ],
+  },
+  "3": {
+    name: "The Achiever",
+    descriptor: "Motivated by quality and status — seeks experiences worth having and worth sharing",
+    bullets: [
+      "You're drawn to places that are worth the trip — and the story",
+      "Quality matters: you want the best version of whatever you're doing",
+      "You research before you go and prefer to arrive prepared",
+      "The experience should reflect well — on the destination and on you",
+    ],
+  },
+  "4": {
+    name: "The Individualist",
+    descriptor: "Craves depth and authenticity — drawn to places that feel distinctive and personally meaningful",
+    bullets: [
+      "You're drawn to places that feel distinctive, not generic",
+      "You want to feel something — not just see something",
+      "Authenticity matters more than popularity",
+      "The best stays feel like they were made specifically for someone like you",
+    ],
+  },
+  "5": {
+    name: "The Investigator",
+    descriptor: "Needs space and stimulation — seeks immersive, offbeat experiences away from the crowd",
+    bullets: [
+      "You prefer depth over breadth — one place explored fully beats five places skimmed",
+      "You need time and space to yourself to recharge",
+      "You're drawn to the offbeat, the overlooked, and the intellectually interesting",
+      "Crowds and over-programmed itineraries drain you",
+    ],
+  },
+  "6": {
+    name: "The Loyalist",
+    descriptor: "Values trust and reliability — most comfortable in places that feel safe, consistent, and well-reviewed",
+    bullets: [
+      "You do your research — reviews, safety, logistics — before you commit",
+      "Once you find somewhere you trust, you return",
+      "You travel better when you feel secure in the plan",
+      "Surprises are fine when they're good; bad surprises ruin the trip",
+    ],
+  },
+  "7": {
+    name: "The Enthusiast",
+    descriptor: "Energized by variety and novelty — drawn to destinations packed with options and new experiences",
+    bullets: [
+      "You want options — the best trip has more to do than you have time for",
+      "Novelty energizes you; repetition bores you fast",
+      "You're spontaneous and open to changing the plan if something better comes up",
+      "FOMO is real: you'd rather try five things than perfect one",
+    ],
+  },
+  "8": {
+    name: "The Challenger",
+    descriptor: "Bold and direct — seeks experiences that feel powerful, expansive, and worth the effort",
+    bullets: [
+      "You want experiences that feel significant, not safe",
+      "You'd rather go somewhere raw and real than polished and predictable",
+      "You make decisions quickly and move through a destination with purpose",
+      "You need to feel like you earned the experience",
+    ],
+  },
+  "9": {
+    name: "The Peacemaker",
+    descriptor: "Restores through calm — drawn to unhurried, harmonious places where they can fully decompress",
+    bullets: [
+      "You travel to genuinely restore — not just to change location",
+      "Calm, unhurried environments are where you actually relax",
+      "Conflict, crowds, and friction drain you faster than others",
+      "The best trips leave you feeling like yourself again",
+    ],
+  },
+};
+
 interface Props {
   onSave: (p: Profile) => void;
   onClose: () => void;
@@ -23,28 +116,35 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
   const [step, setStep] = useState<Step>("info");
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [confirmingType, setConfirmingType] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
-
-  const template = TEMPLATES.find((t) => t.type === selectedType);
 
   function handleNameNext() {
     if (!name.trim()) return;
     setStep("know-type");
   }
 
-  function handleTypeConfirmed() {
-    if (!template) return;
+  function handleTypeConfirmed(typeToConfirm: string) {
+    const tmpl = TEMPLATES.find((t) => t.type === typeToConfirm);
+    if (!tmpl) return;
+    setSelectedType(typeToConfirm);
     setDraft({
       name: name.trim(),
-      enneagramType: selectedType,
-      description: template.description,
-      axisWeights: { ...template.axisWeights },
-      thresholds: { ...template.thresholds },
-      dealbreakers: [...template.dealbreakers],
+      enneagramType: typeToConfirm,
+      description: tmpl.description,
+      axisWeights: { ...tmpl.axisWeights },
+      thresholds: { ...tmpl.thresholds },
+      dealbreakers: [...tmpl.dealbreakers],
     });
     setStep("review");
+  }
+
+  function goBackFromTypeSelect() {
+    setConfirmingType(null);
+    setSelectedType("");
+    setStep("know-type");
   }
 
   function handleAssessmentComplete(result: AssessmentResult) {
@@ -105,7 +205,8 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
             {step === "info" && "Add Traveler Profile"}
             {step === "know-type" && (isSelf ? "Find Your Travel Style" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
             {step === "assess" && "Travel Style Assessment"}
-            {step === "type-select" && (isSelf ? "Select Your Type" : `Select ${name ? name + "'s" : "Their"} Type`)}
+            {step === "type-select" && !confirmingType && (isSelf ? "Select Your Type" : `Select ${name ? name + "'s" : "Their"} Type`)}
+            {step === "type-select" && confirmingType && `Type ${confirmingType} — ${TYPE_INFO[confirmingType]?.name ?? ""}`}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
           <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
@@ -138,6 +239,9 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                   ? <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">you</span>
                   : <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name}</span>
                 }.
+              </p>
+              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs leading-relaxed">
+                We look at how you&apos;re wired — what energizes you, what you need to feel at ease, and what makes an experience feel like it was made for you.
               </p>
               <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm pt-1">
                 {isSelf
@@ -178,35 +282,46 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
 
           {/* Step 4: Type selector */}
           {step === "type-select" && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-2">Personality Type</label>
-                <div className="grid grid-cols-3 gap-2">
+            <div>
+              {!confirmingType ? (
+                /* Type list — number + name + descriptor */
+                <div className="space-y-2">
                   {baseTypes.map((base) => {
-                    const t = TEMPLATES.find((tmpl) => tmpl.type === base);
-                    if (!t) return null;
+                    const info = TYPE_INFO[base];
+                    if (!info) return null;
                     return (
                       <button
-                        key={t.type}
-                        className={`text-left px-3 py-2 rounded border text-xs transition-colors ${
-                          selectedType === t.type
-                            ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                            : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
-                        }`}
-                        onClick={() => setSelectedType(t.type)}
+                        key={base}
+                        className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors active:scale-[0.99]"
+                        onClick={() => setConfirmingType(base)}
                       >
-                        <div className="font-semibold">Type {t.type}</div>
-                        <div className="text-[#6B8299] text-xs mt-0.5 line-clamp-1">{t.description.split("—")[0].trim()}</div>
+                        <p className="text-[#9BB0C1] text-xs">Type {base}</p>
+                        <p className="text-[#2C3E50] dark:text-white text-sm font-semibold mt-0.5">{info.name}</p>
+                        <p className="text-[#6B8299] dark:text-[#9BB0C1] text-xs mt-1 leading-snug">{info.descriptor}</p>
                       </button>
                     );
                   })}
                 </div>
-              </div>
-              {selectedType && template && (
-                <div className="bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-3">
-                  <p className="text-xs text-[#6B8299] uppercase mb-1">Selected</p>
-                  <p className="text-[#2C3E50] dark:text-white font-medium text-sm">Type {selectedType}</p>
-                  <p className="text-[#6B8299] dark:text-[#9BB0C1] text-xs mt-0.5">{template.description}</p>
+              ) : (
+                /* Confirmation view — inline, no page navigation */
+                <div className="space-y-5">
+                  <div>
+                    <p className="text-[#9BB0C1] text-xs uppercase tracking-wide">Type {confirmingType}</p>
+                    <p className="text-[#2C3E50] dark:text-white text-xl font-semibold mt-1">
+                      {TYPE_INFO[confirmingType].name}
+                    </p>
+                    <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mt-1 leading-relaxed">
+                      Does this sound like {isSelf ? "you" : name}?
+                    </p>
+                  </div>
+                  <ul className="space-y-3">
+                    {TYPE_INFO[confirmingType].bullets.map((b, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-[#5B8BA0] flex-shrink-0 font-bold mt-px">·</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
@@ -291,15 +406,22 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
           {step === "assess" && (
             <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
           )}
-          {step === "type-select" && (
+          {step === "type-select" && !confirmingType && (
+            <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={goBackFromTypeSelect}>← Back</button>
+          )}
+          {step === "type-select" && confirmingType && (
             <>
-              <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
               <button
-                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
-                onClick={handleTypeConfirmed}
-                disabled={!selectedType}
+                className={`px-4 py-2 text-sm rounded ${btnSecondary}`}
+                onClick={() => setConfirmingType(null)}
               >
-                Review Defaults →
+                Go back — try another
+              </button>
+              <button
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
+                onClick={() => handleTypeConfirmed(confirmingType)}
+              >
+                Yes, this is me →
               </button>
             </>
           )}
