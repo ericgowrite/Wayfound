@@ -32,3 +32,93 @@ body {
 .dark * {
   scrollbar-color: #3D5A6E transparent;
 }
+
+/* ── Driver.js ViyaWay theme (v1.x) ─────────────────────────────────────── */
+.driver-popover {
+  background: white !important;
+  border-radius: 12px !important;
+  border: 1px solid #E0E8ED !important;
+  box-shadow: 0 8px 32px rgba(60, 90, 110, 0.15) !important;
+  font-family: inherit !important;
+  max-width: 300px !important;
+  padding: 16px !important;
+}
+
+.driver-popover-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #2C3E50 !important;
+  margin-bottom: 6px !important;
+}
+
+.driver-popover-description {
+  font-size: 12px !important;
+  color: #6B8299 !important;
+  line-height: 1.55 !important;
+}
+
+.driver-popover-footer {
+  margin-top: 14px !important;
+}
+
+.driver-popover-footer-btn {
+  background: #5B8BA0 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+  cursor: pointer !important;
+}
+
+.driver-popover-footer-btn:hover,
+.driver-popover-footer-btn:focus {
+  background: #4A7A8F !important;
+}
+
+.driver-popover-btn-disabled {
+  opacity: 0.4 !important;
+  pointer-events: none !important;
+}
+
+.driver-popover-close-btn {
+  font-size: 11px !important;
+  color: #9BB0C1 !important;
+  text-decoration: underline !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  width: auto !important;
+  height: auto !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 12px !important;
+}
+
+.driver-popover-close-btn:hover,
+.driver-popover-close-btn:focus {
+  color: #6B8299 !important;
+}
+
+/* Dark mode */
+.dark .driver-popover {
+  background: #1e2d3d !important;
+  border-color: #3D5A6E !important;
+}
+
+.dark .driver-popover-title {
+  color: white !important;
+}
+
+.dark .driver-popover-description {
+  color: #9BB0C1 !important;
+}
+
+/* Arrow colors to match popover background */
+.driver-popover-arrow {
+  border-color: white !important;
+}
+
+.dark .driver-popover-arrow {
+  border-color: #1e2d3d !important;
+}

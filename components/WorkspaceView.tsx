@@ -29,8 +29,10 @@ import ComparisonView from "./ComparisonView";
 import CalibrationPrompt from "./CalibrationPrompt";
 import JourneyPromptCard from "./JourneyPromptCard";
 import UpgradePrompt from "./UpgradePrompt";
+import WorkspaceTour from "./WorkspaceTour";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useAuth } from "@/lib/AuthContext";
+import { useTourState } from "@/lib/useTourState";
 
 interface Props {
   workspace: TripWorkspace;
@@ -59,6 +61,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [selectedSavedIds, setSelectedSavedIds] = useState<Set<string>>(new Set());
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonOptions, setComparisonOptions] = useState<ScoredOption[]>([]);
+  const { isDone: tourDone, markDone: markTourDone } = useTourState("workspace");
+  const [showTour, setShowTour] = useState(false);
   const [workspaceNotes, setWorkspaceNotes] = useState(workspace.notes);
   // Keep notes in sync when the workspace prop is refreshed from the server.
   // Computed during render (React's recommended "adjusting state when a prop
@@ -80,6 +84,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [selectedSavedCardId, setSelectedSavedCardId] = useState<string | null>(null);
   const [rescoring, setRescoring] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  // Auto-start workspace tour on first visit — 600ms delay so the DOM is painted
+  useEffect(() => {
+    if (tourDone) return;
+    const t = setTimeout(() => setShowTour(true), 600);
+    return () => clearTimeout(t);
+  }, [tourDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleTourDone() {
+    setShowTour(false);
+    await markTourDone();
+  }
 
   useEffect(() => {
     // localStorage requires browser access — checking it during render would
@@ -586,13 +602,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         {mode === "search" ? (
           <div className="flex flex-col sm:flex-row gap-2">
             <input
+              id="tour-search-input"
               className={`flex-1 min-w-0 ${inputCls} rounded-lg border px-3 py-2 text-sm focus:outline-none transition-colors`}
               placeholder={`Search ${workspace.destination || "any destination"}…`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            <div className="flex gap-2">
+            <div id="tour-category" className="flex gap-2">
               <CategorySelect value={category} onChange={setCategory} />
               <button
                 className="flex-1 sm:flex-initial px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
@@ -654,7 +671,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-4 sm:px-6">
+      <div id="tour-tabs" className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-4 sm:px-6">
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "search"
@@ -690,7 +707,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* ── Results tab ── */}
         {activeTab === "search" && (
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div id="tour-results" className="flex-1 min-h-0 flex flex-col">
             {/* Non-scrolling header: pills, banners, result count */}
             <div className="px-4 pt-4 flex-shrink-0 space-y-3">
             {/* Search history pills */}
@@ -845,7 +862,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Results */}
             {!searching && sortedResults.length > 0 && (
-              <div className="flex-1 min-h-0 flex flex-col">
+              <div id="tour-fit-score" className="flex-1 min-h-0 flex flex-col">
 
                 {/* Mobile: stacked expandable cards */}
                 <div className="lg:hidden overflow-y-auto flex-1 space-y-3 pb-4">
@@ -1259,6 +1276,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       {showUpgradePrompt && (
         <UpgradePrompt onClose={() => setShowUpgradePrompt(false)} />
       )}
+
+      {showTour && <WorkspaceTour onDone={handleTourDone} />}
     </div>
   );
 }

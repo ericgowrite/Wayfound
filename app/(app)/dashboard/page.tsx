@@ -11,6 +11,8 @@ import { AssessmentResult } from "@/lib/assessment";
 import { useTheme } from "@/lib/useTheme";
 import { useAuth } from "@/lib/AuthContext";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import DashboardTour from "@/components/DashboardTour";
+import { useTourState } from "@/lib/useTourState";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -36,6 +38,8 @@ export default function Home() {
   const [profilesOpen, setProfilesOpen] = useState(true);
   const [profilesLoaded, setProfilesLoaded] = useState(false);
   const [firstRunError, setFirstRunError] = useState("");
+  const { isDone: tourDone, markDone: markTourDone } = useTourState("dashboard");
+  const [showTour, setShowTour] = useState(false);
 
   // Wait for the Firebase user to be confirmed before fetching — ensures
   // the ID token is available when fetchWithAuth runs.
@@ -67,6 +71,19 @@ export default function Home() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
+
+  // Auto-start dashboard tour once profiles are loaded and the user hasn't seen it.
+  // Don't start when profiles.length === 0 — first-run onboarding is already showing.
+  useEffect(() => {
+    if (profilesLoaded && profiles.length > 0 && !tourDone) {
+      setShowTour(true);
+    }
+  }, [profilesLoaded, profiles.length, tourDone]);
+
+  async function handleTourDone() {
+    setShowTour(false);
+    await markTourDone();
+  }
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) ?? null;
   const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;
@@ -248,6 +265,13 @@ export default function Home() {
           <div>
             <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
             <p className="text-xs text-[#6B8299] mt-0.5">Your true path to travel</p>
+            <button
+              id="tour-trigger"
+              className="text-xs text-[#5B8BA0] hover:underline mt-1"
+              onClick={() => setShowTour(true)}
+            >
+              Take a tour
+            </button>
           </div>
           <button
             className="md:hidden text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-white text-xl leading-none mt-0.5 transition-colors"
@@ -261,12 +285,14 @@ export default function Home() {
           {/* Profiles section */}
           <div className="mt-2">
             <button
+              id="tour-travelers"
               className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#6B8299] uppercase font-medium tracking-wide hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={() => setProfilesOpen((o) => !o)}
             >
               <span>Travelers</span>
               <span className="flex items-center gap-1">
                 <span
+                  id="tour-add-traveler"
                   className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white transition-colors"
                   onClick={(e) => { e.stopPropagation(); setShowAddProfile(true); }}
                   title="Add traveler"
@@ -312,9 +338,10 @@ export default function Home() {
           <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mx-4" />
 
           {/* Trips section */}
-          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <div id="tour-trips" className="flex items-center justify-between px-4 pt-3 pb-2">
             <span className="text-xs text-[#6B8299] uppercase font-medium tracking-wide">Trips</span>
             <button
+              id="tour-create-trip"
               className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-sm transition-colors"
               onClick={() => setShowNewWorkspace(true)}
               title="New Trip"
@@ -610,6 +637,9 @@ export default function Home() {
 
       {/* Fit legend modal */}
       {showFitLegend && <FitLegendModal onClose={() => setShowFitLegend(false)} />}
+
+      {/* Product tour */}
+      {showTour && <DashboardTour onDone={handleTourDone} />}
     </div>
   );
 }

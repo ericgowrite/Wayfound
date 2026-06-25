@@ -53,6 +53,19 @@ async function ensureUserDoc(user: User) {
  * Non-fatal: if this fails the user is already signed in; orphaned anon data
  * will be cleaned up by the scheduled cleanup job.
  */
+async function mirrorTourFlagsToFirestore(uid: string) {
+  const db = getFirebaseDb();
+  const ref = doc(db, "users", uid, "config", "preferences");
+  const updates: Record<string, boolean> = {};
+  if (typeof window !== "undefined") {
+    if (localStorage.getItem("vw_tour_dashboard") === "1") updates.tourDashboardDone = true;
+    if (localStorage.getItem("vw_tour_workspace") === "1") updates.tourWorkspaceDone = true;
+  }
+  if (Object.keys(updates).length > 0) {
+    await setDoc(ref, updates, { merge: true }).catch(() => {});
+  }
+}
+
 async function mergeAnonData(anonUid: string) {
   try {
     await fetchWithAuth("/api/merge-anonymous", {
@@ -107,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (anonUid && auth.currentUser?.uid !== anonUid) {
       await mergeAnonData(anonUid);
     }
+    if (auth.currentUser) await mirrorTourFlagsToFirestore(auth.currentUser.uid);
   }
 
   /**
@@ -124,9 +138,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const credential = EmailAuthProvider.credential(email, password);
       const cred = await linkWithCredential(current, credential);
       try { await ensureUserDoc(cred.user); } catch {}
+      await mirrorTourFlagsToFirestore(cred.user.uid);
     } else {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       try { await ensureUserDoc(cred.user); } catch {}
+      await mirrorTourFlagsToFirestore(cred.user.uid);
     }
   }
 
@@ -145,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Happy path: Google account is new → link → same UID preserved.
         const cred = await linkWithPopup(current, googleProvider);
         try { await ensureUserDoc(cred.user); } catch {}
+        await mirrorTourFlagsToFirestore(cred.user.uid);
       } catch (err: unknown) {
         const code = (err as { code?: string }).code;
         if (code === "auth/credential-already-in-use") {
@@ -158,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (cred.user.uid !== anonUid) {
             await mergeAnonData(anonUid);
           }
+          await mirrorTourFlagsToFirestore(cred.user.uid);
         } else {
           throw err;
         }
