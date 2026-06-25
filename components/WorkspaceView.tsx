@@ -22,9 +22,12 @@ import {
   logCalibrationEvent,
   CalibrationSuggestion,
 } from "@/lib/calibration";
+import { getEligiblePrompt, JOURNEY_DISPLAY, journeyDisplayKey } from "@/lib/journey";
+import { logEvent } from "@/lib/analytics";
 import ResultCard from "./ResultCard";
 import ComparisonView from "./ComparisonView";
 import CalibrationPrompt from "./CalibrationPrompt";
+import JourneyPromptCard from "./JourneyPromptCard";
 import UpgradePrompt from "./UpgradePrompt";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useAuth } from "@/lib/AuthContext";
@@ -51,7 +54,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [searching, setSearching] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const [activeTab, setActiveTab] = useState<"search" | "saved">("search");
+  const [activeTab, setActiveTab] = useState<"search" | "saved" | "history">("search");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showComparison, setShowComparison] = useState(false);
   const [workspaceNotes, setWorkspaceNotes] = useState(workspace.notes);
@@ -220,12 +223,24 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           ...workspace,
           savedOptions: [
             ...workspace.savedOptions,
-            { ...option, savedAt: new Date().toISOString(), tags: [] } as SavedOption,
+            {
+              ...option,
+              savedAt: new Date().toISOString(),
+              tags: [],
+              journeyState: "saved",
+            } as SavedOption,
           ],
         };
     updateWorkspace(updated);
 
     if (!alreadySaved && primaryProfile) {
+      logEvent({
+        event: "viyaway_item_saved",
+        itemId: option.id,
+        propertyType: "accommodation",
+        fitScore: option.alignmentScore,
+        enneagramType: primaryProfile.enneagramType,
+      });
       trackSave(option, primaryProfile.id);
       if (shouldTriggerCalibration(primaryProfile.id)) {
         markCalibrationShown(primaryProfile.id);
@@ -235,7 +250,16 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     }
   }
 
+  // Map legacy status values to journeyState for sync
+  const STATUS_TO_JOURNEY: Record<string, import("@/types").JourneyState> = {
+    interested: "interested",
+    booked: "booked",
+    rejected: "not_going",
+    new: "saved",
+  };
+
   function handleStatusChange(searchId: string, optionId: string, status: ScoredOption["status"]) {
+    const journeyState = STATUS_TO_JOURNEY[status] ?? "saved";
     updateWorkspace({
       ...workspace,
       searches: workspace.searches.map((s) =>
@@ -243,15 +267,33 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           ? { ...s, scoredResults: s.scoredResults.map((o) => (o.id === optionId ? { ...o, status } : o)) }
           : s
       ),
-      savedOptions: workspace.savedOptions.map((o) => (o.id === optionId ? { ...o, status } : o)),
+      savedOptions: workspace.savedOptions.map((o) =>
+        o.id === optionId ? { ...o, status, journeyState } : o
+      ),
     });
 
+    if (status === "interested" && primaryProfile) {
+      logEvent({
+        event: "viyaway_item_interested",
+        itemId: optionId,
+        estimatedTravelWindow: null,
+      });
+    }
     if (status === "rejected" && primaryProfile) {
       const option =
         workspace.searches.find((s) => s.id === searchId)?.scoredResults.find((o) => o.id === optionId) ??
         workspace.savedOptions.find((o) => o.id === optionId);
       if (option) trackReject(option, primaryProfile.id);
     }
+  }
+
+  function handleJourneyUpdate(optionId: string, fields: Partial<SavedOption>) {
+    updateWorkspace({
+      ...workspace,
+      savedOptions: workspace.savedOptions.map((o) =>
+        o.id === optionId ? { ...o, ...fields } : o
+      ),
+    });
   }
 
   function handleNotesChange(searchId: string, optionId: string, notes: string) {
@@ -574,6 +616,16 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         >
           Saved{workspace.savedOptions.length > 0 ? ` (${workspace.savedOptions.length})` : ""}
         </button>
+        <button
+          className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "history"
+              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+          }`}
+          onClick={() => setActiveTab("history")}
+        >
+          History
+        </button>
       </div>
 
       <div className="flex-1 overflow-auto">
@@ -789,6 +841,16 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         {/* ── Saved tab ── */}
         {activeTab === "saved" && (
           <div className="p-4">
+            {/* Journey prompt card — highest priority prompt surfaces here */}
+            {workspace.savedOptions.length > 0 && primaryProfile && (
+              <JourneyPromptCard
+                prompt={getEligiblePrompt(workspace.savedOptions)}
+                primaryEnneagramType={primaryProfile.enneagramType}
+                destination={workspace.destination}
+                onUpdate={handleJourneyUpdate}
+              />
+            )}
+
             {workspace.savedOptions.length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">📋</div>
@@ -836,6 +898,106 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 onBlur={() => updateWorkspace({ ...workspace, notes: workspaceNotes })}
               />
             </div>
+          </div>
+        )}
+
+        {/* ── History tab ── */}
+        {activeTab === "history" && (
+          <div className="p-4">
+            {(() => {
+              const confirmed = workspace.savedOptions.filter(
+                (o) => o.journeyState === "fit_confirmed"
+              );
+              const goodOrPerfect = confirmed.filter(
+                (o) => o.fitOutcome === "perfect" || o.fitOutcome === "good"
+              );
+              const sorted = [...workspace.savedOptions].sort((a, b) => {
+                const dateA =
+                  a.fitConfirmedAt ?? a.bookedAt ?? a.savedAt;
+                const dateB =
+                  b.fitConfirmedAt ?? b.bookedAt ?? b.savedAt;
+                return new Date(dateB).getTime() - new Date(dateA).getTime();
+              });
+
+              return (
+                <>
+                  {/* Accuracy summary card — only when at least one confirmation exists */}
+                  {confirmed.length > 0 && (
+                    <div className="mb-4 bg-gradient-to-r from-[#5B8BA0]/10 to-[#5B8BA0]/5 dark:from-[#5B8BA0]/20 dark:to-[#5B8BA0]/10 border border-[#5B8BA0]/30 dark:border-[#5B8BA0]/40 rounded-xl px-4 py-3">
+                      <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] uppercase tracking-wide font-medium mb-0.5">
+                        ViyaWay accuracy
+                      </p>
+                      <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">
+                        {goodOrPerfect.length} of {confirmed.length} stay{confirmed.length !== 1 ? "s" : ""} confirmed as{" "}
+                        {goodOrPerfect.length === 1 ? "a " : ""}good or perfect fit
+                      </p>
+                      {confirmed.length >= 2 && (
+                        <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">
+                          {Math.round((goodOrPerfect.length / confirmed.length) * 100)}% accuracy on this trip
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {sorted.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="text-5xl mb-4">🗓️</div>
+                      <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No history yet</p>
+                      <p className="text-sm text-[#6B8299] mt-1">Save options from your searches to start tracking your journey</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {sorted.map((opt) => {
+                        const key = journeyDisplayKey(opt);
+                        const display = JOURNEY_DISPLAY[key] ?? JOURNEY_DISPLAY.saved;
+                        const isNotGoing = opt.journeyState === "not_going";
+                        return (
+                          <div
+                            key={opt.id}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
+                              isNotGoing
+                                ? "border-[#E0E8ED] dark:border-[#2a3f52] bg-[#F8FAFB] dark:bg-[#0f1923] opacity-50"
+                                : "border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d]"
+                            }`}
+                          >
+                            <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${display.dot}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium truncate ${isNotGoing ? "line-through text-[#9BB0C1] dark:text-[#6B8299]" : "text-[#2C3E50] dark:text-white"}`}>
+                                {opt.name}
+                              </p>
+                              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] truncate">
+                                {opt.alignmentScore}% fit
+                                {workspace.destination ? ` · ${workspace.destination}` : ""}
+                              </p>
+                            </div>
+                            <div className="flex-shrink-0 text-right">
+                              {opt.journeyState === "unresolved" ? (
+                                <button
+                                  className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                                  onClick={() =>
+                                    handleJourneyUpdate(opt.id, {
+                                      journeyState: "booked",
+                                      promptDismissCount: 0,
+                                      promptDismissedAt: undefined,
+                                    })
+                                  }
+                                >
+                                  Did you go?
+                                </button>
+                              ) : (
+                                <span className={`text-xs font-medium ${display.textColor}`}>
+                                  {display.label}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

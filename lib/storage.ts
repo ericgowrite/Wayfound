@@ -11,7 +11,24 @@
  */
 
 import { adminDb } from "@/lib/firebase-admin";
-import { Profile, TripWorkspace } from "@/types";
+import { JourneyState, Profile, SavedOption, TripWorkspace } from "@/types";
+
+// Maps legacy ScoredOption.status values to the new journeyState field.
+// Runs transparently on every read so existing saved data is never broken.
+function hydrateSavedOption(opt: SavedOption): SavedOption {
+  if (opt.journeyState) return opt;
+  const map: Record<string, JourneyState> = {
+    interested: "interested",
+    booked: "booked",
+    rejected: "not_going",
+  };
+  return { ...opt, journeyState: map[opt.status] ?? "saved" };
+}
+
+function hydrateWorkspace(ws: TripWorkspace): TripWorkspace {
+  if (!ws.savedOptions?.length) return ws;
+  return { ...ws, savedOptions: ws.savedOptions.map(hydrateSavedOption) };
+}
 
 function profilesRef(userId: string) {
   return adminDb.collection("users").doc(userId).collection("config").doc("profiles");
@@ -64,12 +81,12 @@ export async function deleteProfileFromList(userId: string, id: string): Promise
 
 export async function getWorkspaces(userId: string): Promise<TripWorkspace[]> {
   const snap = await workspacesCol(userId).orderBy("updatedAt", "desc").get();
-  return snap.docs.map((d) => d.data() as TripWorkspace);
+  return snap.docs.map((d) => hydrateWorkspace(d.data() as TripWorkspace));
 }
 
 export async function getWorkspace(userId: string, id: string): Promise<TripWorkspace | null> {
   const doc = await workspacesCol(userId).doc(id).get();
-  return doc.exists ? (doc.data() as TripWorkspace) : null;
+  return doc.exists ? hydrateWorkspace(doc.data() as TripWorkspace) : null;
 }
 
 export async function saveWorkspace(userId: string, workspace: TripWorkspace): Promise<void> {

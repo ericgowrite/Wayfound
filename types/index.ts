@@ -85,6 +85,22 @@ export interface PropertyFeedback {
   submittedAt: string;
 }
 
+export type JourneyState =
+  | "saved"
+  | "interested"
+  | "booked"
+  | "fit_confirmed"
+  | "not_going"
+  | "unresolved";
+
+export type EstimatedTravelWindow =
+  | "this_month"
+  | "next_3_months"
+  | "later"
+  | "not_sure";
+
+export type FitOutcome = "perfect" | "good" | "off";
+
 export interface ScoredOption {
   id: string;
   searchId: string;
@@ -112,6 +128,14 @@ export interface ScoredOption {
 export interface SavedOption extends ScoredOption {
   savedAt: string;
   tags: string[];
+  // Journey state machine — tracks the lifecycle from save → outcome
+  journeyState: JourneyState;
+  estimatedTravelWindow?: EstimatedTravelWindow;
+  fitOutcome?: FitOutcome;
+  fitConfirmedAt?: string;
+  bookedAt?: string;
+  promptDismissedAt?: string;
+  promptDismissCount?: number;
 }
 
 export const AXIS_LABELS: Record<keyof AxisWeights, string> = {
