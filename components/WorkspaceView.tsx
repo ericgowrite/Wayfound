@@ -75,6 +75,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedSavedCardId, setSelectedSavedCardId] = useState<string | null>(null);
   const [rescoring, setRescoring] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
@@ -118,6 +119,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const detailCard =
     (selectedCardId ? sortedResults.find((o) => o.id === selectedCardId) : null) ??
     sortedResults[0] ??
+    null;
+
+  // Saved tab detail panel
+  const detailSavedCard =
+    (selectedSavedCardId ? workspace.savedOptions.find((o) => o.id === selectedSavedCardId) : null) ??
+    workspace.savedOptions[0] ??
     null;
 
   async function handleSearch() {
@@ -948,30 +955,37 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
         {/* ── Saved tab ── */}
         {activeTab === "saved" && (
-          <div className="flex-1 overflow-y-auto p-4">
-            {/* Journey prompt card — highest priority prompt surfaces here */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            {/* Journey prompt card — non-scrolling header */}
             {workspace.savedOptions.length > 0 && primaryProfile && (
-              <JourneyPromptCard
-                prompt={getEligiblePrompt(workspace.savedOptions)}
-                primaryEnneagramType={primaryProfile.enneagramType}
-                destination={workspace.destination}
-                onUpdate={handleJourneyUpdate}
-              />
+              <div className="px-4 pt-4 flex-shrink-0">
+                <JourneyPromptCard
+                  prompt={getEligiblePrompt(workspace.savedOptions)}
+                  primaryEnneagramType={primaryProfile.enneagramType}
+                  destination={workspace.destination}
+                  onUpdate={handleJourneyUpdate}
+                />
+              </div>
             )}
 
-            {workspace.savedOptions.length === 0 ? (
-              <div className="text-center py-16">
+            {/* Empty state */}
+            {workspace.savedOptions.length === 0 && (
+              <div className="flex-1 flex flex-col items-center justify-center py-16">
                 <div className="text-6xl mb-4">📋</div>
                 <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No saved options yet</p>
                 <p className="text-sm text-[#6B8299] mt-1">Save results from your searches to compare later</p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {workspace.savedOptions.map((option) => {
-                  const sourceSearch = workspace.searches.find((s) => s.id === option.searchId);
-                  return (
-                    <div key={option.id} className={expandedCardId === option.id ? "lg:col-span-2" : ""}>
+            )}
+
+            {workspace.savedOptions.length > 0 && (
+              <>
+                {/* Mobile: stacked expandable cards */}
+                <div className="lg:hidden flex-1 overflow-y-auto p-4 space-y-3">
+                  {workspace.savedOptions.map((option) => {
+                    const sourceSearch = workspace.searches.find((s) => s.id === option.searchId);
+                    return (
                       <ResultCard
+                        key={option.id}
                         option={option}
                         workspace={workspace}
                         travelers={travelers}
@@ -986,26 +1000,93 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                         onChatUpdate={(msgs) => handleChatUpdate(option.searchId, option.id, msgs)}
                         onDeepDive={() => {}}
                         onFeedbackSubmit={(fb) => handleFeedbackSubmit(option.searchId, option.id, fb)}
-                        onExpandedChange={(exp) => setExpandedCardId(exp ? option.id : null)}
+                      />
+                    );
+                  })}
+                  <div className="mt-6">
+                    <p className="text-[#6B8299] text-xs uppercase tracking-wide mb-2">Trip Notes</p>
+                    <textarea
+                      className={`w-full ${inputCls} text-sm rounded-lg border p-3 resize-none focus:outline-none transition-colors`}
+                      rows={4}
+                      placeholder="Notes about this trip…"
+                      value={workspaceNotes}
+                      onChange={(e) => setWorkspaceNotes(e.target.value)}
+                      onBlur={() => updateWorkspace({ ...workspace, notes: workspaceNotes })}
+                    />
+                  </div>
+                </div>
+
+                {/* Desktop: master-detail */}
+                <div className="hidden lg:flex gap-4 flex-1 min-h-0 px-4 pb-4">
+                  {/* Left: compact list + trip notes */}
+                  <div className="w-72 xl:w-80 flex-shrink-0 overflow-y-auto space-y-2 pb-4">
+                    {workspace.savedOptions.map((option) => {
+                      const sourceSearch = workspace.searches.find((s) => s.id === option.searchId);
+                      return (
+                        <ResultCard
+                          key={option.id}
+                          option={option}
+                          workspace={workspace}
+                          travelers={travelers}
+                          profileWeights={profileWeights}
+                          isSelected={false}
+                          category={sourceSearch?.category}
+                          searchQuery={sourceSearch?.query}
+                          variant="list"
+                          selected={detailSavedCard?.id === option.id}
+                          onSelect={() => setSelectedSavedCardId(option.id)}
+                          onToggleSelect={() => {}}
+                          onSave={() => handleSaveOption(option)}
+                          onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
+                          onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
+                          onChatUpdate={(msgs) => handleChatUpdate(option.searchId, option.id, msgs)}
+                          onDeepDive={() => {}}
+                          onFeedbackSubmit={(fb) => handleFeedbackSubmit(option.searchId, option.id, fb)}
+                        />
+                      );
+                    })}
+                    <div className="pt-4">
+                      <p className="text-[#6B8299] text-xs uppercase tracking-wide mb-2">Trip Notes</p>
+                      <textarea
+                        className={`w-full ${inputCls} text-sm rounded-lg border p-3 resize-none focus:outline-none transition-colors`}
+                        rows={4}
+                        placeholder="Notes about this trip…"
+                        value={workspaceNotes}
+                        onChange={(e) => setWorkspaceNotes(e.target.value)}
+                        onBlur={() => updateWorkspace({ ...workspace, notes: workspaceNotes })}
                       />
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
 
-            {/* Trip notes */}
-            <div className="mt-6">
-              <p className="text-[#6B8299] text-xs uppercase tracking-wide mb-2">Trip Notes</p>
-              <textarea
-                className={`w-full ${inputCls} text-sm rounded-lg border p-3 resize-none focus:outline-none transition-colors`}
-                rows={4}
-                placeholder="Notes about this trip…"
-                value={workspaceNotes}
-                onChange={(e) => setWorkspaceNotes(e.target.value)}
-                onBlur={() => updateWorkspace({ ...workspace, notes: workspaceNotes })}
-              />
-            </div>
+                  {/* Right: detail panel */}
+                  <div className="flex-1 overflow-y-auto pb-4">
+                    {detailSavedCard && (() => {
+                      const sourceSearch = workspace.searches.find((s) => s.id === detailSavedCard.searchId);
+                      return (
+                        <ResultCard
+                          key={detailSavedCard.id}
+                          option={detailSavedCard}
+                          workspace={workspace}
+                          travelers={travelers}
+                          profileWeights={profileWeights}
+                          isSelected={false}
+                          category={sourceSearch?.category}
+                          searchQuery={sourceSearch?.query}
+                          variant="detail"
+                          onToggleSelect={() => {}}
+                          onSave={() => handleSaveOption(detailSavedCard)}
+                          onStatusChange={(s) => handleStatusChange(detailSavedCard.searchId, detailSavedCard.id, s)}
+                          onNotesChange={(n) => handleNotesChange(detailSavedCard.searchId, detailSavedCard.id, n)}
+                          onChatUpdate={(msgs) => handleChatUpdate(detailSavedCard.searchId, detailSavedCard.id, msgs)}
+                          onDeepDive={() => {}}
+                          onFeedbackSubmit={(fb) => handleFeedbackSubmit(detailSavedCard.searchId, detailSavedCard.id, fb)}
+                        />
+                      );
+                    })()}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
