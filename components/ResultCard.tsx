@@ -147,11 +147,10 @@ export default function ResultCard({
   const [resolvedUrl, setResolvedUrl] = useState<string>(option.source ?? "");
   const [reportSent, setReportSent] = useState(false);
 
-  // Trigger validation the first time the card expands.
-  // This genuinely belongs in an effect (it kicks off an async network call via
-  // validateUrl), so the setState-in-effect lint rule is suppressed at each call site.
+  // Trigger validation the first time the detail section becomes visible —
+  // either when the user expands a default card, or immediately in detail variant.
   useEffect(() => {
-    if (!expanded || urlStatus !== "idle") return;
+    if ((!expanded && !isDetail) || urlStatus !== "idle") return;
     const raw = option.source?.trim();
     if (!raw || !/^https?:\/\//i.test(raw)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -167,7 +166,7 @@ export default function ResultCard({
         setUrlStatus("invalid");
       }
     });
-  }, [expanded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [expanded, isDetail]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleReport() {
     reportBadUrl({
@@ -432,6 +431,39 @@ export default function ResultCard({
 
             {/* Right: description, tradeoffs, source */}
             <div className="space-y-3">
+              {/* Source CTA — featured at top in detail mode */}
+              {isDetail && (
+                <div className="flex items-center gap-2">
+                  {urlStatus === "checking" && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
+                  )}
+                  {urlStatus === "valid" && (
+                    <>
+                      <a
+                        href={resolvedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                      >
+                        <span>🔗</span>
+                        {getSourceLabel(resolvedUrl)}
+                      </a>
+                      {reportSent ? (
+                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
+                      ) : (
+                        <button
+                          onClick={handleReport}
+                          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          title="Report a bad or incorrect link"
+                        >
+                          🚩 Report
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
               <div>
                 <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1">Description</p>
                 <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
@@ -449,40 +481,40 @@ export default function ResultCard({
                   </ul>
                 </div>
               )}
-              {/* Source link — validated before display */}
-              <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
-                {urlStatus === "checking" && (
-                  <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
-                )}
-
-                {urlStatus === "valid" && (
-                  <>
-                    <a
-                      href={resolvedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
-                    >
-                      {getSourceLabel(resolvedUrl)}
-                    </a>
-                    {reportSent ? (
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
-                    ) : (
-                      <button
-                        onClick={handleReport}
-                        className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                        title="Report a bad or incorrect link"
+              {/* Source link — small text in default/expanded mode */}
+              {!isDetail && (
+                <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
+                  {urlStatus === "checking" && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
+                  )}
+                  {urlStatus === "valid" && (
+                    <>
+                      <a
+                        href={resolvedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
                       >
-                        🚩 Report
-                      </button>
-                    )}
-                  </>
-                )}
-
-                {urlStatus === "invalid" && !reportSent && (
-                  <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
-                )}
-              </div>
+                        {getSourceLabel(resolvedUrl)}
+                      </a>
+                      {reportSent ? (
+                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
+                      ) : (
+                        <button
+                          onClick={handleReport}
+                          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          title="Report a bad or incorrect link"
+                        >
+                          🚩 Report
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {urlStatus === "invalid" && !reportSent && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
+                  )}
+                </div>
+              )}
 
               {/* Chat trigger — styled as a card action button */}
               <button
