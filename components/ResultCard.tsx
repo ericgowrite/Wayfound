@@ -17,6 +17,10 @@ interface Props {
   isSelected: boolean;
   category?: SearchCategory;
   searchQuery?: string;
+  /** "list" = compact row, click fires onSelect; "detail" = always-expanded panel; "default" = current toggle behavior */
+  variant?: "default" | "list" | "detail";
+  selected?: boolean;
+  onSelect?: () => void;
   onToggleSelect: () => void;
   onSave: () => void;
   onStatusChange: (status: ScoredOption["status"]) => void;
@@ -43,6 +47,9 @@ export default function ResultCard({
   isSelected,
   category,
   searchQuery,
+  variant = "default",
+  selected = false,
+  onSelect,
   onToggleSelect,
   onSave,
   onStatusChange,
@@ -52,6 +59,8 @@ export default function ResultCard({
   onFeedbackSubmit,
   onExpandedChange,
 }: Props) {
+  const isList = variant === "list";
+  const isDetail = variant === "detail";
   const [expanded, setExpanded] = useState(false);
   const [showFullExplanation, setShowFullExplanation] = useState(false);
   const [notes, setNotes] = useState(option.notes);
@@ -269,12 +278,18 @@ export default function ResultCard({
   const groupMin = hasMultipleTravelers ? Math.min(...travelerScoreValues) : null;
   const groupMinTier = groupMin !== null ? fitTier(groupMin) : null;
 
+  const selectionRing = isList && selected ? "ring-2 ring-[#5B8BA0]/40" : "";
+
   return (
-    <div className={`border rounded-xl bg-white dark:bg-[#1e2d3d] ${borderColor} transition-all`}>
+    <div className={`border rounded-xl bg-white dark:bg-[#1e2d3d] ${borderColor} ${selectionRing} transition-all`}>
       {/* Header */}
       <div
-        className="flex items-start gap-3 p-4 cursor-pointer select-none"
-        onClick={() => { const next = !expanded; setExpanded(next); onExpandedChange?.(next); }}
+        className={`flex items-start gap-3 p-4 select-none ${isList ? "cursor-pointer" : isDetail ? "" : "cursor-pointer"}`}
+        onClick={() => {
+          if (isList) { onSelect?.(); return; }
+          if (isDetail) return;
+          const next = !expanded; setExpanded(next); onExpandedChange?.(next);
+        }}
       >
         <input
           type="checkbox"
@@ -338,10 +353,10 @@ export default function ResultCard({
             )}
           </div>
           <div className="mt-1">
-            <p className={`text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed ${showFullExplanation ? "" : "line-clamp-3"}`}>
+            <p className={`text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed ${isList ? "line-clamp-2" : showFullExplanation ? "" : "line-clamp-3"}`}>
               {option.fitExplanation}
             </p>
-            {option.fitExplanation && option.fitExplanation.length > 160 && (
+            {!isList && option.fitExplanation && option.fitExplanation.length > 160 && (
               <button
                 className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] mt-0.5 transition-colors"
                 onClick={(e) => { e.stopPropagation(); setShowFullExplanation((v) => !v); }}
@@ -387,11 +402,13 @@ export default function ResultCard({
             </div>
           )}
         </div>
-        <span className="text-[#9BB0C1] text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
+        {!isList && !isDetail && (
+          <span className="text-[#9BB0C1] text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
+        )}
       </div>
 
-      {/* Expanded details */}
-      {expanded && (
+      {/* Expanded details — always on in detail variant, toggled in default */}
+      {(isDetail || (!isList && expanded)) && (
         <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
           {/* Inner split deliberately waits for xl (not md) — these cards sit inside a
               2-column results grid on large screens, so a md breakpoint would split this

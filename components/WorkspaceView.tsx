@@ -74,6 +74,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [showFitCallout, setShowFitCallout] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [rescoring, setRescoring] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
@@ -112,6 +113,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       ? sortByGroupFit(displayedSearch.scoredResults, travelers)
       : sortByAlignment(displayedSearch.scoredResults)
     : [];
+
+  // Detail panel: explicit selection, or auto-select first result
+  const detailCard =
+    (selectedCardId ? sortedResults.find((o) => o.id === selectedCardId) : null) ??
+    sortedResults[0] ??
+    null;
 
   async function handleSearch() {
     if (!query.trim()) return;
@@ -800,11 +807,53 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
                   {" · "}&quot;{displayedSearch!.query}&quot;
                 </p>
-                {/* Grid on desktop (more visible at a glance, less scrolling), single column on mobile */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                {/* Mobile: stacked expandable cards */}
+                <div className="lg:hidden space-y-3">
                   {sortedResults.map((option) => (
-                    <div key={option.id} className={expandedCardId === option.id ? "lg:col-span-2" : ""}>
+                    <ResultCard
+                      key={option.id}
+                      option={option}
+                      workspace={workspace}
+                      travelers={travelers}
+                      profileWeights={profileWeights}
+                      isSelected={selectedIds.has(option.id)}
+                      category={displayedSearch!.category}
+                      searchQuery={displayedSearch!.query}
+                      onToggleSelect={() => toggleSelect(option.id)}
+                      onSave={() => handleSaveOption(option)}
+                      onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
+                      onNotesChange={(n) => handleNotesChange(displayedSearch!.id, option.id, n)}
+                      onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, option.id, msgs)}
+                      onDeepDive={() => {}}
+                      onFeedbackSubmit={(fb) => handleFeedbackSubmit(displayedSearch!.id, option.id, fb)}
+                    />
+                  ))}
+                  <div className="pt-2 pb-4 flex justify-center">
+                    {loadingMore ? (
+                      <div className="text-center text-[#6B8299]">
+                        <div className="text-2xl mb-1 animate-spin">⟳</div>
+                        <p className="text-sm">Finding more options…</p>
+                      </div>
+                    ) : (
+                      <button
+                        className="flex items-center gap-2 px-5 py-3 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
+                        onClick={handleMore}
+                      >
+                        <span>Find more options</span>
+                        <span>→</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Desktop: master-detail */}
+                <div className="hidden lg:flex gap-4 items-start">
+                  {/* Left: scrollable compact list */}
+                  <div className="w-72 xl:w-80 flex-shrink-0 space-y-2">
+                    {sortedResults.map((option) => (
                       <ResultCard
+                        key={option.id}
                         option={option}
                         workspace={workspace}
                         travelers={travelers}
@@ -812,6 +861,9 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                         isSelected={selectedIds.has(option.id)}
                         category={displayedSearch!.category}
                         searchQuery={displayedSearch!.query}
+                        variant="list"
+                        selected={detailCard?.id === option.id}
+                        onSelect={() => setSelectedCardId(option.id)}
                         onToggleSelect={() => toggleSelect(option.id)}
                         onSave={() => handleSaveOption(option)}
                         onStatusChange={(s) => handleStatusChange(displayedSearch!.id, option.id, s)}
@@ -819,29 +871,49 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                         onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, option.id, msgs)}
                         onDeepDive={() => {}}
                         onFeedbackSubmit={(fb) => handleFeedbackSubmit(displayedSearch!.id, option.id, fb)}
-                        onExpandedChange={(exp) => setExpandedCardId(exp ? option.id : null)}
                       />
+                    ))}
+                    <div className="pt-2 pb-4 flex justify-center">
+                      {loadingMore ? (
+                        <div className="text-center text-[#6B8299]">
+                          <div className="text-2xl mb-1 animate-spin">⟳</div>
+                          <p className="text-sm">Finding more…</p>
+                        </div>
+                      ) : (
+                        <button
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
+                          onClick={handleMore}
+                        >
+                          <span>Find more</span>
+                          <span>→</span>
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                {/* Find more */}
-                <div className="pt-2 pb-4 flex justify-center">
-                  {loadingMore ? (
-                    <div className="text-center text-[#6B8299]">
-                      <div className="text-2xl mb-1 animate-spin">⟳</div>
-                      <p className="text-sm">Finding more options…</p>
-                    </div>
-                  ) : (
-                    <button
-                      className="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-full bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors text-sm font-medium shadow-sm"
-                      onClick={handleMore}
-                    >
-                      <span>Find more options</span>
-                      <span className="hidden sm:inline text-xs text-white/70">aligned to your profile</span>
-                      <span>→</span>
-                    </button>
-                  )}
+                  {/* Right: sticky detail panel */}
+                  <div className="flex-1 sticky top-0 self-start max-h-[calc(100vh-10rem)] overflow-y-auto">
+                    {detailCard && (
+                      <ResultCard
+                        key={detailCard.id}
+                        option={detailCard}
+                        workspace={workspace}
+                        travelers={travelers}
+                        profileWeights={profileWeights}
+                        isSelected={selectedIds.has(detailCard.id)}
+                        category={displayedSearch!.category}
+                        searchQuery={displayedSearch!.query}
+                        variant="detail"
+                        onToggleSelect={() => toggleSelect(detailCard.id)}
+                        onSave={() => handleSaveOption(detailCard)}
+                        onStatusChange={(s) => handleStatusChange(displayedSearch!.id, detailCard.id, s)}
+                        onNotesChange={(n) => handleNotesChange(displayedSearch!.id, detailCard.id, n)}
+                        onChatUpdate={(msgs) => handleChatUpdate(displayedSearch!.id, detailCard.id, msgs)}
+                        onDeepDive={() => {}}
+                        onFeedbackSubmit={(fb) => handleFeedbackSubmit(displayedSearch!.id, detailCard.id, fb)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             )}
