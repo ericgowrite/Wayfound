@@ -56,7 +56,9 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [searchError, setSearchError] = useState("");
   const [activeTab, setActiveTab] = useState<"search" | "saved" | "history">("search");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedSavedIds, setSelectedSavedIds] = useState<Set<string>>(new Set());
   const [showComparison, setShowComparison] = useState(false);
+  const [comparisonOptions, setComparisonOptions] = useState<ScoredOption[]>([]);
   const [workspaceNotes, setWorkspaceNotes] = useState(workspace.notes);
   // Keep notes in sync when the workspace prop is refreshed from the server.
   // Computed during render (React's recommended "adjusting state when a prop
@@ -464,6 +466,17 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   const selectedOptions = activeSearch?.scoredResults.filter((o) => selectedIds.has(o.id)) ?? [];
 
+  function toggleSavedSelect(id: string) {
+    setSelectedSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < 3) next.add(id);
+      return next;
+    });
+  }
+
+  const selectedSavedOptions = workspace.savedOptions.filter((o) => selectedSavedIds.has(o.id));
+
   const inputCls =
     "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
 
@@ -740,7 +753,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 </span>
                 <button
                   className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
-                  onClick={() => setShowComparison(true)}
+                  onClick={() => { setComparisonOptions(selectedOptions); setShowComparison(true); }}
                 >
                   Compare →
                 </button>
@@ -978,6 +991,29 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             )}
 
+            {/* Comparison bar */}
+            {selectedSavedIds.size >= 2 && (
+              <div className="px-4 pb-2 flex-shrink-0">
+                <div className="flex items-center gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/40 dark:border-[#5B8BA0] rounded-xl px-4 py-2.5">
+                  <span className="text-[#5B8BA0] dark:text-[#7DBAD4] text-sm font-medium">
+                    {selectedSavedIds.size} selected
+                  </span>
+                  <button
+                    className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
+                    onClick={() => { setComparisonOptions(selectedSavedOptions); setShowComparison(true); }}
+                  >
+                    Compare →
+                  </button>
+                  <button
+                    className="text-[#6B8299] text-sm hover:text-[#2C3E50] dark:hover:text-white ml-auto transition-colors"
+                    onClick={() => setSelectedSavedIds(new Set())}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Empty state */}
             {workspace.savedOptions.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center py-16">
@@ -1000,10 +1036,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                         workspace={workspace}
                         travelers={travelers}
                         profileWeights={profileWeights}
-                        isSelected={false}
+                        isSelected={selectedSavedIds.has(option.id)}
                         category={sourceSearch?.category}
                         searchQuery={sourceSearch?.query}
-                        onToggleSelect={() => {}}
+                        onToggleSelect={() => toggleSavedSelect(option.id)}
                         onSave={() => handleSaveOption(option)}
                         onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
                         onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
@@ -1039,13 +1075,13 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                           workspace={workspace}
                           travelers={travelers}
                           profileWeights={profileWeights}
-                          isSelected={false}
+                          isSelected={selectedSavedIds.has(option.id)}
                           category={sourceSearch?.category}
                           searchQuery={sourceSearch?.query}
                           variant="list"
                           selected={detailSavedCard?.id === option.id}
                           onSelect={() => setSelectedSavedCardId(option.id)}
-                          onToggleSelect={() => {}}
+                          onToggleSelect={() => toggleSavedSelect(option.id)}
                           onSave={() => handleSaveOption(option)}
                           onStatusChange={(s) => handleStatusChange(option.searchId, option.id, s)}
                           onNotesChange={(n) => handleNotesChange(option.searchId, option.id, n)}
@@ -1201,9 +1237,9 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         )}
       </div>
 
-      {showComparison && selectedOptions.length >= 2 && profileWeights && (
+      {showComparison && comparisonOptions.length >= 2 && profileWeights && (
         <ComparisonView
-          options={selectedOptions}
+          options={comparisonOptions}
           profileWeights={profileWeights}
           workspaceId={workspace.id}
           onClose={() => setShowComparison(false)}
