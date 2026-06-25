@@ -334,6 +334,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     });
   }
 
+  function handleJourneyUpdateMultiple(updates: { optionId: string; fields: Partial<SavedOption> }[]) {
+    let options = workspace.savedOptions;
+    for (const { optionId, fields } of updates) {
+      options = options.map((o) => (o.id === optionId ? { ...o, ...fields } : o));
+    }
+    updateWorkspace({ ...workspace, savedOptions: options });
+  }
+
   function handleNotesChange(searchId: string, optionId: string, notes: string) {
     updateWorkspace({
       ...workspace,
@@ -961,9 +969,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <div className="px-4 pt-4 flex-shrink-0">
                 <JourneyPromptCard
                   prompt={getEligiblePrompt(workspace.savedOptions)}
+                  savedOptions={workspace.savedOptions}
                   primaryEnneagramType={primaryProfile.enneagramType}
                   destination={workspace.destination}
                   onUpdate={handleJourneyUpdate}
+                  onUpdateMultiple={handleJourneyUpdateMultiple}
                 />
               </div>
             )}

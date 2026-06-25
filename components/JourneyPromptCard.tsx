@@ -7,9 +7,11 @@ import { logEvent } from "@/lib/analytics";
 
 interface Props {
   prompt: EligiblePrompt;
+  savedOptions: SavedOption[];
   primaryEnneagramType: string;
   destination: string;
   onUpdate: (optionId: string, fields: Partial<SavedOption>) => void;
+  onUpdateMultiple: (updates: { optionId: string; fields: Partial<SavedOption> }[]) => void;
 }
 
 const WINDOW_OPTIONS: { value: EstimatedTravelWindow; label: string }[] = [
@@ -19,8 +21,9 @@ const WINDOW_OPTIONS: { value: EstimatedTravelWindow; label: string }[] = [
   { value: "not_sure", label: "Not sure" },
 ];
 
-export default function JourneyPromptCard({ prompt, primaryEnneagramType, destination, onUpdate }: Props) {
+export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagramType, destination, onUpdate, onUpdateMultiple }: Props) {
   const [showWindowPicker, setShowWindowPicker] = useState(false);
+  const [showOtherPicker, setShowOtherPicker] = useState(false);
 
   if (!prompt) return null;
   const { option } = prompt;
@@ -108,6 +111,12 @@ export default function JourneyPromptCard({ prompt, primaryEnneagramType, destin
   }
 
   // ── Prompt A: Booking confirmation ─────────────────────────────────────────
+
+  // Other saved items that are also "interested" — user may have booked one of these instead
+  const otherInterested = savedOptions.filter(
+    (o) => o.journeyState === "interested" && o.id !== option.id
+  );
+
   function confirmBooked(travelWindow?: EstimatedTravelWindow) {
     onUpdate(option.id, {
       journeyState: "booked",
@@ -125,6 +134,31 @@ export default function JourneyPromptCard({ prompt, primaryEnneagramType, destin
       propertyType: "accommodation",
     });
     setShowWindowPicker(false);
+  }
+
+  function confirmBookedOther(other: SavedOption) {
+    onUpdateMultiple([
+      {
+        optionId: other.id,
+        fields: { journeyState: "booked", status: "booked", bookedAt: new Date().toISOString() },
+      },
+      {
+        // Keep current option as "interested", just dismiss the prompt for 7 days
+        optionId: option.id,
+        fields: {
+          promptDismissedAt: new Date().toISOString(),
+          promptDismissCount: (option.promptDismissCount ?? 0) + 1,
+        },
+      },
+    ]);
+    logEvent({
+      event: "viyaway_booking_confirmed",
+      itemId: other.id,
+      fitScore: other.alignmentScore,
+      enneagramType: primaryEnneagramType,
+      propertyType: "accommodation",
+    });
+    setShowOtherPicker(false);
   }
 
   if (showWindowPicker) {
@@ -168,7 +202,7 @@ export default function JourneyPromptCard({ prompt, primaryEnneagramType, destin
           ×
         </button>
       </div>
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-3 flex-wrap">
         <button
           className="flex-1 py-2 rounded-lg bg-[#5B8BA0] text-white text-sm font-medium hover:bg-[#4A7A8F] transition-colors"
           onClick={() => setShowWindowPicker(true)}
@@ -190,6 +224,39 @@ export default function JourneyPromptCard({ prompt, primaryEnneagramType, destin
           No longer interested
         </button>
       </div>
+
+      {/* "I booked a different hotel" — only shown when other interested options exist */}
+      {otherInterested.length > 0 && (
+        <div className="mt-3 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-3">
+          {!showOtherPicker ? (
+            <button
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
+              onClick={() => setShowOtherPicker(true)}
+            >
+              I booked a different hotel →
+            </button>
+          ) : (
+            <div className="space-y-1.5">
+              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Which one did you book?</p>
+              {otherInterested.map((other) => (
+                <button
+                  key={other.id}
+                  className="w-full text-left px-3 py-2 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm text-[#3D5A6E] dark:text-[#B8D4E3] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/5 dark:hover:bg-[#5B8BA0]/10 transition-colors"
+                  onClick={() => confirmBookedOther(other)}
+                >
+                  {other.name}
+                </button>
+              ))}
+              <button
+                className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
+                onClick={() => setShowOtherPicker(false)}
+              >
+                Never mind
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
