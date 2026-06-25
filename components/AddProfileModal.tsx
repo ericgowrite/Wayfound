@@ -133,7 +133,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
           {step === "know-type" && (
             <div className="space-y-3">
               <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed">
-                Everyone travels differently. We use the Enneagram — a time-tested personality framework — to understand what makes travel feel right for{" "}
+                Everyone travels differently. We use personality-based matching to understand what makes travel feel right for{" "}
                 {isSelf
                   ? <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">you</span>
                   : <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name}</span>
@@ -141,8 +141,8 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
               </p>
               <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm pt-1">
                 {isSelf
-                  ? "Do you already know your Enneagram type?"
-                  : <>Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their Enneagram type?</>
+                  ? "Do you already know your personality type?"
+                  : <>Does <span className="text-[#2C3E50] dark:text-white font-medium">{name}</span> already know their personality type?</>
                 }
               </p>
               <div className="flex flex-col gap-2 pt-1">
@@ -180,7 +180,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
           {step === "type-select" && (
             <div className="space-y-4">
               <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-2">Enneagram Type</label>
+                <label className="text-[#6B8299] text-xs uppercase block mb-2">Personality Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {baseTypes.map((base) => {
                     const t = TEMPLATES.find((tmpl) => tmpl.type === base);
