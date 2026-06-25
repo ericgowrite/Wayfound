@@ -207,6 +207,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   }
 
   async function updateWorkspace(updated: TripWorkspace) {
+    onChange(updated); // optimistic — UI reflects change instantly
     try {
       const res = await fetchWithAuth(`/api/workspaces/${updated.id}`, {
         method: "PUT",
@@ -215,7 +216,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const saved = await res.json();
-      onChange(saved);
+      onChange(saved); // confirmed — server may normalise fields
       return saved;
     } catch (e) {
       console.error("Failed to save workspace:", e);
@@ -658,13 +659,15 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* ── Results tab ── */}
         {activeTab === "search" && (
-          <div className="p-4">
+          <div className="flex-1 min-h-0 flex flex-col">
+            {/* Non-scrolling header: pills, banners, result count */}
+            <div className="px-4 pt-4 flex-shrink-0 space-y-3">
             {/* Search history pills */}
             {workspace.searches.length > 1 && (
-              <div className="mb-4 flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap">
                 {workspace.searches.map((s) => {
                   const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                   const isActive = s.id === activeSearchId;
@@ -735,9 +738,22 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             )}
 
+            {/* Result count — shown in header so it stays visible */}
+            {!searching && sortedResults.length > 0 && (
+              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
+                {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
+                {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
+                {" · "}&quot;{displayedSearch!.query}&quot;
+              </p>
+            )}
+            </div>{/* end header */}
+
+            {/* Scrollable content area */}
+            <div className="flex-1 min-h-0 flex flex-col px-4 pb-4">
+
             {/* Searching state */}
             {searching && (
-              <div className="text-center py-16">
+              <div className="flex-1 flex flex-col items-center justify-center py-16">
                 <div className="text-5xl mb-4 animate-pulse">{mode === "score" ? "✦" : "🔍"}</div>
                 <p className="text-[#3D5A6E] dark:text-[#B8D4E3] font-medium">
                   {mode === "score" ? "Researching and scoring…" : "Searching and scoring options…"}
@@ -801,15 +817,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Results */}
             {!searching && sortedResults.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
-                  {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
-                  {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
-                  {" · "}&quot;{displayedSearch!.query}&quot;
-                </p>
+              <div className="flex-1 min-h-0 flex flex-col">
 
                 {/* Mobile: stacked expandable cards */}
-                <div className="lg:hidden space-y-3">
+                <div className="lg:hidden overflow-y-auto flex-1 space-y-3 pb-4">
                   {sortedResults.map((option) => (
                     <ResultCard
                       key={option.id}
@@ -847,10 +858,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   </div>
                 </div>
 
-                {/* Desktop: master-detail */}
-                <div className="hidden lg:flex gap-4 items-start">
+                {/* Desktop: master-detail — each panel scrolls independently */}
+                <div className="hidden lg:flex gap-4 flex-1 min-h-0">
                   {/* Left: scrollable compact list */}
-                  <div className="w-72 xl:w-80 flex-shrink-0 space-y-2">
+                  <div className="w-72 xl:w-80 flex-shrink-0 overflow-y-auto space-y-2 pb-4">
                     {sortedResults.map((option) => (
                       <ResultCard
                         key={option.id}
@@ -891,8 +902,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     </div>
                   </div>
 
-                  {/* Right: sticky detail panel */}
-                  <div className="flex-1 sticky top-0 self-start max-h-[calc(100vh-10rem)] overflow-y-auto">
+                  {/* Right: independently scrollable detail panel */}
+                  <div className="flex-1 overflow-y-auto pb-4">
                     {detailCard && (
                       <ResultCard
                         key={detailCard.id}
@@ -920,7 +931,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Empty state */}
             {!searching && sortedResults.length === 0 && (
-              <div className="text-center py-16">
+              <div className="flex-1 flex flex-col items-center justify-center py-16">
                 <div className="text-6xl mb-4">✈️</div>
                 <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
                   {workspace.searches.length > 0 ? "No results found" : "Search to get started"}
@@ -930,12 +941,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 </p>
               </div>
             )}
+
+            </div>{/* end content area */}
           </div>
         )}
 
         {/* ── Saved tab ── */}
         {activeTab === "saved" && (
-          <div className="p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {/* Journey prompt card — highest priority prompt surfaces here */}
             {workspace.savedOptions.length > 0 && primaryProfile && (
               <JourneyPromptCard
@@ -998,7 +1011,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
         {/* ── History tab ── */}
         {activeTab === "history" && (
-          <div className="p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {(() => {
               const confirmed = workspace.savedOptions.filter(
                 (o) => o.journeyState === "fit_confirmed"
