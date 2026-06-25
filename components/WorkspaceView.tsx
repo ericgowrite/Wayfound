@@ -260,6 +260,33 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   function handleStatusChange(searchId: string, optionId: string, status: ScoredOption["status"]) {
     const journeyState = STATUS_TO_JOURNEY[status] ?? "saved";
+
+    const optionFromSearch = workspace.searches
+      .find((s) => s.id === searchId)
+      ?.scoredResults.find((o) => o.id === optionId);
+    const alreadySaved = workspace.savedOptions.some((o) => o.id === optionId);
+
+    // Interested and Booked are journey-tracked states — auto-save the item
+    // so handleJourneyUpdate can find it even if the user never clicked Save.
+    let savedOptions = workspace.savedOptions.map((o) =>
+      o.id === optionId ? { ...o, status, journeyState } : o
+    );
+    if (!alreadySaved && optionFromSearch && (status === "interested" || status === "booked")) {
+      savedOptions = [
+        ...savedOptions,
+        { ...optionFromSearch, status, journeyState, savedAt: new Date().toISOString(), tags: [] } as SavedOption,
+      ];
+      if (primaryProfile) {
+        logEvent({
+          event: "viyaway_item_saved",
+          itemId: optionId,
+          propertyType: "accommodation",
+          fitScore: optionFromSearch.alignmentScore,
+          enneagramType: primaryProfile.enneagramType,
+        });
+      }
+    }
+
     updateWorkspace({
       ...workspace,
       searches: workspace.searches.map((s) =>
@@ -267,9 +294,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           ? { ...s, scoredResults: s.scoredResults.map((o) => (o.id === optionId ? { ...o, status } : o)) }
           : s
       ),
-      savedOptions: workspace.savedOptions.map((o) =>
-        o.id === optionId ? { ...o, status, journeyState } : o
-      ),
+      savedOptions,
     });
 
     if (status === "interested" && primaryProfile) {
@@ -280,9 +305,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
     }
     if (status === "rejected" && primaryProfile) {
-      const option =
-        workspace.searches.find((s) => s.id === searchId)?.scoredResults.find((o) => o.id === optionId) ??
-        workspace.savedOptions.find((o) => o.id === optionId);
+      const option = optionFromSearch ?? workspace.savedOptions.find((o) => o.id === optionId);
       if (option) trackReject(option, primaryProfile.id);
     }
   }
