@@ -1027,7 +1027,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 </div>
 
                 {/* Desktop: master-detail */}
-                <div className="hidden lg:flex gap-4 flex-1 min-h-0 px-4 pb-4">
+                <div className="hidden lg:flex gap-4 flex-1 min-h-0 px-4 pt-4 pb-4">
                   {/* Left: compact list + trip notes */}
                   <div className="w-72 xl:w-80 flex-shrink-0 overflow-y-auto space-y-2 pb-4">
                     {workspace.savedOptions.map((option) => {
