@@ -18,5 +18,9 @@ service cloud.firestore {
     match /urlValidationCache/{domain} {
       allow read, write: if false;
     }
+    // Gemini search result cache — Admin SDK only.
+    match /searchQueryCache/{hash} {
+      allow read, write: if false;
+    }
   }
 }

@@ -1,8 +1,78 @@
+import { createHash } from "node:crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Profile, ScoredOption, SearchCategory, DeepDiveResult, ChatMessage } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 import { combineProfiles } from "@/lib/scoring";
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
+
+// ── Gemini search result cache ────────────────────────────────────────────────
+// Caches searchAndScore() results for 24 hours, keyed by a hash of the query,
+// category, combined profile weights, and destination. Same user re-running a
+// search, or two users with identical profiles searching the same query, share
+// one Gemini call. alignmentScore is recomputed by attachTravelerScores() on
+// every hit so scoring stays correct. fitExplanation is the only stale field.
+
+type RawResult = Omit<ScoredOption, "id" | "searchId" | "status" | "notes">;
+const SEARCH_CACHE_COLLECTION = "searchQueryCache";
+const SEARCH_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function searchCacheKey(
+  query: string,
+  category: SearchCategory,
+  profiles: Profile[],
+  destination?: string,
+  partySize?: number
+): string {
+  const combined = combineProfiles(profiles);
+  const input = JSON.stringify({
+    q: query.toLowerCase().trim(),
+    cat: category,
+    dest: (destination || "").toLowerCase().trim(),
+    party: partySize || 1,
+    // Round axis weights to 2dp so tiny float differences don't split entries.
+    weights: Object.fromEntries(
+      (Object.entries(combined.axisWeights) as [string, number][]).map(
+        ([k, v]) => [k, Math.round(v * 100)]
+      )
+    ),
+    dealbreakers: [...combined.dealbreakers].sort(),
+    thresholds: combined.thresholds,
+  });
+  return createHash("sha256").update(input).digest("hex").slice(0, 32);
+}
+
+async function getCachedSearch(key: string): Promise<RawResult[] | null> {
+  try {
+    const doc = await adminDb.collection(SEARCH_CACHE_COLLECTION).doc(key).get();
+    if (!doc.exists) return null;
+    const d = doc.data()!;
+    if ((d.expiresAt as Timestamp).toMillis() < Date.now()) return null;
+    return d.results as RawResult[];
+  } catch {
+    return null; // cache failure is non-fatal — fall through to Gemini
+  }
+}
+
+async function setCachedSearch(
+  key: string,
+  query: string,
+  category: SearchCategory,
+  results: RawResult[]
+): Promise<void> {
+  try {
+    await adminDb.collection(SEARCH_CACHE_COLLECTION).doc(key).set({
+      query,
+      category,
+      results,
+      cachedAt: Timestamp.now(),
+      expiresAt: Timestamp.fromMillis(Date.now() + SEARCH_CACHE_TTL_MS),
+    });
+  } catch {
+    // cache write failure is non-fatal
+  }
+}
 
 // Lazy singleton — initialized on first call so a missing env var surfaces as
 // a runtime 500 from the route handler rather than crashing the build.
@@ -298,6 +368,15 @@ export async function searchAndScore(
   dates?: { start: string; end: string },
   partySize?: number
 ): Promise<ScoredOption[]> {
+  // Cache check — dates excluded from key intentionally (24h TTL prevents
+  // stale seasonal results; including dates destroys hit rate for re-searches).
+  const cacheKey = searchCacheKey(query, category, profiles, destination, partySize);
+  const cached = await getCachedSearch(cacheKey);
+  if (cached) {
+    console.log(`[VIYA-AI] search cache hit: "${query}" (${category})`);
+    return cached.map((item) => hydrate(item, searchId));
+  }
+
   const systemPrompt = buildSystemPrompt("search");
   const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
 
@@ -334,6 +413,8 @@ ${thresholdLine(scoringProfile)}`.trim();
   auditResponse(raw, "search");
   const items = parseArray(raw);
   for (const item of items) auditCitedDomain(item.name, item.source, citedDomains);
+  // Write to cache before hydrating so the stored items have no UUID fields.
+  await setCachedSearch(cacheKey, query, category, items);
   return items.map((item) => hydrate(item, searchId));
 }
 
