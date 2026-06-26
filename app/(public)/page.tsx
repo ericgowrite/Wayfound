@@ -68,7 +68,7 @@ const STEPS = [
 
 const BENEFITS = [
   { title: "Based on you", desc: "Not generic reviews" },
-  { title: "Personality-matched", desc: "Science-backed fit scores" },
+  { title: "Personality-matched", desc: "Fit scores built from how you're wired" },
   { title: "Group travel ready", desc: "See fit for everyone" },
   { title: "Always free", desc: "No hidden costs" },
 ];
