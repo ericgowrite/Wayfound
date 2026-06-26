@@ -422,7 +422,7 @@ export default function Home() {
             <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wider font-medium">Legal</p>
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Privacy Policy ↗</a>
             <a href="/terms" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Terms of Service ↗</a>
-            <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money ↗</a>
+            {/* <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money ↗</a> */}
           </div>
 
           {/* Affiliate disclosure */}

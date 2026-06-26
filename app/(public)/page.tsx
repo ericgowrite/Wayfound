@@ -202,8 +202,8 @@ export default function LandingPage() {
             <Link href="/privacy" className="hover:text-[#2C3E50] transition-colors">Privacy Policy</Link>
             <span className="mx-1.5">&bull;</span>
             <Link href="/terms" className="hover:text-[#2C3E50] transition-colors">Terms of Service</Link>
-            <span className="mx-1.5">&bull;</span>
-            <Link href="/affiliate-disclosure" className="hover:text-[#2C3E50] transition-colors">How We Make Money</Link>
+            {/* <span className="mx-1.5">&bull;</span> */}
+            {/* <Link href="/affiliate-disclosure" className="hover:text-[#2C3E50] transition-colors">How We Make Money</Link> */}
           </div>
         </div>
       </footer>
