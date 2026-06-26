@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import DashboardTour from "@/components/DashboardTour";
 import { useTourState } from "@/lib/useTourState";
+import { CATEGORY_META } from "@/lib/categories";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -31,6 +32,7 @@ export default function Home() {
   const [newStartDate, setNewStartDate] = useState("");
   const [newEndDate, setNewEndDate] = useState("");
   const [newPartySize, setNewPartySize] = useState<number>(2);
+  const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
   const [showFitLegend, setShowFitLegend] = useState(false);
@@ -71,6 +73,13 @@ export default function Home() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
+
+  // Reset to first search of the newly active workspace when the workspace switches.
+  useEffect(() => {
+    const ws = workspaces.find((w) => w.id === activeWorkspaceId);
+    setActiveSearchId(ws?.searches[0]?.id ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWorkspaceId]);
 
   // Auto-start dashboard tour once profiles are loaded and the user hasn't seen it.
   // Don't start when profiles.length === 0 — first-run onboarding is already showing.
@@ -358,30 +367,63 @@ export default function Home() {
                 const primaryProfile = profiles.find((p) => p.id === (w.travelers ?? [])[0]);
                 const extraCount = (w.travelers?.length ?? 1) - 1;
                 return (
-                  <div
-                    key={w.id}
-                    className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
-                      w.id === activeWorkspaceId
-                        ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                        : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
-                    }`}
-                    onClick={() => setActiveWorkspaceId(w.id)}
-                  >
-                    <span className="text-sm">📁</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{w.name}</p>
-                      <p className="text-xs text-[#6B8299] dark:text-[#6B8299] truncate">
-                        {primaryProfile?.name ?? ""}
-                        {extraCount > 0 ? ` +${extraCount}` : ""}
-                        {w.destination ? ` · ${w.destination}` : ""}
-                      </p>
-                    </div>
-                    <button
-                      className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
-                      onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
+                  <div key={w.id}>
+                    {/* Trip row */}
+                    <div
+                      className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
+                        w.id === activeWorkspaceId
+                          ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                          : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
+                      }`}
+                      onClick={() => setActiveWorkspaceId(w.id)}
                     >
-                      ×
-                    </button>
+                      <span className="text-sm">📁</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{w.name}</p>
+                        <p className="text-xs text-[#6B8299] dark:text-[#6B8299] truncate">
+                          {primaryProfile?.name ?? ""}
+                          {extraCount > 0 ? ` +${extraCount}` : ""}
+                          {w.destination ? ` · ${w.destination}` : ""}
+                        </p>
+                      </div>
+                      <button
+                        className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
+                        onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    {/* Search sub-list — only under the active workspace */}
+                    {w.id === activeWorkspaceId && w.searches.length > 0 && (
+                      <div className="ml-4 mb-1 border-l border-[#E0E8ED] dark:border-[#2a3f52] pl-2 space-y-0.5">
+                        {w.searches.map((s) => {
+                          const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
+                          const isActive = s.id === activeSearchId;
+                          return (
+                            <button
+                              key={s.id}
+                              className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors text-xs ${
+                                isActive
+                                  ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4] font-medium"
+                                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveSearchId(s.id);
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              <span className="flex-shrink-0">{meta.icon}</span>
+                              <span className="truncate flex-1">{s.query}</span>
+                              <span className="flex-shrink-0 text-[#9BB0C1] dark:text-[#6B8299]">
+                                {s.scoredResults.length}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -456,6 +498,8 @@ export default function Home() {
             travelers={travelerProfiles}
             onChange={handleWorkspaceChange}
             onProfileUpdate={handleProfileUpdate}
+            activeSearchId={activeSearchId}
+            onSearchChange={setActiveSearchId}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-[#6B8299]">

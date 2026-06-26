@@ -33,6 +33,14 @@ body {
   scrollbar-color: #3D5A6E transparent;
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Driver.js ViyaWay theme (v1.x) ─────────────────────────────────────── */
 .driver-popover {
   background: white !important;

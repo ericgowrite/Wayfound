@@ -39,11 +39,13 @@ interface Props {
   travelers: Profile[];
   onChange: (w: TripWorkspace) => void;
   onProfileUpdate: (profile: Profile) => void;
+  activeSearchId: string | null;
+  onSearchChange: (id: string) => void;
 }
 
 type SortMode = "fit" | "group";
 
-export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate }: Props) {
+export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, activeSearchId, onSearchChange }: Props) {
   const { isAnonymous } = useAuth();
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
@@ -73,9 +75,6 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setPrevWorkspaceNotes(workspace.notes);
     setWorkspaceNotes(workspace.notes);
   }
-  const [activeSearchId, setActiveSearchId] = useState<string | null>(
-    workspace.searches[0]?.id ?? null
-  );
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
   const [showFitCallout, setShowFitCallout] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
@@ -166,7 +165,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         ...workspace,
         searches: [search, ...workspace.searches.filter((s) => s.id !== search.id)],
       });
-      setActiveSearchId(search.id);
+      onSearchChange(search.id);
       setActiveTab("search");
     } catch (e) {
       setSearchError(e instanceof Error ? e.message : String(e));
@@ -195,7 +194,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         ...workspace,
         searches: [search, ...workspace.searches.filter((s) => s.id !== search.id)],
       });
-      setActiveSearchId(search.id);
+      onSearchChange(search.id);
       setActiveTab("search");
     } catch (e) {
       setSearchError(e instanceof Error ? e.message : String(e));
@@ -708,48 +707,24 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         {/* ── Results tab ── */}
         {activeTab === "search" && (
           <div id="tour-results" className="flex-1 min-h-0 flex flex-col">
-            {/* Non-scrolling header: pills, banners, result count */}
+            {/* Non-scrolling header: category tabs, banners, result count */}
             <div className="px-4 pt-4 flex-shrink-0 space-y-3">
-            {/* Search history pills */}
-            {workspace.searches.length > 1 && (
-              <div className="flex gap-2 flex-wrap">
-                {workspace.searches.map((s) => {
-                  const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
-                  const isActive = s.id === activeSearchId;
-                  return (
-                    <button
-                      key={s.id}
-                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors flex items-center gap-1 ${
-                        isActive
-                          ? "border-[#5B8BA0] text-[#5B8BA0] dark:text-[#7DBAD4] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 font-medium"
-                          : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1]"
-                      }`}
-                      onClick={() => { setActiveSearchId(s.id); setCategoryFilter(null); setQuery(s.query); }}
-                    >
-                      <span>{meta.icon}</span>
-                      <span className="truncate max-w-[160px]">{s.query}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Category tabs — shown when same query searched across multiple categories */}
             {showCategoryTabs && (
-              <div className="mb-3 flex gap-1 flex-wrap">
+              <div className="mb-3 flex gap-1 overflow-x-auto scrollbar-none pb-0.5">
                 {siblingSearches.map((s) => {
                   const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                   const isActive = (categoryFilter ?? activeSearch?.category) === s.category;
                   return (
                     <button
                       key={s.id}
-                      className={`text-xs px-3 py-1 rounded-lg border transition-colors flex items-center gap-1.5 ${
+                      className={`flex-shrink-0 text-xs px-3 py-1 rounded-lg border transition-colors flex items-center gap-1.5 ${
                         isActive
                           ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4] font-medium"
                           : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1] bg-white dark:bg-[#1e2d3d]"
                       }`}
                       onClick={() => {
-                        setActiveSearchId(s.id);
+                        onSearchChange(s.id);
                         setCategoryFilter(s.category);
                       }}
                     >
