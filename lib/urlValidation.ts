@@ -108,3 +108,29 @@ export function getUrlReports(): UrlReport[] {
     return [];
   }
 }
+
+// ── Link Recovery ─────────────────────────────────────────────────────────────
+
+/**
+ * Ask the server to find a replacement URL for a named result via Google Places.
+ * Returns null if nothing found or on any error — callers degrade gracefully.
+ */
+export async function findReplacementUrl(params: {
+  name: string;
+  category?: string;
+  destination?: string;
+}): Promise<string | null> {
+  try {
+    const { fetchWithAuth } = await import("@/lib/fetchWithAuth");
+    const res = await fetchWithAuth("/api/find-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data.url === "string" ? data.url : null;
+  } catch {
+    return null;
+  }
+}

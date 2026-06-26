@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage, PropertyFeedback } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
-import { validateUrl, reportBadUrl } from "@/lib/urlValidation";
+import { validateUrl, reportBadUrl, findReplacementUrl } from "@/lib/urlValidation";
 import { isFeedbackEligible, relevantFeedbackAxes, AXIS_FEEDBACK_FLAGS } from "@/lib/feedback";
 import AxisBar from "./AxisBar";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
@@ -141,11 +141,28 @@ export default function ResultCard({
     }
   }, [chatInput, chatLoading, chatMessages, option, workspace.id, searchQuery, onChatUpdate]);
 
-  // URL validation
-  type UrlStatus = "idle" | "checking" | "valid" | "invalid";
+  // URL validation + automatic link recovery
+  type UrlStatus = "idle" | "checking" | "valid" | "recovering" | "recovered" | "not_found";
   const [urlStatus, setUrlStatus] = useState<UrlStatus>("idle");
   const [resolvedUrl, setResolvedUrl] = useState<string>(option.source ?? "");
   const [reportSent, setReportSent] = useState(false);
+
+  /** Attempt to find a replacement URL via Google Places. */
+  function recoverUrl() {
+    setUrlStatus("recovering");
+    findReplacementUrl({
+      name: option.name,
+      category: category,
+      destination: workspace.destination,
+    }).then((found) => {
+      if (found) {
+        setResolvedUrl(found);
+        setUrlStatus("recovered");
+      } else {
+        setUrlStatus("not_found");
+      }
+    });
+  }
 
   // Trigger validation the first time the detail section becomes visible —
   // either when the user expands a default card, or immediately in detail variant.
@@ -153,8 +170,7 @@ export default function ResultCard({
     if ((!expanded && !isDetail) || urlStatus !== "idle") return;
     const raw = option.source?.trim();
     if (!raw || !/^https?:\/\//i.test(raw)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUrlStatus("invalid");
+      recoverUrl();
       return;
     }
     setUrlStatus("checking");
@@ -163,7 +179,7 @@ export default function ResultCard({
         setResolvedUrl(result.finalUrl);
         setUrlStatus("valid");
       } else {
-        setUrlStatus("invalid");
+        recoverUrl();
       }
     });
   }, [expanded, isDetail]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -176,7 +192,7 @@ export default function ResultCard({
       timestamp: new Date().toISOString(),
     });
     setReportSent(true);
-    setUrlStatus("invalid"); // hide the link immediately after report
+    recoverUrl(); // try to find a better link immediately
   }
 
   const AFFILIATE_PARTNERS: Record<string, string> = {
@@ -433,11 +449,13 @@ export default function ResultCard({
             <div className="space-y-3">
               {/* Source CTA — featured at top in detail mode */}
               {isDetail && (
-                <div className="flex items-center gap-2">
-                  {urlStatus === "checking" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {(urlStatus === "checking" || urlStatus === "recovering") && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                      {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
+                    </span>
                   )}
-                  {urlStatus === "valid" && (
+                  {(urlStatus === "valid" || urlStatus === "recovered") && (
                     <>
                       <a
                         href={resolvedUrl}
@@ -448,9 +466,7 @@ export default function ResultCard({
                         <span>🔗</span>
                         {getSourceLabel(resolvedUrl)}
                       </a>
-                      {reportSent ? (
-                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
-                      ) : (
+                      {urlStatus === "valid" && !reportSent && (
                         <button
                           onClick={handleReport}
                           className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
@@ -460,6 +476,9 @@ export default function ResultCard({
                         </button>
                       )}
                     </>
+                  )}
+                  {urlStatus === "not_found" && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
                   )}
                 </div>
               )}
@@ -484,10 +503,12 @@ export default function ResultCard({
               {/* Source link — small text in default/expanded mode */}
               {!isDetail && (
                 <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
-                  {urlStatus === "checking" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">Checking source…</span>
+                  {(urlStatus === "checking" || urlStatus === "recovering") && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                      {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
+                    </span>
                   )}
-                  {urlStatus === "valid" && (
+                  {(urlStatus === "valid" || urlStatus === "recovered") && (
                     <>
                       <a
                         href={resolvedUrl}
@@ -497,9 +518,7 @@ export default function ResultCard({
                       >
                         {getSourceLabel(resolvedUrl)}
                       </a>
-                      {reportSent ? (
-                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Reported — thanks</span>
-                      ) : (
+                      {urlStatus === "valid" && !reportSent && (
                         <button
                           onClick={handleReport}
                           className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
@@ -510,7 +529,7 @@ export default function ResultCard({
                       )}
                     </>
                   )}
-                  {urlStatus === "invalid" && !reportSent && (
+                  {urlStatus === "not_found" && (
                     <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
                   )}
                 </div>
