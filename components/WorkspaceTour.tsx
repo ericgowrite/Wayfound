@@ -14,6 +14,7 @@ export default function WorkspaceTour({ onDone }: Props) {
 
   useEffect(() => {
     const doneCalledRef = { current: false };
+    const mobile = window.innerWidth < 768;
 
     const driverObj = driver({
       animate: true,
@@ -35,7 +36,7 @@ export default function WorkspaceTour({ onDone }: Props) {
       },
       steps: [
         {
-          element: "#tour-category",
+          ...(mobile ? {} : { element: "#tour-category" }),
           popover: {
             title: "What Are You Looking For?",
             description:
@@ -43,7 +44,7 @@ export default function WorkspaceTour({ onDone }: Props) {
           },
         },
         {
-          element: "#tour-search-input",
+          ...(mobile ? {} : { element: "#tour-search-input" }),
           popover: {
             title: "Search Anything",
             description:
@@ -51,6 +52,8 @@ export default function WorkspaceTour({ onDone }: Props) {
           },
         },
         {
+          // Always target #tour-results (always in DOM); #tour-fit-score only
+          // exists when results are present, which breaks the tour for new users.
           element: "#tour-results",
           popover: {
             title: "Ranked by Fit, Not Popularity",
@@ -59,11 +62,11 @@ export default function WorkspaceTour({ onDone }: Props) {
           },
         },
         {
-          element: "#tour-fit-score",
+          ...(mobile ? {} : { element: "#tour-results" }),
           popover: {
             title: "Your Fit Score",
             description:
-              "See the score badge on each card — click any result to see exactly why it's a good — or bad — fit.",
+              "Each result shows a fit score. Tap any card to see exactly why it's a good — or bad — match for your travel style.",
           },
         },
         {

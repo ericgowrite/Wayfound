@@ -14,6 +14,10 @@ export default function DashboardTour({ onDone }: Props) {
 
   useEffect(() => {
     const doneCalledRef = { current: false };
+    // On mobile the sidebar is hidden off-screen — targeting sidebar elements
+    // causes Driver.js to position the popover outside the viewport, making
+    // the Next/Back buttons unreachable. Use floating popovers instead.
+    const mobile = window.innerWidth < 768;
 
     const driverObj = driver({
       animate: true,
@@ -35,16 +39,16 @@ export default function DashboardTour({ onDone }: Props) {
       },
       steps: [
         {
-          element: "#tour-travelers",
+          ...(mobile ? {} : { element: "#tour-travelers" }),
           popover: {
             title: "Your Travelers",
             description:
               "<em>Welcome to ViyaWay — here's a quick tour, takes about 60 seconds.</em><br><br>" +
-              "Each traveler has a personality profile that drives their recommendations. Click a name to view or edit their travel style.",
+              "Each traveler has a personality profile that drives their recommendations. Tap a name to view or edit their travel style.",
           },
         },
         {
-          element: "#tour-add-traveler",
+          ...(mobile ? {} : { element: "#tour-add-traveler" }),
           popover: {
             title: "Add a Travel Companion",
             description:
@@ -52,7 +56,7 @@ export default function DashboardTour({ onDone }: Props) {
           },
         },
         {
-          element: "#tour-trips",
+          ...(mobile ? {} : { element: "#tour-trips" }),
           popover: {
             title: "Your Trips",
             description:
@@ -60,7 +64,7 @@ export default function DashboardTour({ onDone }: Props) {
           },
         },
         {
-          element: "#tour-create-trip",
+          ...(mobile ? {} : { element: "#tour-create-trip" }),
           popover: {
             title: "Create a Trip",
             description:
