@@ -527,7 +527,7 @@ export default function Home() {
                 <label className="text-[#6B8299] text-xs uppercase block mb-1">Trip Name</label>
                 <input
                   className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
-                  placeholder="Tuscany 2026"
+                  placeholder="e.g. Tuscany 2026"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
@@ -538,7 +538,7 @@ export default function Home() {
                 <label className="text-[#6B8299] text-xs uppercase block mb-1">Destination</label>
                 <input
                   className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
-                  placeholder="Tuscany, Italy"
+                  placeholder="e.g. Tuscany, Italy"
                   value={newDest}
                   onChange={(e) => setNewDest(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
