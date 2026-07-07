@@ -29,8 +29,6 @@ export default function Home() {
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
-  const [newStartDate, setNewStartDate] = useState("");
-  const [newEndDate, setNewEndDate] = useState("");
   const [newPartySize, setNewPartySize] = useState<number>(2);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
@@ -118,7 +116,6 @@ export default function Home() {
           name: newName,
           destination: newDest,
           travelers,
-          ...(newStartDate && newEndDate ? { dates: { start: newStartDate, end: newEndDate } } : {}),
           partySize: newPartySize,
         }),
       });
@@ -542,28 +539,6 @@ export default function Home() {
                   onChange={(e) => setNewDest(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
                 />
-              </div>
-              {/* Dates — two equal columns */}
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="text-[#6B8299] text-xs uppercase block mb-1">Check In</label>
-                  <input
-                    type="date"
-                    className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
-                    value={newStartDate}
-                    onChange={(e) => setNewStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-[#6B8299] text-xs uppercase block mb-1">Check Out</label>
-                  <input
-                    type="date"
-                    className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
-                    value={newEndDate}
-                    min={newStartDate}
-                    onChange={(e) => setNewEndDate(e.target.value)}
-                  />
-                </div>
               </div>
               {/* Guests — stepper on its own row */}
               <div className="flex items-center justify-between">
