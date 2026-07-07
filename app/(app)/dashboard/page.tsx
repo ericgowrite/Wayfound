@@ -467,10 +467,9 @@ export default function Home() {
             {/* <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money ↗</a> */}
           </div>
 
-          {/* Affiliate disclosure */}
-          <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-2.5">
+          {/* <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-2.5">
             ViyaWay may earn a commission from bookings. This doesn&apos;t affect our recommendations.
-          </p>
+          </p> */}
         </div>
       </div>
 
