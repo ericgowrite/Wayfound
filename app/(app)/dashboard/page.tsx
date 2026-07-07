@@ -132,8 +132,7 @@ export default function Home() {
       setShowNewWorkspace(false);
       setNewName("");
       setNewDest("");
-      setNewStartDate("");
-      setNewEndDate("");
+
       setNewPartySize(2);
     } catch (e) {
       console.error("[createWorkspace] threw:", e);
@@ -494,6 +493,7 @@ export default function Home() {
             travelers={travelerProfiles}
             onChange={handleWorkspaceChange}
             onProfileUpdate={handleProfileUpdate}
+            onOpenProfile={travelerProfiles[0] ? () => setEditingProfile(travelerProfiles[0]) : undefined}
             activeSearchId={activeSearchId}
             onSearchChange={setActiveSearchId}
           />

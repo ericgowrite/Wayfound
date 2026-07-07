@@ -269,6 +269,10 @@ const AXIS_SCHEMA = `"axisScores": {
   }`;
 
 const AXIS_GUIDE = `Axis scoring guide:
+CRITICAL: Axis scores describe the PROPERTY'S objective characteristics — what it IS, not how well it matches this traveler.
+Score each axis based on the property itself. Do NOT adjust axis scores based on the traveler's type, weights, or preferences.
+The same property should receive the same axis scores regardless of who is searching. Personalization is applied mathematically after scoring.
+
 - calm: 0=very high energy/stimulating, 1=very peaceful/calm
 - designSincerity: 0=staged/generic/touristy, 1=authentic/genuine
 - valueIntegrity: 0=overpriced/poor value, 1=excellent value for money
@@ -366,15 +370,18 @@ export async function searchAndScore(
   profiles: Profile[],
   destination?: string,
   dates?: { start: string; end: string },
-  partySize?: number
+  partySize?: number,
+  skipCache?: boolean
 ): Promise<ScoredOption[]> {
   // Cache check — dates excluded from key intentionally (24h TTL prevents
   // stale seasonal results; including dates destroys hit rate for re-searches).
   const cacheKey = searchCacheKey(query, category, profiles, destination, partySize);
-  const cached = await getCachedSearch(cacheKey);
-  if (cached) {
-    console.log(`[VIYA-AI] search cache hit: "${query}" (${category})`);
-    return cached.map((item) => hydrate(item, searchId));
+  if (!skipCache) {
+    const cached = await getCachedSearch(cacheKey);
+    if (cached) {
+      console.log(`[VIYA-AI] search cache hit: "${query}" (${category})`);
+      return cached.map((item) => hydrate(item, searchId));
+    }
   }
 
   const systemPrompt = buildSystemPrompt("search");

@@ -39,13 +39,14 @@ interface Props {
   travelers: Profile[];
   onChange: (w: TripWorkspace) => void;
   onProfileUpdate: (profile: Profile) => void;
+  onOpenProfile?: () => void;
   activeSearchId: string | null;
   onSearchChange: (id: string) => void;
 }
 
 type SortMode = "fit" | "group";
 
-export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, activeSearchId, onSearchChange }: Props) {
+export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, onOpenProfile, activeSearchId, onSearchChange }: Props) {
   const { isAnonymous } = useAuth();
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
@@ -166,6 +167,13 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         searches: [search, ...workspace.searches.filter((s) => s.id !== search.id)],
       });
       onSearchChange(search.id);
+      logEvent({
+        event: "viyaway_search_run",
+        query,
+        category,
+        destination: workspace.destination ?? null,
+        resultCount: search.scoredResults?.length ?? 0,
+      });
       setActiveTab("search");
     } catch (e) {
       setSearchError(e instanceof Error ? e.message : String(e));
@@ -760,11 +768,22 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Result count — shown in header so it stays visible */}
             {!searching && sortedResults.length > 0 && (
-              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
-                {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
-                {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
-                {" · "}&quot;{displayedSearch!.query}&quot;
-              </p>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
+                  {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
+                  {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
+                  {" · "}&quot;{displayedSearch!.query}&quot;
+                  {" · "}<span className="italic">AI-curated · may not reflect recent changes</span>
+                </p>
+                {onOpenProfile && (
+                  <button
+                    onClick={onOpenProfile}
+                    className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] text-left transition-colors"
+                  >
+                    Results not feeling right? Review your travel profile →
+                  </button>
+                )}
+              </div>
             )}
             </div>{/* end header */}
 

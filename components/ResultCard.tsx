@@ -8,6 +8,7 @@ import { validateUrl, reportBadUrl, findReplacementUrl } from "@/lib/urlValidati
 import { isFeedbackEligible, relevantFeedbackAxes, AXIS_FEEDBACK_FLAGS } from "@/lib/feedback";
 import AxisBar from "./AxisBar";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { logEvent } from "@/lib/analytics";
 
 interface Props {
   option: ScoredOption;
@@ -304,6 +305,7 @@ export default function ResultCard({
           if (isList) { onSelect?.(); return; }
           if (isDetail) return;
           const next = !expanded; setExpanded(next); onExpandedChange?.(next);
+          if (next) logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
         }}
       >
         <input
@@ -449,36 +451,56 @@ export default function ResultCard({
             <div className="space-y-3">
               {/* Source CTA — featured at top in detail mode */}
               {isDetail && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {(urlStatus === "checking" || urlStatus === "recovering") && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
-                      {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
-                    </span>
-                  )}
-                  {(urlStatus === "valid" || urlStatus === "recovered") && (
-                    <>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(urlStatus === "checking" || urlStatus === "recovering") && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                        {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
+                      </span>
+                    )}
+                    {urlStatus === "valid" && (
+                      <>
+                        <a
+                          href={resolvedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
+                        >
+                          <span>🔗</span>
+                          {getSourceLabel(resolvedUrl)}
+                        </a>
+                        {!reportSent && (
+                          <button
+                            onClick={handleReport}
+                            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                            title="Report a bad or incorrect link"
+                          >
+                            🚩 Report
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {urlStatus === "recovered" && (
                       <a
                         href={resolvedUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0]/80 text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                        onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
                       >
                         <span>🔗</span>
                         {getSourceLabel(resolvedUrl)}
                       </a>
-                      {urlStatus === "valid" && !reportSent && (
-                        <button
-                          onClick={handleReport}
-                          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                          title="Report a bad or incorrect link"
-                        >
-                          🚩 Report
-                        </button>
-                      )}
-                    </>
-                  )}
-                  {urlStatus === "not_found" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
+                    )}
+                    {urlStatus === "not_found" && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
+                    )}
+                  </div>
+                  {urlStatus === "recovered" && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
+                      Couldn&apos;t verify the original link — this may be the official site
+                    </span>
                   )}
                 </div>
               )}
@@ -502,35 +524,54 @@ export default function ResultCard({
               )}
               {/* Source link — small text in default/expanded mode */}
               {!isDetail && (
-                <div className="flex items-center gap-3 flex-wrap min-h-[1.5rem]">
-                  {(urlStatus === "checking" || urlStatus === "recovering") && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
-                      {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
-                    </span>
-                  )}
-                  {(urlStatus === "valid" || urlStatus === "recovered") && (
-                    <>
+                <div className="flex flex-col gap-0.5 min-h-[1.5rem]">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {(urlStatus === "checking" || urlStatus === "recovering") && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                        {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
+                      </span>
+                    )}
+                    {urlStatus === "valid" && (
+                      <>
+                        <a
+                          href={resolvedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
+                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
+                        >
+                          {getSourceLabel(resolvedUrl)}
+                        </a>
+                        {!reportSent && (
+                          <button
+                            onClick={handleReport}
+                            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                            title="Report a bad or incorrect link"
+                          >
+                            🚩 Report
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {urlStatus === "recovered" && (
                       <a
                         href={resolvedUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
+                        onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
                       >
                         {getSourceLabel(resolvedUrl)}
                       </a>
-                      {urlStatus === "valid" && !reportSent && (
-                        <button
-                          onClick={handleReport}
-                          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                          title="Report a bad or incorrect link"
-                        >
-                          🚩 Report
-                        </button>
-                      )}
-                    </>
-                  )}
-                  {urlStatus === "not_found" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
+                    )}
+                    {urlStatus === "not_found" && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
+                    )}
+                  </div>
+                  {urlStatus === "recovered" && (
+                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
+                      Couldn&apos;t verify the original link — this may be the official site
+                    </span>
                   )}
                 </div>
               )}
