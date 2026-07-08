@@ -102,24 +102,6 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
           </div>
 
           <div>
-            <label className={`${label} block mb-2`}>Thresholds (warn if axis falls below)</label>
-            <div className="grid grid-cols-2 gap-2">
-              {AXIS_KEYS.map((k) => (
-                <div key={k} className="flex items-center gap-2">
-                  <span className="text-xs text-[#6B8299] dark:text-[#9BB0C1] w-28 truncate">{AXIS_LABELS[k]}</span>
-                  <input
-                    type="number" min={0} max={1} step={0.05}
-                    className={`w-16 ${input} text-xs rounded border p-1 focus:outline-none`}
-                    placeholder="—"
-                    value={draft.thresholds[k] ?? ""}
-                    onChange={(e) => setThreshold(k, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
             <label className={`${label} block mb-2`}>Dealbreakers</label>
             <div className="space-y-1.5 mb-2">
               {draft.dealbreakers.map((d, i) => (
