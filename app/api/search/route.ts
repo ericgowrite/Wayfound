@@ -52,10 +52,14 @@ export async function POST(request: Request) {
     const profiles = travelerProfiles.length > 0 ? travelerProfiles : (defaultProfile ? [defaultProfile] : []);
 
     const searchId = uuidv4();
+    const t0 = Date.now();
     const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize);
+    console.log(`[VIYA-PERF] gemini searchAndScore: ${Date.now() - t0}ms (${rawResults.length} results) — query="${query}" dest="${workspace.destination ?? ""}"`);
     // Validate every link before it's ever shown to the user — no result
     // should reach the client with a known-broken source (MVP backlog #4).
+    const t1 = Date.now();
     const validatedResults = await validateResultLinks(rawResults, workspace.destination, workspace.dates, workspace.partySize);
+    console.log(`[VIYA-PERF] url validation: ${Date.now() - t1}ms for ${rawResults.length} urls`);
     const scoredResults = attachTravelerScores(validatedResults, travelerProfiles);
 
     const search: Search = {
