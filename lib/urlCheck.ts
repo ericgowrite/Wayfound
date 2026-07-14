@@ -69,19 +69,6 @@ export interface ValidateResult {
   reason: string;
 }
 
-/** Extract the root domain (e.g. "booking.com" from "www.booking.com") */
-function rootDomain(hostname: string): string {
-  const parts = hostname.replace(/^www\./, "").split(".");
-  return parts.slice(-2).join(".");
-}
-
-function sameDomain(urlA: string, urlB: string): boolean {
-  try {
-    return rootDomain(new URL(urlA).hostname) === rootDomain(new URL(urlB).hostname);
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Block requests to private/loopback addresses to prevent SSRF.
@@ -131,10 +118,10 @@ export async function checkUrl(url: string): Promise<ValidateResult> {
     if (status === 404) {
       return { valid: false, finalUrl: null, status, reason: "not_found" };
     }
-    if (status >= 200 && status < 300 && !sameDomain(url, finalUrl)) {
-      return { valid: false, finalUrl: null, status, reason: "cross_domain_redirect" };
-    }
     if (status >= 200 && status < 400) {
+      // Accept any successful response including cross-domain redirects —
+      // international properties (.it, .id, .co.uk) commonly redirect to OTA
+      // listings or regional TLD equivalents, which are legitimate destinations.
       return { valid: true, finalUrl, status, reason: "ok" };
     }
     if (status === 403 || status === 405 || status >= 500) {

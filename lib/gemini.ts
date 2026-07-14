@@ -49,7 +49,11 @@ async function getCachedSearch(key: string): Promise<RawResult[] | null> {
     if (!doc.exists) return null;
     const d = doc.data()!;
     if ((d.expiresAt as Timestamp).toMillis() < Date.now()) return null;
-    return d.results as RawResult[];
+    const results = d.results as RawResult[];
+    // Treat a cached empty array as a miss — a prior Gemini failure shouldn't
+    // lock users out for 24 hours.
+    if (results.length === 0) return null;
+    return results;
   } catch {
     return null; // cache failure is non-fatal — fall through to Gemini
   }
@@ -61,6 +65,9 @@ async function setCachedSearch(
   category: SearchCategory,
   results: RawResult[]
 ): Promise<void> {
+  // Don't cache empty result sets — a failed Gemini call shouldn't be served
+  // to subsequent users for 24 hours.
+  if (results.length === 0) return;
   try {
     await adminDb.collection(SEARCH_CACHE_COLLECTION).doc(key).set({
       query,
