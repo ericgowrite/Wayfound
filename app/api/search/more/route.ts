@@ -4,7 +4,6 @@ import { getTokenClaims, AuthError } from "@/lib/serverAuth";
 import { searchMoreOptions } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
 import { friendlyError } from "@/lib/errorMessages";
-import { validateResultLinks } from "@/lib/urlCheck";
 
 const ANON_SEARCH_LIMIT = 2;
 
@@ -40,8 +39,7 @@ export async function POST(request: Request) {
 
     const alreadySeen = search.scoredResults.map((r) => r.name);
     const rawResults = await searchMoreOptions(search.query, search.category, searchId, profiles, alreadySeen, workspace.destination, workspace.dates, workspace.partySize);
-    const validatedResults = await validateResultLinks(rawResults, workspace.destination, workspace.dates, workspace.partySize);
-    const newResults = attachTravelerScores(validatedResults, travelerProfiles);
+    const newResults = attachTravelerScores(rawResults, travelerProfiles);
 
     const updatedSearch = { ...search, scoredResults: [...search.scoredResults, ...newResults] };
     const updatedWorkspace = {
