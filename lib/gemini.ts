@@ -162,20 +162,23 @@ async function callWithSearch(systemPrompt: string, userPrompt: string): Promise
 }
 
 /**
- * Best-effort cross-check: log a warning when a result's claimed source
- * domain has zero corroboration from any search-grounding citation. This is
- * a soft signal (titles aren't always clean domains) — it informs, doesn't block.
+ * Cross-check a result's claimed source URL against Gemini's search-grounding
+ * citations. Returns true if corroborated (or if we can't tell — citations
+ * may be incomplete). Returns false only when citations are present AND the
+ * domain has zero overlap with any of them, which is strong evidence Gemini
+ * constructed the URL rather than finding it in search results.
  */
-function auditCitedDomain(resultName: string, sourceUrl: string | undefined, citedDomains: Set<string>): void {
-  if (!sourceUrl || citedDomains.size === 0) return;
+function isCitedDomainCorroborated(resultName: string, sourceUrl: string | undefined, citedDomains: Set<string>): boolean {
+  if (!sourceUrl || citedDomains.size === 0) return true; // can't tell — give benefit of doubt
   try {
     const host = new URL(sourceUrl).hostname.replace(/^www\./, "");
     const corroborated = Array.from(citedDomains).some((d) => d.includes(host) || host.includes(d));
     if (!corroborated) {
-      console.warn(`[VIYA-AI] source domain "${host}" for "${resultName}" not found in search citations — relying on server-side URL validation as the real check`);
+      console.warn(`[VIYA-AI] nulling source for "${resultName}" — domain "${host}" not found in search citations (likely hallucinated)`);
     }
+    return corroborated;
   } catch {
-    // unparseable URL — server-side validation will catch it regardless
+    return true; // unparseable URL — let client-side validation handle it
   }
 }
 
@@ -405,7 +408,7 @@ Search the web for this query, then score each result against the profile.
 For each option found (aim for 4-8 results), return a JSON array:
 [{
   "name": "Option name",
-  "source": "full https:// URL to the official website or booking page (required)",
+  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
   "description": "Brief description",
   "price": "Price if available",
   ${AXIS_SCHEMA},
@@ -426,7 +429,13 @@ ${thresholdLine(scoringProfile)}`.trim();
   const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "search");
   const items = parseArray(raw);
-  for (const item of items) auditCitedDomain(item.name, item.source, citedDomains);
+  // Null out any source URL not corroborated by search citations — these are
+  // likely hallucinated. The client-side Places recovery handles empty sources.
+  for (const item of items) {
+    if (!isCitedDomainCorroborated(item.name, item.source, citedDomains)) {
+      item.source = "";
+    }
+  }
   // Write to cache before hydrating so the stored items have no UUID fields.
   await setCachedSearch(cacheKey, query, category, items);
   return items.map((item) => hydrate(item, searchId));
@@ -462,7 +471,7 @@ ${profiles.length > 1 ? `This is a group trip — find options that work well fo
 Return a JSON array using the same structure:
 [{
   "name": "Option name",
-  "source": "full https:// URL to the official website or booking page (required)",
+  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
   "description": "Brief description",
   "price": "Price if available",
   ${AXIS_SCHEMA},
@@ -483,7 +492,11 @@ ${thresholdLine(scoringProfile)}`.trim();
   const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
   const items = parseArray(raw);
-  for (const item of items) auditCitedDomain(item.name, item.source, citedDomains);
+  for (const item of items) {
+    if (!isCitedDomainCorroborated(item.name, item.source, citedDomains)) {
+      item.source = "";
+    }
+  }
   return items.map((item) => hydrate(item, searchId));
 }
 
@@ -624,7 +637,7 @@ ${isUrl ? "Fetch the page and use that content to score this option." : "Search 
 Return a single JSON object (not an array):
 {
   "name": "Option name",
-  "source": "full https:// URL to the official website or booking page (required)",
+  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
   "description": "Brief description (2-3 sentences)",
   "price": "Price if found, otherwise omit",
   ${AXIS_SCHEMA},
@@ -646,7 +659,9 @@ ${thresholdLine(scoringProfile)}`.trim();
   auditResponse(raw, "scoreSpecific", { userProvidedUrl });
 
   const parsed = parseObject(raw);
-  if (!userProvidedUrl) auditCitedDomain(parsed.name, parsed.source, citedDomains);
+  if (!userProvidedUrl && !isCitedDomainCorroborated(parsed.name, parsed.source, citedDomains)) {
+    parsed.source = "";
+  }
 
   // Sacred Rule 1: Always restore user-provided URL — never let Gemini overwrite it.
   if (userProvidedUrl) {
