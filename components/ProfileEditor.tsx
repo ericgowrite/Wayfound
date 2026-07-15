@@ -66,6 +66,9 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
 
         <div className="p-4 space-y-6">
           <div>
+            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-3">
+              ViyaWay uses your travel style to score every result.
+            </p>
             <label className={`${label} block mb-1`}>Description</label>
             <textarea
               className={`w-full ${input} text-sm rounded border p-2 resize-none focus:outline-none`}
@@ -79,7 +82,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
             {(() => {
               const info = TYPE_INFO[draft.enneagramType ?? ""];
               return info ? (
-                <ul className="space-y-2 mb-3">
+                <ul className="space-y-2">
                   {info.bullets.map((bullet, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
                       <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
@@ -89,17 +92,6 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
                 </ul>
               ) : null;
             })()}
-            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
-              ViyaWay uses your travel style to score every result.
-            </p>
-            {onRetakeAssessment && (
-              <button
-                className="mt-1.5 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline block"
-                onClick={onRetakeAssessment}
-              >
-                Update your travel style →
-              </button>
-            )}
           </div>
 
           <div>
@@ -125,7 +117,15 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
           </div>
         </div>
 
-        <div className="p-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E] flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-[#1e2d3d]">
+        <div className="p-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E] flex gap-2 justify-between sticky bottom-0 bg-white dark:bg-[#1e2d3d]">
+          {onRetakeAssessment ? (
+            <button
+              className={`px-4 py-2 text-sm rounded ${btnSecondary}`}
+              onClick={onRetakeAssessment}
+            >
+              Update travel style →
+            </button>
+          ) : <div />}
           <button
             className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
             onClick={handleSave} disabled={saving}

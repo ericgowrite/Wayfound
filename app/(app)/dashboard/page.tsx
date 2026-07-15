@@ -334,14 +334,9 @@ export default function Home() {
                 ))}
               </div>
             )}
-            {travelerProfiles.length > 0 && (
-              <button
-                className="w-full text-left px-4 pb-3 pt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
-                onClick={() => setEditingProfile(travelerProfiles[0])}
-              >
-                Results not feeling right? Update your travel style →
-              </button>
-            )}
+            <p className="px-4 pb-3 pt-0.5 text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed">
+              Select a traveler to view or update their style.
+            </p>
           </div>
 
           {/* Divider */}
