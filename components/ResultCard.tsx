@@ -858,6 +858,7 @@ export default function ResultCard({
           type="checkbox"
           className="mt-1 accent-[#5B8BA0] cursor-pointer flex-shrink-0"
           checked={isSelected}
+          title="Select to compare"
           onChange={(e) => { e.stopPropagation(); onToggleSelect(); }}
           onClick={(e) => e.stopPropagation()}
         />

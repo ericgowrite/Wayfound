@@ -778,6 +778,19 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             )}
 
             {/* Comparison bar */}
+            {selectedIds.size === 1 && (
+              <div className="mb-4 flex items-center gap-3 bg-[#5B8BA0]/5 dark:bg-[#5B8BA0]/10 border border-[#5B8BA0]/25 dark:border-[#5B8BA0]/40 rounded-xl px-4 py-2.5">
+                <span className="text-[#5B8BA0] dark:text-[#7DBAD4] text-sm">
+                  1 selected — check another result to compare
+                </span>
+                <button
+                  className="text-[#6B8299] text-sm hover:text-[#2C3E50] dark:hover:text-white ml-auto transition-colors"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  Clear
+                </button>
+              </div>
+            )}
             {selectedIds.size >= 2 && (
               <div className="mb-4 flex items-center gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/40 dark:border-[#5B8BA0] rounded-xl px-4 py-2.5">
                 <span className="text-[#5B8BA0] dark:text-[#7DBAD4] text-sm font-medium">
@@ -1027,6 +1040,21 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             )}
 
             {/* Comparison bar */}
+            {selectedSavedIds.size === 1 && (
+              <div className="px-4 pb-2 flex-shrink-0">
+                <div className="flex items-center gap-3 bg-[#5B8BA0]/5 dark:bg-[#5B8BA0]/10 border border-[#5B8BA0]/25 dark:border-[#5B8BA0]/40 rounded-xl px-4 py-2.5">
+                  <span className="text-[#5B8BA0] dark:text-[#7DBAD4] text-sm">
+                    1 selected — check another result to compare
+                  </span>
+                  <button
+                    className="text-[#6B8299] text-sm hover:text-[#2C3E50] dark:hover:text-white ml-auto transition-colors"
+                    onClick={() => setSelectedSavedIds(new Set())}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
             {selectedSavedIds.size >= 2 && (
               <div className="px-4 pb-2 flex-shrink-0">
                 <div className="flex items-center gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/40 dark:border-[#5B8BA0] rounded-xl px-4 py-2.5">
