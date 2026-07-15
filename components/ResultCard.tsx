@@ -76,7 +76,7 @@ export default function ResultCard({
   const [deepDiveError, setDeepDiveError] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   // "About this property" in expanded card mode — collapsed by default
-  const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [aboutExpanded, setAboutExpanded] = useState(true);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
