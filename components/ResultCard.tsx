@@ -422,24 +422,6 @@ export default function ResultCard({
   function renderExpandedCardMode(inOverlay = false) {
     return (
       <div className="space-y-4">
-        {/* Focus-mode trigger — desktop only, hidden inside overlay itself */}
-        {!inOverlay && (
-          <div className="flex justify-end -mb-1">
-            <button
-              className="hidden md:inline-flex items-center gap-1 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
-              onClick={() => setOverlayOpen(true)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 3 21 3 21 9" />
-                <polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
-              Focus view
-            </button>
-          </div>
-        )}
-
         {/* 2. About this — collapsible, collapsed by default; label is category-aware */}
         {option.description && (
           <div>
@@ -958,18 +940,7 @@ export default function ResultCard({
               ))}
             </div>
           )}
-          {option.watchOutFor && option.watchOutFor.length > 0 && (
-            <div className="flex gap-1 mt-1.5 flex-wrap">
-              {option.watchOutFor.map((w) => (
-                <span
-                  key={w}
-                  className="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-1.5 py-0.5 rounded-full"
-                >
-                  ⚠ {w}
-                </span>
-              ))}
-            </div>
-          )}
+
           {option.dealbreakersTriggered.length > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {option.dealbreakersTriggered.map((d) => (
@@ -1012,26 +983,26 @@ export default function ResultCard({
           )}
         </div>
 
-        {/* Chevron + focus-mode expand icon (default variant only) */}
+        {/* Chevron (default variant) */}
         {!isList && !isDetail && (
-          <div className="flex items-center gap-1.5 flex-shrink-0 mt-1" onClick={(e) => e.stopPropagation()}>
-            {expanded && (
-              <button
-                className="text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors p-0.5 rounded"
-                onClick={() => setOverlayOpen(true)}
-                title="Open in focus view"
-                aria-label="Open in focus view"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 3 21 3 21 9" />
-                  <polyline points="9 21 3 21 3 15" />
-                  <line x1="21" y1="3" x2="14" y2="10" />
-                  <line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-              </button>
-            )}
-            <span className="text-[#9BB0C1] text-xs">{expanded ? "▲" : "▼"}</span>
-          </div>
+          <span className="text-[#9BB0C1] text-xs flex-shrink-0 mt-1.5">{expanded ? "▲" : "▼"}</span>
+        )}
+
+        {/* Expand-to-overlay button — detail panel, desktop only */}
+        {isDetail && (
+          <button
+            className="hidden md:inline-flex items-center gap-1 text-xs font-medium text-[#5B8BA0] dark:text-[#7DBAD4] hover:text-[#4A7A8F] dark:hover:text-[#9DCAE8] transition-colors flex-shrink-0 mt-1"
+            onClick={(e) => { e.stopPropagation(); setOverlayOpen(true); }}
+            aria-label="Open in focus view"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 3 21 3 21 9" />
+              <polyline points="9 21 3 21 3 15" />
+              <line x1="21" y1="3" x2="14" y2="10" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+            Expand
+          </button>
         )}
       </div>
 

@@ -561,20 +561,16 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
             <h1 className="text-xl font-semibold text-[#2C3E50] dark:text-white truncate">{workspace.name}</h1>
-            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm flex flex-wrap items-center gap-x-2">
+            <p className="text-[#3D5A6E] dark:text-[#9BB0C1] text-sm flex flex-wrap items-center gap-x-2">
               {workspace.destination}
               {workspace.dates?.start && workspace.dates?.end && (
-                <span className="text-[#9BB0C1] dark:text-[#6B8299]">
-                  · {formatDate(workspace.dates.start)} – {formatDate(workspace.dates.end)}
-                </span>
+                <span>· {formatDate(workspace.dates.start)} – {formatDate(workspace.dates.end)}</span>
               )}
               {workspace.partySize && workspace.partySize > 0 && (
-                <span className="text-[#9BB0C1] dark:text-[#6B8299]">· {workspace.partySize} guests</span>
+                <span>· {workspace.partySize} guests</span>
               )}
               {travelers.length > 0 && (
-                <span className="text-[#9BB0C1] dark:text-[#6B8299]">
-                  · {travelers.map((t) => t.name).join(", ")}
-                </span>
+                <span>· {travelers.map((t) => t.name).join(", ")}</span>
               )}
             </p>
           </div>
@@ -607,7 +603,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       </div>
 
       {/* Search / Score bar */}
-      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-3 space-y-2">
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-4 space-y-3">
         {/* Mode toggle */}
         <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 w-fit">
           <button
@@ -718,8 +714,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "search"
-              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
           }`}
           onClick={() => setActiveTab("search")}
         >
@@ -728,8 +724,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "saved"
-              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
           }`}
           onClick={() => setActiveTab("saved")}
         >
@@ -738,8 +734,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         <button
           className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "history"
-              ? "border-[#E8A87C] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
           }`}
           onClick={() => setActiveTab("history")}
         >
@@ -804,7 +800,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Result count — shown in header so it stays visible */}
             {!searching && sortedResults.length > 0 && (
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-1.5">
                 <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
                   {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
                   {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
@@ -1074,7 +1070,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Empty state */}
             {workspace.savedOptions.length === 0 && (
-              <div className="flex-1 flex flex-col items-center justify-center py-16">
+              <div className="flex flex-col items-center justify-center min-h-[65vh]">
                 <div className="text-6xl mb-4">📋</div>
                 <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No saved options yet</p>
                 <p className="text-sm text-[#6B8299] mt-1">Save results from your searches to compare later</p>
@@ -1229,8 +1225,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   )}
 
                   {sorted.length === 0 ? (
-                    <div className="text-center py-16">
-                      <div className="text-5xl mb-4">🗓️</div>
+                    <div className="flex flex-col items-center justify-center min-h-[65vh]">
+                      <div className="text-6xl mb-4">🗓️</div>
                       <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No history yet</p>
                       <p className="text-sm text-[#6B8299] mt-1">Save options from your searches to start tracking your journey</p>
                     </div>

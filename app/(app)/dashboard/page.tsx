@@ -267,7 +267,7 @@ export default function Home() {
         <div className="flex items-start justify-between px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
           <div>
             <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
-            <p className="text-xs text-[#6B8299] mt-0.5">Travel that fits who you are.</p>
+            <p className="text-xs text-[#3D5A6E] dark:text-[#9BB0C1] mt-0.5">Travel that fits who you are.</p>
             <button
               id="tour-trigger"
               className="text-xs text-[#5B8BA0] hover:underline mt-1"
