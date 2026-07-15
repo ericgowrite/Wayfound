@@ -338,6 +338,18 @@ export default function ResultCard({
 
   const selectionRing = isList && selected ? "ring-2 ring-[#5B8BA0]/40" : "";
 
+  // Context-aware "About this" label — avoids "property" for tours, restaurants, etc.
+  const aboutLabel = (() => {
+    switch (category) {
+      case "accommodation": return "About this property";
+      case "tour":          return "About this tour";
+      case "restaurant":    return "About this restaurant";
+      case "activity":      return "About this activity";
+      case "attraction":    return "About this place";
+      default:              return "About this place";
+    }
+  })();
+
   // ── Section heading class helpers ─────────────────────────────────────────────
   // Applied consistently in both the inline expanded card and the focus-mode overlay.
   const sH = "text-sm font-semibold text-[#2C3E50] dark:text-[#B8D4E3]";
@@ -410,8 +422,8 @@ export default function ResultCard({
   function renderExpandedCardMode(inOverlay = false) {
     return (
       <div className="space-y-4">
-        {/* Focus-mode trigger — inline card only, desktop only */}
-        {!isDetail && !inOverlay && (
+        {/* Focus-mode trigger — desktop only, hidden inside overlay itself */}
+        {!inOverlay && (
           <div className="flex justify-end -mb-1">
             <button
               className="hidden md:inline-flex items-center gap-1 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
@@ -428,7 +440,7 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* 2. About this property — collapsible, collapsed by default */}
+        {/* 2. About this — collapsible, collapsed by default; label is category-aware */}
         {option.description && (
           <div>
             <button
@@ -436,7 +448,7 @@ export default function ResultCard({
               onClick={() => setAboutExpanded((v) => !v)}
             >
               <div className="flex items-center justify-between gap-2">
-                <p className={sH}>About this property</p>
+                <p className={sH}>{aboutLabel}</p>
                 <span className="text-[#9BB0C1] text-xs flex-shrink-0">{aboutExpanded ? "▲" : "▼"}</span>
               </div>
               {!aboutExpanded && (
@@ -922,7 +934,7 @@ export default function ResultCard({
             )}
           </div>
           <div className="mt-1">
-            <p className={`text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed ${isList ? "line-clamp-2" : showFullExplanation ? "" : "line-clamp-3"}`}>
+            <p className={`text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed ${isList ? "line-clamp-2" : showFullExplanation ? "" : "line-clamp-3"}`}>
               {option.fitExplanation}
             </p>
             {!isList && option.fitExplanation && option.fitExplanation.length > 160 && (
@@ -1069,7 +1081,7 @@ export default function ResultCard({
                     </span>
                   )}
                 </div>
-                <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed mt-1">{option.fitExplanation}</p>
+                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed mt-1">{option.fitExplanation}</p>
               </div>
               <button
                 className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none flex-shrink-0 ml-2 transition-colors"
