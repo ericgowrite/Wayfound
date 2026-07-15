@@ -233,24 +233,19 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
 
           {step === "review" && draft.axisWeights && (
             <div className="space-y-5">
-              {(() => {
-                const info = TYPE_INFO[draft.enneagramType ?? ""];
-                return info ? (
-                  <ul className="space-y-2">
-                    {info.bullets.map((bullet, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                        <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">{draft.description}</p>
-                );
-              })()}
-              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
-                ViyaWay uses your travel style to score every result.
-              </p>
+              <div>
+                {(() => {
+                  const info = TYPE_INFO[draft.enneagramType ?? ""];
+                  return info ? (
+                    <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
+                      Type {draft.enneagramType} — {info.name}
+                    </p>
+                  ) : null;
+                })()}
+                <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mt-1">
+                  ViyaWay uses your travel style to score every result.
+                </p>
+              </div>
 
               <div>
                 <label className="text-[#6B8299] text-xs uppercase block mb-2">Dealbreakers</label>
@@ -327,7 +322,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save Profile"}
+                {saving ? "Saving..." : "Done"}
               </button>
             </>
           )}
