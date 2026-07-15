@@ -69,10 +69,12 @@ export default function ResultCard({
   const [flaggedAxes, setFlaggedAxes] = useState<Set<keyof AxisWeights>>(new Set());
   const [feedbackNote, setFeedbackNote] = useState("");
   const [deepDive, setDeepDive] = useState<DeepDiveResult | null>(null);
+  const [deepDiveMode, setDeepDiveMode] = useState(false);
   const [loadingDive, setLoadingDive] = useState(false);
   const [deepDiveError, setDeepDiveError] = useState(false);
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Deep dive progressive disclosure
   const [showMoreWhyItFits, setShowMoreWhyItFits] = useState(false);
@@ -279,7 +281,9 @@ export default function ResultCard({
       const data = await res.json();
       if (data.deepDive) {
         setDeepDive(data.deepDive);
+        setDeepDiveMode(true);
         onDeepDive();
+        setTimeout(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
       } else {
         setDeepDiveError(true);
       }
@@ -317,7 +321,7 @@ export default function ResultCard({
   const selectionRing = isList && selected ? "ring-2 ring-[#5B8BA0]/40" : "";
 
   return (
-    <div className={`border rounded-xl bg-white dark:bg-[#1e2d3d] ${borderColor} ${selectionRing} transition-all`}>
+    <div ref={cardRef} className={`border rounded-xl bg-white dark:bg-[#1e2d3d] ${borderColor} ${selectionRing} transition-all`}>
       {/* Header */}
       <div
         className={`flex items-start gap-3 p-4 select-none ${isList ? "cursor-pointer" : isDetail ? "" : "cursor-pointer"}`}
@@ -474,595 +478,497 @@ export default function ResultCard({
 
       {/* Expanded details — always on in detail variant, toggled in default */}
       {(isDetail || (!isList && expanded)) && (
-        <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
-          {/* THE VERDICT — position 2, shown when deep dive is available */}
-          {deepDive?.bottomLine && (
-            <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
-              <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
-            </div>
-          )}
+        <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4">
+          {!deepDiveMode ? (
+            /* ── EXPANDED CARD MODE ── mutually exclusive with Deep Dive mode */
+            <div className="space-y-4">
+              {/* THE VERDICT — shown when deep dive data is available */}
+              {deepDive?.bottomLine && (
+                <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
+                </div>
+              )}
 
-          {/* Traveler fit — position 3, all travelers */}
-          {travelers.length > 0 && (
-            <div>
-              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-2.5">Traveler fit</p>
-              <div className="space-y-2.5">
-                {travelers.map((traveler, idx) => {
-                  const ts = option.travelerScores?.[traveler.id];
-                  const tScore = ts?.alignmentScore ?? option.alignmentScore;
-                  const violations = ts?.thresholdViolations ?? [];
-                  const tTier = fitTier(tScore);
-                  const barWidth = Math.max(0, Math.min(100, tScore));
-                  return (
-                    <div key={traveler.id}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}>
-                          {traveler.name[0]}
+              {/* Traveler fit */}
+              {travelers.length > 0 && (
+                <div>
+                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-2.5">Traveler fit</p>
+                  <div className="space-y-2.5">
+                    {travelers.map((traveler, idx) => {
+                      const ts = option.travelerScores?.[traveler.id];
+                      const tScore = ts?.alignmentScore ?? option.alignmentScore;
+                      const violations = ts?.thresholdViolations ?? [];
+                      const tTier = fitTier(tScore);
+                      const barWidth = Math.max(0, Math.min(100, tScore));
+                      return (
+                        <div key={traveler.id}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}>
+                              {traveler.name[0]}
+                            </div>
+                            <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">{traveler.name}</span>
+                            <div
+                              className="flex-1 relative bg-[#E0E8ED] dark:bg-[#3D5A6E]"
+                              style={{ height: "8px", borderRadius: "9999px" }}
+                            >
+                              <div
+                                style={{
+                                  position: "absolute", top: 0, left: 0, height: "8px", borderRadius: "9999px",
+                                  width: `${barWidth}%`, backgroundColor: tTier.hex, backgroundImage: "none", background: tTier.hex,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium" style={{ color: tTier.hex }}>
+                              {tScore}%
+                            </span>
+                          </div>
+                          {violations.length > 0 && (
+                            <div className="ml-[calc(1.5rem+0.75rem+5rem+0.75rem)] mt-1">
+                              <span className="text-xs text-amber-600 dark:text-amber-400">⚠ Below threshold: {violations.join(", ")}</span>
+                            </div>
+                          )}
                         </div>
-                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">{traveler.name}</span>
-                        <div
-                          className="flex-1 relative bg-[#E0E8ED] dark:bg-[#3D5A6E]"
-                          style={{ height: "8px", borderRadius: "9999px" }}
-                        >
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              height: "8px",
-                              borderRadius: "9999px",
-                              width: `${barWidth}%`,
-                              backgroundColor: tTier.hex,
-                              backgroundImage: "none",
-                              background: tTier.hex,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
-                          style={{ color: tTier.hex }}
-                        >
-                          {tScore}%
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* See why / Research again CTA */}
+              <div>
+                {deepDiveError && (
+                  <p className="text-xs text-red-500 dark:text-red-400 mb-2">Research failed — try again</p>
+                )}
+                {deepDive ? (
+                  <button
+                    className="w-full px-4 py-2.5 text-sm rounded-lg border border-[#5B8BA0]/40 dark:border-[#5B8BA0]/50 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/15 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                    onClick={handleDeepDive}
+                    disabled={loadingDive}
+                  >
+                    {loadingDive ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></> : "Research again →"}
+                  </button>
+                ) : (
+                  <button
+                    className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                    onClick={handleDeepDive}
+                    disabled={loadingDive}
+                  >
+                    {loadingDive ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></> : seeWhyCopy}
+                  </button>
+                )}
+              </div>
+
+              {/* Chat trigger */}
+              <button
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
+                  chatOpen
+                    ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                    : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
+                }`}
+                onClick={() => { setChatOpen((v) => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100); }}
+              >
+                <span className="text-sm">💬</span>
+                <span>{chatOpen ? "Hide chat" : "Ask ViyaWay about this place"}</span>
+                {chatMessages.length > 0 && !chatOpen && <span className="text-xs opacity-60">({chatMessages.length})</span>}
+              </button>
+
+              {/* Secondary info: source, Watch out for (expanded mode only), About this property (expanded mode only), source link */}
+              <div className="space-y-3">
+                {isDetail && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(urlStatus === "checking" || urlStatus === "recovering") && (
+                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                          {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
                         </span>
+                      )}
+                      {urlStatus === "valid" && (
+                        <>
+                          <a href={resolvedUrl} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                            onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}>
+                            <span>🔗</span>{getSourceLabel(resolvedUrl)}
+                          </a>
+                          {!reportSent && (
+                            <button onClick={handleReport} className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors" title="Report a bad or incorrect link">
+                              🚩 Report
+                            </button>
+                          )}
+                        </>
+                      )}
+                      {urlStatus === "recovered" && (
+                        <a href={resolvedUrl} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0]/80 text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
+                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}>
+                          <span>🔗</span>{getSourceLabel(resolvedUrl)}
+                        </a>
+                      )}
+                      {urlStatus === "not_found" && <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>}
+                    </div>
+                    {urlStatus === "recovered" && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Couldn&apos;t verify the original link — this may be the official site</span>
+                    )}
+                  </div>
+                )}
+
+                {option.tradeoffs.length > 0 && (
+                  <div>
+                    <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">Watch out for</p>
+                    <ul className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] space-y-1">
+                      {option.tradeoffs.map((t, i) => (
+                        <li key={i} className="flex gap-1.5">
+                          <span className="text-[#9BB0C1] flex-shrink-0 mt-0.5">•</span>
+                          <span>{t}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">About this property</p>
+                  <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
+                </div>
+
+                {!isDetail && (
+                  <div className="flex flex-col gap-0.5 min-h-[1.5rem]">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {(urlStatus === "checking" || urlStatus === "recovering") && (
+                        <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
+                          {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
+                        </span>
+                      )}
+                      {urlStatus === "valid" && (
+                        <>
+                          <a href={resolvedUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
+                            onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}>
+                            {getSourceLabel(resolvedUrl)}
+                          </a>
+                          {!reportSent && (
+                            <button onClick={handleReport} className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors" title="Report a bad or incorrect link">
+                              🚩 Report
+                            </button>
+                          )}
+                        </>
+                      )}
+                      {urlStatus === "recovered" && (
+                        <a href={resolvedUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
+                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}>
+                          {getSourceLabel(resolvedUrl)}
+                        </a>
+                      )}
+                      {urlStatus === "not_found" && <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>}
+                    </div>
+                    {urlStatus === "recovered" && (
+                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Couldn&apos;t verify the original link — this may be the official site</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Inline Chat */}
+              {chatOpen && (
+                <div className="rounded-xl bg-[#F3F7FA] dark:bg-[#1a2a38] border border-[#E0E8ED] dark:border-[#2a3f52] overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+                    <div>
+                      <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Ask anything about {option.name}</p>
+                      <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299]">
+                        {travelers.length === 1
+                          ? `For ${travelers[0].name}`
+                          : `For ${travelers.slice(0, -1).map((t) => t.name).join(", ")} & ${travelers[travelers.length - 1].name}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {chatMessages.length > 0 && (
+                        <button className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                          onClick={() => { setChatMessages([]); onChatUpdate([]); }} title="Clear chat history">Clear</button>
+                      )}
+                      <button className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
+                        onClick={() => setChatOpen(false)}>Collapse</button>
+                    </div>
+                  </div>
+                  <div className="max-h-64 sm:max-h-72 overflow-y-auto p-3 space-y-2.5">
+                    {chatMessages.length === 0 && (
+                      <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] text-center py-4">
+                        Pricing, vibe, logistics, or how it fits your travel style — ask away.
+                      </p>
+                    )}
+                    {chatMessages.map((msg) => (
+                      <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                          msg.role === "user"
+                            ? "bg-[#5B8BA0] text-white rounded-br-md"
+                            : "bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-bl-md"
+                        }`}>{msg.content}</div>
                       </div>
-                      {violations.length > 0 && (
-                        <div className="ml-[calc(1.5rem+0.75rem+5rem+0.75rem)] mt-1">
-                          <span className="text-xs text-amber-600 dark:text-amber-400">
-                            ⚠ Below threshold: {violations.join(", ")}
+                    ))}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white dark:bg-[#2a3f52] border border-[#E0E8ED] dark:border-[#3D5A6E] px-3 py-2 rounded-2xl rounded-bl-md">
+                          <span className="flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                            <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                            <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                           </span>
                         </div>
-                      )}
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] sticky bottom-0">
+                    <input
+                      ref={chatInputRef}
+                      type="text"
+                      className="flex-1 bg-transparent text-sm text-[#2C3E50] dark:text-[#B8D4E3] placeholder-[#9BB0C1] dark:placeholder-[#6B8299] outline-none min-w-0"
+                      placeholder="Ask about pricing, vibe, logistics…"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleChatSend(); } }}
+                      disabled={chatLoading}
+                    />
+                    <button
+                      className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:text-[#4A7A8F] dark:hover:text-[#9DCAE8] disabled:opacity-40 transition-colors text-sm font-medium px-2 py-1 flex-shrink-0"
+                      onClick={handleChatSend}
+                      disabled={chatLoading || !chatInput.trim()}
+                    >Send</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div>
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1.5">Notes</p>
+                <textarea
+                  className="w-full bg-[#F8FAFB] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] text-sm rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2.5 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
+                  rows={2} placeholder="Add notes…" value={notes}
+                  onChange={(e) => setNotes(e.target.value)} onBlur={() => onNotesChange(notes)}
+                />
+              </div>
+
+              {/* Post-trip feedback */}
+              {option.feedback ? (
+                <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] bg-[#F8FAFB] dark:bg-[#2a3f52]/60 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Your feedback</p>
+                  <p className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]">
+                    {option.feedback.metExpectations === "yes" ? "Met expectations ✓" : option.feedback.metExpectations === "no" ? "Didn't meet expectations ✗" : "Mixed — partly met expectations"}
+                  </p>
+                  {option.feedback.axisFlags.length > 0 && (
+                    <ul className="mt-1.5 space-y-1">
+                      {option.feedback.axisFlags.map((axis) => (
+                        <li key={axis} className="text-xs text-amber-600 dark:text-amber-400">⚠ {AXIS_FEEDBACK_FLAGS[axis]}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {option.feedback.note && (
+                    <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 italic">&quot;{option.feedback.note}&quot;</p>
+                  )}
+                </div>
+              ) : feedbackEligible && !feedbackDismissed ? (
+                <div className="rounded-xl border border-[#5B8BA0]/40 dark:border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 px-4 py-3 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">How was {option.name}?</p>
+                    <button className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] flex-shrink-0"
+                      onClick={() => setFeedbackDismissed(true)}>Not now</button>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {(["yes", "mixed", "no"] as PropertyFeedback["metExpectations"][]).map((v) => (
+                      <button key={v}
+                        className={`px-3 py-1 text-xs rounded-lg capitalize transition-colors ${
+                          metExpectations === v
+                            ? "bg-[#5B8BA0] text-white font-medium"
+                            : "bg-white dark:bg-[#1e2d3d] text-[#6B8299] dark:text-[#9BB0C1] border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0]"
+                        }`}
+                        onClick={() => setMetExpectations(v)}>
+                        {v === "yes" ? "Met expectations" : v === "no" ? "Didn't meet expectations" : "Mixed"}
+                      </button>
+                    ))}
+                  </div>
+                  {feedbackAxes.length > 0 && (
+                    <div className="space-y-1">
+                      {feedbackAxes.map((axis) => (
+                        <label key={axis} className="flex items-center gap-2 text-xs text-[#3D5A6E] dark:text-[#B8D4E3] cursor-pointer">
+                          <input type="checkbox" className="accent-[#5B8BA0]" checked={flaggedAxes.has(axis)} onChange={() => toggleAxisFlag(axis)} />
+                          {AXIS_FEEDBACK_FLAGS[axis]}
+                        </label>
+                      ))}
                     </div>
+                  )}
+                  <textarea
+                    className="w-full bg-white dark:bg-[#1e2d3d] text-[#2C3E50] dark:text-[#B8D4E3] text-xs rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
+                    rows={2} placeholder="Anything worth remembering for next time? (optional)"
+                    value={feedbackNote} onChange={(e) => setFeedbackNote(e.target.value)}
+                  />
+                  <button
+                    className="px-3 py-1.5 text-xs rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                    onClick={handleFeedbackSubmit} disabled={!metExpectations}>Save feedback</button>
+                </div>
+              ) : null}
+
+              {/* Actions */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
+                    isSaved
+                      ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/20 dark:hover:bg-[#5B8BA0]/30"
+                      : "bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
+                  }`}
+                  onClick={onSave}
+                >{isSaved ? "Saved ✓" : "Save"}</button>
+                {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => {
+                  const isActive = option.status === s;
+                  const activeClass =
+                    s === "booked" ? "bg-emerald-500 dark:bg-emerald-600 text-white font-semibold shadow-sm"
+                    : s === "interested" ? "bg-amber-400 dark:bg-amber-500 text-amber-900 dark:text-white font-semibold shadow-sm"
+                    : "bg-red-400 dark:bg-red-600 text-white font-semibold shadow-sm";
+                  return (
+                    <button key={s}
+                      className={`px-3 py-1.5 text-sm rounded-lg transition-all active:scale-95 ${isActive ? activeClass : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"}`}
+                      onClick={() => onStatusChange(s)}>
+                      {s === "interested" ? "⭐ Interested" : s === "rejected" ? "✗ Reject" : "✅ Booked"}
+                    </button>
                   );
                 })}
               </div>
             </div>
-          )}
-
-          {/* "See why this fits you →" — position 4, full-width primary CTA; demoted to ghost after first research */}
-          <div>
-            {deepDiveError && (
-              <p className="text-xs text-red-500 dark:text-red-400 mb-2">Research failed — try again</p>
-            )}
-            {deepDive ? (
+          ) : (
+            /* ── DEEP DIVE MODE ── mutually exclusive with expanded card mode */
+            /* option.tradeoffs, option.description, chat, and actions never render here */
+            <div className="space-y-4">
+              {/* Back link at top */}
               <button
-                className="w-full px-4 py-2.5 text-sm rounded-lg border border-[#5B8BA0]/40 dark:border-[#5B8BA0]/50 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/15 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                onClick={handleDeepDive}
-                disabled={loadingDive}
+                className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                onClick={() => setDeepDiveMode(false)}
               >
-                {loadingDive ? (
-                  <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
-                ) : "Research again →"}
+                ← Back to results
               </button>
-            ) : (
-              <button
-                className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                onClick={handleDeepDive}
-                disabled={loadingDive}
-              >
-                {loadingDive ? (
-                  <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
-                ) : seeWhyCopy}
-              </button>
-            )}
-          </div>
 
-          {/* Chat trigger — position 4 */}
-          <button
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
-              chatOpen
-                ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
-            }`}
-            onClick={() => {
-              setChatOpen((v) => !v);
-              if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
-            }}
-          >
-            <span className="text-sm">💬</span>
-            <span>{chatOpen ? "Hide chat" : "Ask ViyaWay about this place"}</span>
-            {chatMessages.length > 0 && !chatOpen && (
-              <span className="text-xs opacity-60">
-                ({chatMessages.length})
-              </span>
-            )}
-          </button>
-
-          {/* Secondary info: source, tradeoffs, description */}
-          <div className="space-y-3">
-              {/* Source CTA — featured at top in detail mode */}
-              {isDetail && (
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {(urlStatus === "checking" || urlStatus === "recovering") && (
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
-                        {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
-                      </span>
-                    )}
-                    {urlStatus === "valid" && (
-                      <>
-                        <a
-                          href={resolvedUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
-                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
-                        >
-                          <span>🔗</span>
-                          {getSourceLabel(resolvedUrl)}
-                        </a>
-                        {!reportSent && (
-                          <button
-                            onClick={handleReport}
-                            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                            title="Report a bad or incorrect link"
-                          >
-                            🚩 Report
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {urlStatus === "recovered" && (
-                      <a
-                        href={resolvedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5B8BA0]/80 text-white hover:bg-[#4A7A8F] text-sm font-medium transition-colors shadow-sm"
-                        onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
-                      >
-                        <span>🔗</span>
-                        {getSourceLabel(resolvedUrl)}
-                      </a>
-                    )}
-                    {urlStatus === "not_found" && (
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
-                    )}
-                  </div>
-                  {urlStatus === "recovered" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
-                      Couldn&apos;t verify the original link — this may be the official site
-                    </span>
-                  )}
+              {/* THE VERDICT — leads deep dive */}
+              {deepDive!.bottomLine && (
+                <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive!.bottomLine}</p>
                 </div>
               )}
 
-              {option.tradeoffs.length > 0 && (
-                <div>
-                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">Watch out for</p>
-                  <ul className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] space-y-1">
-                    {option.tradeoffs.map((t, i) => (
-                      <li key={i} className="flex gap-1.5">
-                        <span className="text-[#9BB0C1] flex-shrink-0 mt-0.5">•</span>
-                        <span>{t}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div>
-                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">About this property</p>
-                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
-              </div>
-              {/* Source link — small text in default/expanded mode */}
-              {!isDetail && (
-                <div className="flex flex-col gap-0.5 min-h-[1.5rem]">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {(urlStatus === "checking" || urlStatus === "recovering") && (
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] animate-pulse">
-                        {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
-                      </span>
-                    )}
-                    {urlStatus === "valid" && (
-                      <>
-                        <a
-                          href={resolvedUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
-                          onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
-                        >
-                          {getSourceLabel(resolvedUrl)}
-                        </a>
-                        {!reportSent && (
-                          <button
-                            onClick={handleReport}
-                            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                            title="Report a bad or incorrect link"
-                          >
-                            🚩 Report
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {urlStatus === "recovered" && (
-                      <a
-                        href={resolvedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline text-sm inline-flex items-center gap-1"
-                        onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
-                      >
-                        {getSourceLabel(resolvedUrl)}
-                      </a>
-                    )}
-                    {urlStatus === "not_found" && (
-                      <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Source not available</span>
-                    )}
-                  </div>
-                  {urlStatus === "recovered" && (
-                    <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
-                      Couldn&apos;t verify the original link — this may be the official site
-                    </span>
-                  )}
-                </div>
-              )}
-          </div>
-
-          {/* Inline Chat — full width below the grid */}
-          {chatOpen && (
-            <div className="rounded-xl bg-[#F3F7FA] dark:bg-[#1a2a38] border border-[#E0E8ED] dark:border-[#2a3f52] overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between px-3 py-2 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
-                <div>
-                  <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
-                    Ask anything about {option.name}
-                  </p>
-                  <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299]">
-                    {travelers.length === 1
-                      ? `For ${travelers[0].name}`
-                      : `For ${travelers.slice(0, -1).map((t) => t.name).join(", ")} & ${travelers[travelers.length - 1].name}`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {chatMessages.length > 0 && (
-                    <button
-                      className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                      onClick={() => { setChatMessages([]); onChatUpdate([]); }}
-                      title="Clear chat history"
-                    >
-                      Clear
-                    </button>
-                  )}
-                  <button
-                    className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
-                    onClick={() => setChatOpen(false)}
-                  >
-                    Collapse
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages area */}
-              <div className="max-h-64 sm:max-h-72 overflow-y-auto p-3 space-y-2.5">
-                {chatMessages.length === 0 && (
-                  <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] text-center py-4">
-                    Pricing, vibe, logistics, or how it fits your travel style — ask away.
-                  </p>
-                )}
-                {chatMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                        msg.role === "user"
-                          ? "bg-[#5B8BA0] text-white rounded-br-md"
-                          : "bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-bl-md"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-                {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white dark:bg-[#2a3f52] border border-[#E0E8ED] dark:border-[#3D5A6E] px-3 py-2 rounded-2xl rounded-bl-md">
-                      <span className="flex gap-1">
-                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-1.5 h-1.5 bg-[#9BB0C1] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Input area — sticky on mobile */}
-              <div className="flex items-center gap-2 px-3 py-2.5 border-t border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] sticky bottom-0">
-                <input
-                  ref={chatInputRef}
-                  type="text"
-                  className="flex-1 bg-transparent text-sm text-[#2C3E50] dark:text-[#B8D4E3] placeholder-[#9BB0C1] dark:placeholder-[#6B8299] outline-none min-w-0"
-                  placeholder="Ask about pricing, vibe, logistics…"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleChatSend();
-                    }
-                  }}
-                  disabled={chatLoading}
-                />
-                <button
-                  className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:text-[#4A7A8F] dark:hover:text-[#9DCAE8] disabled:opacity-40 transition-colors text-sm font-medium px-2 py-1 flex-shrink-0"
-                  onClick={handleChatSend}
-                  disabled={chatLoading || !chatInput.trim()}
-                >
-                  Send
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Deep dive result */}
-          {deepDive && (
-            <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] overflow-hidden">
-              {/* Why this fits you */}
-              {deepDive.whyItFits.length > 0 && (
-                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <p className="text-xs font-semibold text-green-600 dark:text-green-500 mb-2.5">Why this fits you</p>
-                  <ul className="space-y-2">
-                    {deepDive.whyItFits.slice(0, 2).map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                        <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    {showMoreWhyItFits && deepDive.whyItFits.slice(2).map((item, i) => (
-                      <li key={i + 2} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                        <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {deepDive.whyItFits.length > 2 && (
-                    <button
-                      className="mt-2 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
-                      onClick={() => setShowMoreWhyItFits((v) => !v)}
-                    >
-                      {showMoreWhyItFits
-                        ? "Show less"
-                        : `Show ${deepDive.whyItFits.length - 2} more reason${deepDive.whyItFits.length - 2 === 1 ? "" : "s"} →`}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Watch out for */}
-              {deepDive.watchOutFor.length > 0 && (
-                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <div
-                    className="flex items-center justify-between gap-2 cursor-pointer"
-                    onClick={() => setWatchOutForExpanded((v) => !v)}
-                  >
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-500">Watch out for</p>
-                    <span className="text-[#9BB0C1] text-xs flex-shrink-0">{watchOutForExpanded ? "▲" : "▼"}</span>
-                  </div>
-                  <ul className="mt-2 space-y-2">
-                    <li className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                      <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
-                      <span>{deepDive.watchOutFor[0]}</span>
-                    </li>
-                    {watchOutForExpanded && deepDive.watchOutFor.slice(1).map((item, i) => (
-                      <li key={i + 1} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                        <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {!watchOutForExpanded && deepDive.watchOutFor.length > 1 && (
-                    <button
-                      className="mt-1.5 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4]"
-                      onClick={() => setWatchOutForExpanded(true)}
-                    >
-                      {deepDive.watchOutFor.length - 1} more thing{deepDive.watchOutFor.length - 1 === 1 ? "" : "s"} to know ↓
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* What makes it stand out */}
-              {deepDive.standoutFeatures.length > 0 && (
-                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <button
-                    className="w-full text-left"
-                    onClick={() => setStandoutExpanded((v) => !v)}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">What makes it stand out</p>
-                      <span className="text-[#9BB0C1] text-xs flex-shrink-0">{standoutExpanded ? "▲" : "▼"}</span>
-                    </div>
-                    {!standoutExpanded && (
-                      <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">See what&apos;s special ↓</p>
-                    )}
-                  </button>
-                  {standoutExpanded && (
-                    <ul className="mt-2.5 space-y-2">
-                      {deepDive.standoutFeatures.map((item, i) => (
+              <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] overflow-hidden">
+                {/* Why this fits you */}
+                {deepDive!.whyItFits.length > 0 && (
+                  <div className="px-4 py-4">
+                    <p className="text-xs font-semibold text-green-600 dark:text-green-500 mb-2.5">Why this fits you</p>
+                    <ul className="space-y-2">
+                      {deepDive!.whyItFits.slice(0, 2).map((item, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                          <span className="text-[#9BB0C1] dark:text-[#6B8299] flex-shrink-0 mt-0.5">•</span>
+                          <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                      {showMoreWhyItFits && deepDive!.whyItFits.slice(2).map((item, i) => (
+                        <li key={i + 2} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                          <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
-                  )}
-                </div>
-              )}
-
-              {/* About this property */}
-              {deepDive.overview && (
-                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <button
-                    className="w-full text-left"
-                    onClick={() => setOverviewExpanded((v) => !v)}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">About this property</p>
-                      <span className="text-[#9BB0C1] text-xs flex-shrink-0">{overviewExpanded ? "▲" : "▼"}</span>
-                    </div>
-                    {!overviewExpanded && (
-                      <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">Property details ↓</p>
+                    {deepDive!.whyItFits.length > 2 && (
+                      <button className="mt-2 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                        onClick={() => setShowMoreWhyItFits((v) => !v)}>
+                        {showMoreWhyItFits ? "Show less" : `Show ${deepDive!.whyItFits.length - 2} more reason${deepDive!.whyItFits.length - 2 === 1 ? "" : "s"} →`}
+                      </button>
                     )}
-                  </button>
-                  {overviewExpanded && (
-                    <p className="mt-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-relaxed">{deepDive.overview}</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+                  </div>
+                )}
 
-          {/* Notes */}
-          <div>
-            <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1.5">Notes</p>
-            <textarea
-              className="w-full bg-[#F8FAFB] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] text-sm rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2.5 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
-              rows={2}
-              placeholder="Add notes…"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              onBlur={() => onNotesChange(notes)}
-            />
-          </div>
+                {/* Watch out for — Deep Dive mode only; option.tradeoffs not rendered here */}
+                {deepDive!.watchOutFor.length > 0 && (
+                  <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                    <div className="flex items-center justify-between gap-2 cursor-pointer"
+                      onClick={() => setWatchOutForExpanded((v) => !v)}>
+                      <p className="text-xs font-semibold text-amber-600 dark:text-amber-500">Watch out for</p>
+                      <span className="text-[#9BB0C1] text-xs flex-shrink-0">{watchOutForExpanded ? "▲" : "▼"}</span>
+                    </div>
+                    <ul className="mt-2 space-y-2">
+                      <li className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
+                        <span>{deepDive!.watchOutFor[0]}</span>
+                      </li>
+                      {watchOutForExpanded && deepDive!.watchOutFor.slice(1).map((item, i) => (
+                        <li key={i + 1} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                          <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {!watchOutForExpanded && deepDive!.watchOutFor.length > 1 && (
+                      <button className="mt-1.5 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4]"
+                        onClick={() => setWatchOutForExpanded(true)}>
+                        {deepDive!.watchOutFor.length - 1} more thing{deepDive!.watchOutFor.length - 1 === 1 ? "" : "s"} to know ↓
+                      </button>
+                    )}
+                  </div>
+                )}
 
-          {/* Post-trip feedback — low energy, personal (not shared across users yet) */}
-          {option.feedback ? (
-            <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] bg-[#F8FAFB] dark:bg-[#2a3f52]/60 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Your feedback</p>
-              <p className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]">
-                {option.feedback.metExpectations === "yes" ? "Met expectations ✓" : option.feedback.metExpectations === "no" ? "Didn't meet expectations ✗" : "Mixed — partly met expectations"}
-              </p>
-              {option.feedback.axisFlags.length > 0 && (
-                <ul className="mt-1.5 space-y-1">
-                  {option.feedback.axisFlags.map((axis) => (
-                    <li key={axis} className="text-xs text-amber-600 dark:text-amber-400">⚠ {AXIS_FEEDBACK_FLAGS[axis]}</li>
-                  ))}
-                </ul>
-              )}
-              {option.feedback.note && (
-                <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 italic">&quot;{option.feedback.note}&quot;</p>
-              )}
-            </div>
-          ) : feedbackEligible && !feedbackDismissed ? (
-            <div className="rounded-xl border border-[#5B8BA0]/40 dark:border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 px-4 py-3 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">How was {option.name}?</p>
-                <button
-                  className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] flex-shrink-0"
-                  onClick={() => setFeedbackDismissed(true)}
-                >
-                  Not now
-                </button>
+                {/* What makes it stand out */}
+                {deepDive!.standoutFeatures.length > 0 && (
+                  <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                    <button className="w-full text-left" onClick={() => setStandoutExpanded((v) => !v)}>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">What makes it stand out</p>
+                        <span className="text-[#9BB0C1] text-xs flex-shrink-0">{standoutExpanded ? "▲" : "▼"}</span>
+                      </div>
+                      {!standoutExpanded && <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">See what&apos;s special ↓</p>}
+                    </button>
+                    {standoutExpanded && (
+                      <ul className="mt-2.5 space-y-2">
+                        {deepDive!.standoutFeatures.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                            <span className="text-[#9BB0C1] dark:text-[#6B8299] flex-shrink-0 mt-0.5">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* About this property — Deep Dive mode only; option.description not rendered here */}
+                {deepDive!.overview && (
+                  <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                    <button className="w-full text-left" onClick={() => setOverviewExpanded((v) => !v)}>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">About this property</p>
+                        <span className="text-[#9BB0C1] text-xs flex-shrink-0">{overviewExpanded ? "▲" : "▼"}</span>
+                      </div>
+                      {!overviewExpanded && <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">Property details ↓</p>}
+                    </button>
+                    {overviewExpanded && (
+                      <p className="mt-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-relaxed">{deepDive!.overview}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="flex gap-1.5">
-                {(["yes", "mixed", "no"] as PropertyFeedback["metExpectations"][]).map((v) => (
-                  <button
-                    key={v}
-                    className={`px-3 py-1 text-xs rounded-lg capitalize transition-colors ${
-                      metExpectations === v
-                        ? "bg-[#5B8BA0] text-white font-medium"
-                        : "bg-white dark:bg-[#1e2d3d] text-[#6B8299] dark:text-[#9BB0C1] border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0]"
-                    }`}
-                    onClick={() => setMetExpectations(v)}
-                  >
-                    {v === "yes" ? "Met expectations" : v === "no" ? "Didn't meet expectations" : "Mixed"}
-                  </button>
-                ))}
+              {/* Notes */}
+              <div>
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1.5">Notes</p>
+                <textarea
+                  className="w-full bg-[#F8FAFB] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] text-sm rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2.5 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
+                  rows={2} placeholder="Add notes…" value={notes}
+                  onChange={(e) => setNotes(e.target.value)} onBlur={() => onNotesChange(notes)}
+                />
               </div>
 
-              {feedbackAxes.length > 0 && (
-                <div className="space-y-1">
-                  {feedbackAxes.map((axis) => (
-                    <label key={axis} className="flex items-center gap-2 text-xs text-[#3D5A6E] dark:text-[#B8D4E3] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="accent-[#5B8BA0]"
-                        checked={flaggedAxes.has(axis)}
-                        onChange={() => toggleAxisFlag(axis)}
-                      />
-                      {AXIS_FEEDBACK_FLAGS[axis]}
-                    </label>
-                  ))}
-                </div>
-              )}
-
-              <textarea
-                className="w-full bg-white dark:bg-[#1e2d3d] text-[#2C3E50] dark:text-[#B8D4E3] text-xs rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-2 resize-none focus:outline-none focus:border-[#5B8BA0] transition-colors"
-                rows={2}
-                placeholder="Anything worth remembering for next time? (optional)"
-                value={feedbackNote}
-                onChange={(e) => setFeedbackNote(e.target.value)}
-              />
-
+              {/* Back link at bottom */}
               <button
-                className="px-3 py-1.5 text-xs rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
-                onClick={handleFeedbackSubmit}
-                disabled={!metExpectations}
+                className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                onClick={() => setDeepDiveMode(false)}
               >
-                Save feedback
+                ← Back to results
               </button>
             </div>
-          ) : null}
-
-          {/* Actions */}
-          <div className="flex gap-2 flex-wrap">
-            <button
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
-                isSaved
-                  ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/20 dark:hover:bg-[#5B8BA0]/30"
-                  : "bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
-              }`}
-              onClick={onSave}
-            >
-              {isSaved ? "Saved ✓" : "Save"}
-            </button>
-            {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => {
-              const isActive = option.status === s;
-              const activeClass =
-                s === "booked"
-                  ? "bg-emerald-500 dark:bg-emerald-600 text-white font-semibold shadow-sm"
-                  : s === "interested"
-                  ? "bg-amber-400 dark:bg-amber-500 text-amber-900 dark:text-white font-semibold shadow-sm"
-                  : "bg-red-400 dark:bg-red-600 text-white font-semibold shadow-sm";
-              const inactiveClass =
-                "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]";
-              return (
-                <button
-                  key={s}
-                  className={`px-3 py-1.5 text-sm rounded-lg transition-all active:scale-95 ${isActive ? activeClass : inactiveClass}`}
-                  onClick={() => onStatusChange(s)}
-                >
-                  {s === "interested" ? "⭐ Interested" : s === "rejected" ? "✗ Reject" : "✅ Booked"}
-                </button>
-              );
-            })}
-          </div>
-
+          )}
         </div>
       )}
     </div>
