@@ -410,6 +410,24 @@ export default function ResultCard({
   function renderExpandedCardMode(inOverlay = false) {
     return (
       <div className="space-y-4">
+        {/* Focus-mode trigger — inline card only, desktop only */}
+        {!isDetail && !inOverlay && (
+          <div className="flex justify-end -mb-1">
+            <button
+              className="hidden md:inline-flex items-center gap-1 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
+              onClick={() => setOverlayOpen(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+              Focus view
+            </button>
+          </div>
+        )}
+
         {/* 2. About this property — collapsible, collapsed by default */}
         {option.description && (
           <div>
@@ -481,8 +499,8 @@ export default function ResultCard({
 
         {/* 4. THE VERDICT — shown when deep dive data is available */}
         {deepDive?.bottomLine && (
-          <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+          <div className="rounded-xl px-4 py-4 bg-green-50/60 dark:bg-green-900/10 border-l-4 border-green-500 dark:border-green-600">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-green-600 dark:text-green-500 mb-1.5">The Verdict</p>
             <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
           </div>
         )}
@@ -722,8 +740,8 @@ export default function ResultCard({
 
         {/* THE VERDICT — leads deep dive */}
         {deepDive!.bottomLine && (
-          <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+          <div className="rounded-xl px-4 py-4 bg-green-50/60 dark:bg-green-900/10 border-l-4 border-green-500 dark:border-green-600">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-green-600 dark:text-green-500 mb-1.5">The Verdict</p>
             <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive!.bottomLine}</p>
           </div>
         )}
