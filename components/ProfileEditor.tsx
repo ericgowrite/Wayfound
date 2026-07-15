@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { Profile, AxisWeights } from "@/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { TYPE_INFO } from "@/lib/typeInfo";
 
 interface Props {
   profile: Profile;
   onSave: (p: Profile) => void;
   onClose: () => void;
+  onRetakeAssessment?: () => void;
 }
 
-export default function ProfileEditor({ profile, onSave, onClose }: Props) {
+export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssessment }: Props) {
   const [draft, setDraft] = useState<Profile>(JSON.parse(JSON.stringify(profile)));
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
@@ -74,9 +76,30 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
           </div>
 
           <div>
-            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed">
-              Your travel style is set by your personality assessment and shapes every recommendation ViyaWay makes.
+            {(() => {
+              const info = TYPE_INFO[draft.enneagramType ?? ""];
+              return info ? (
+                <ul className="space-y-2 mb-3">
+                  {info.bullets.map((bullet, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                      <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null;
+            })()}
+            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
+              ViyaWay uses your travel style to score every result.
             </p>
+            {onRetakeAssessment && (
+              <button
+                className="mt-1.5 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline block"
+                onClick={onRetakeAssessment}
+              >
+                Update your travel style →
+              </button>
+            )}
           </div>
 
           <div>

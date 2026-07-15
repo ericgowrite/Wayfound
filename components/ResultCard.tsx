@@ -299,6 +299,13 @@ export default function ResultCard({
     legendTimeout.current = setTimeout(() => setShowScoreLegend(false), 150);
   }
 
+  const seeWhyCopy =
+    travelers.length === 1
+      ? "See why this fits you →"
+      : travelers.length === 2
+      ? `See why this fits ${travelers[0].name} & ${travelers[1].name} →`
+      : "See why this fits everyone →";
+
   // Group fit summary badge
   const hasMultipleTravelers = travelers.length > 1;
   const travelerScoreValues = hasMultipleTravelers
@@ -440,6 +447,7 @@ export default function ResultCard({
                   setExpanded(next);
                   onExpandedChange?.(next);
                   logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
+                  handleDeepDive();
                 }}
               >
                 See why →
@@ -467,6 +475,101 @@ export default function ResultCard({
       {/* Expanded details — always on in detail variant, toggled in default */}
       {(isDetail || (!isList && expanded)) && (
         <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
+          {/* Traveler fit — position 2, all travelers */}
+          {travelers.length > 0 && (
+            <div>
+              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-2.5">Traveler fit</p>
+              <div className="space-y-2.5">
+                {travelers.map((traveler, idx) => {
+                  const ts = option.travelerScores?.[traveler.id];
+                  const tScore = ts?.alignmentScore ?? option.alignmentScore;
+                  const violations = ts?.thresholdViolations ?? [];
+                  const tTier = fitTier(tScore);
+                  const barWidth = Math.max(0, Math.min(100, tScore));
+                  return (
+                    <div key={traveler.id}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}>
+                          {traveler.name[0]}
+                        </div>
+                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">{traveler.name}</span>
+                        <div
+                          className="flex-1 relative bg-[#E0E8ED] dark:bg-[#3D5A6E]"
+                          style={{ height: "8px", borderRadius: "9999px" }}
+                        >
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              height: "8px",
+                              borderRadius: "9999px",
+                              width: `${barWidth}%`,
+                              backgroundColor: tTier.hex,
+                              backgroundImage: "none",
+                              background: tTier.hex,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
+                          style={{ color: tTier.hex }}
+                        >
+                          {tScore}%
+                        </span>
+                      </div>
+                      {violations.length > 0 && (
+                        <div className="ml-[calc(1.5rem+0.75rem+5rem+0.75rem)] mt-1">
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            ⚠ Below threshold: {violations.join(", ")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* "See why this fits you →" — position 3, full-width primary CTA */}
+          <div>
+            {deepDiveError && (
+              <p className="text-xs text-red-500 dark:text-red-400 mb-2">Research failed — try again</p>
+            )}
+            <button
+              className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              onClick={handleDeepDive}
+              disabled={loadingDive}
+            >
+              {loadingDive ? (
+                <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
+              ) : deepDive ? "Research again →" : seeWhyCopy}
+            </button>
+          </div>
+
+          {/* Chat trigger — position 4 */}
+          <button
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
+              chatOpen
+                ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
+                : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
+            }`}
+            onClick={() => {
+              setChatOpen((v) => !v);
+              if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
+            }}
+          >
+            <span className="text-sm">💬</span>
+            <span>{chatOpen ? "Hide chat" : "Ask ViyaWay about this place"}</span>
+            {chatMessages.length > 0 && !chatOpen && (
+              <span className="text-xs opacity-60">
+                ({chatMessages.length})
+              </span>
+            )}
+          </button>
+
+          {/* Secondary info: source, tradeoffs, description */}
           <div className="space-y-3">
               {/* Source CTA — featured at top in detail mode */}
               {isDetail && (
@@ -524,13 +627,9 @@ export default function ResultCard({
                 </div>
               )}
 
-              <div>
-                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1">Description</p>
-                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
-              </div>
               {option.tradeoffs.length > 0 && (
                 <div>
-                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-1">Tradeoffs</p>
+                  <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">Watch out for</p>
                   <ul className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] space-y-1">
                     {option.tradeoffs.map((t, i) => (
                       <li key={i} className="flex gap-1.5">
@@ -541,6 +640,10 @@ export default function ResultCard({
                   </ul>
                 </div>
               )}
+              <div>
+                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-1">About this property</p>
+                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">{option.description}</p>
+              </div>
               {/* Source link — small text in default/expanded mode */}
               {!isDetail && (
                 <div className="flex flex-col gap-0.5 min-h-[1.5rem]">
@@ -594,27 +697,6 @@ export default function ResultCard({
                   )}
                 </div>
               )}
-
-              {/* Chat trigger — styled as a card action button */}
-              <button
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors font-medium ${
-                  chatOpen
-                    ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                    : "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E]"
-                }`}
-                onClick={() => {
-                  setChatOpen((v) => !v);
-                  if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100);
-                }}
-              >
-                <span className="text-sm">💬</span>
-                <span>{chatOpen ? "Hide chat" : "Ask ViyaWay about this place"}</span>
-                {chatMessages.length > 0 && !chatOpen && (
-                  <span className="text-xs opacity-60">
-                    ({chatMessages.length})
-                  </span>
-                )}
-              </button>
           </div>
 
           {/* Inline Chat — full width below the grid */}
@@ -712,70 +794,6 @@ export default function ResultCard({
                 >
                   Send
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Per-traveler scores — only when 2+ travelers */}
-          {hasMultipleTravelers && (
-            <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4">
-              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-3">Traveler Fit</p>
-              <div className="space-y-2.5">
-                {travelers.map((traveler, idx) => {
-                  const ts = option.travelerScores?.[traveler.id];
-                  const tScore = ts?.alignmentScore ?? option.alignmentScore;
-                  const violations = ts?.thresholdViolations ?? [];
-                  const tTier = fitTier(tScore);
-                  const barWidth = Math.max(0, Math.min(100, tScore));
-
-                  return (
-                    <div key={traveler.id}>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}
-                        >
-                          {traveler.name[0]}
-                        </div>
-                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] w-20 truncate flex-shrink-0">
-                          {traveler.name}
-                        </span>
-                        {/* Bar track */}
-                        <div
-                          className="flex-1 relative bg-[#E0E8ED] dark:bg-[#3D5A6E]"
-                          style={{ height: "8px", borderRadius: "9999px" }}
-                        >
-                          {/* Filled bar — solid color, width = score */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              height: "8px",
-                              borderRadius: "9999px",
-                              width: `${barWidth}%`,
-                              backgroundColor: tTier.hex,
-                              backgroundImage: "none",
-                              background: tTier.hex,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className="text-xs font-mono tabular-nums w-10 text-right flex-shrink-0 font-medium"
-                          style={{ color: tTier.hex }}
-                        >
-                          {tScore}%
-                        </span>
-                      </div>
-                      {violations.length > 0 && (
-                        <div className="ml-[calc(1.5rem+0.75rem+5rem+0.75rem)] mt-1">
-                          <span className="text-xs text-amber-600 dark:text-amber-400">
-                            ⚠ Below threshold: {violations.join(", ")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}
@@ -1031,24 +1049,6 @@ export default function ResultCard({
                 </button>
               );
             })}
-            <div className="ml-auto flex items-center gap-2">
-              {deepDiveError && (
-                <span className="text-xs text-red-500 dark:text-red-400">Research failed — try again</span>
-              )}
-              <button
-                className="px-3 py-1.5 text-sm rounded-lg bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#E0E8ED] dark:hover:bg-[#3D5A6E] transition-colors disabled:opacity-50"
-                onClick={handleDeepDive}
-                disabled={loadingDive}
-              >
-                {loadingDive ? (
-                  <span className="flex items-center gap-1.5">
-                    <span className="animate-spin inline-block">⟳</span> Researching…
-                  </span>
-                ) : (
-                  deepDive ? "Re-research →" : "Deep Dive →"
-                )}
-              </button>
-            </div>
           </div>
 
         </div>

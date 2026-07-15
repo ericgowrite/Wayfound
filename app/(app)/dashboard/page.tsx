@@ -642,6 +642,7 @@ export default function Home() {
           profile={editingProfile}
           onSave={handleProfileSaved}
           onClose={() => setEditingProfile(null)}
+          onRetakeAssessment={() => { setEditingProfile(null); setShowAddProfile(true); }}
         />
       )}
 
