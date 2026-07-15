@@ -130,3 +130,12 @@ body {
 .dark .driver-popover-arrow {
   border-color: #1e2d3d !important;
 }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}

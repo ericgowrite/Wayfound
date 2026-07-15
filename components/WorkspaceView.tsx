@@ -30,6 +30,7 @@ import CalibrationPrompt from "./CalibrationPrompt";
 import JourneyPromptCard from "./JourneyPromptCard";
 import UpgradePrompt from "./UpgradePrompt";
 import WorkspaceTour from "./WorkspaceTour";
+import SearchLoadingScreen from "./SearchLoadingScreen";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useAuth } from "@/lib/AuthContext";
 import { useTourState } from "@/lib/useTourState";
@@ -59,6 +60,9 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [searching, setSearching] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [loadingItems, setLoadingItems] = useState<import("@/types").LoadingContentItem[]>([]);
+  const [loadingContentReady, setLoadingContentReady] = useState(false);
+  const [showHandoff, setShowHandoff] = useState(false);
   const [activeTab, setActiveTab] = useState<"search" | "saved" | "history">("search");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedSavedIds, setSelectedSavedIds] = useState<Set<string>>(new Set());
@@ -150,6 +154,31 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setSearching(true);
     setSearchError("");
     setCategoryFilter(null);
+    setLoadingItems([]);
+    setLoadingContentReady(false);
+    setShowHandoff(false);
+
+    // Fire loading content in parallel — never awaited before showing results
+    if (workspace.destination) {
+      const travelerPayload = travelers.map((t) => ({
+        name: t.name,
+        type: parseInt(t.enneagramType.replace(/\D/g, ""), 10) || 0,
+      }));
+      fetchWithAuth("/api/loading-content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination: workspace.destination, category, travelers: travelerPayload }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data.items) && data.items.length > 0) {
+            setLoadingItems(data.items);
+            setLoadingContentReady(true);
+          }
+        })
+        .catch(() => {}); // fail silently — fallback copy shows instead
+    }
+
     try {
       const res = await fetchWithAuth("/api/search", {
         method: "POST",
@@ -162,11 +191,20 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         throw new Error(err.error || "Search failed");
       }
       const search: Search = await res.json();
-      onChange({
-        ...workspace,
-        searches: [search, ...workspace.searches.filter((s) => s.id !== search.id)],
-      });
-      onSearchChange(search.id);
+
+      // Handoff moment: brief transition before results appear
+      setSearching(false);
+      setShowHandoff(true);
+      setTimeout(() => {
+        setShowHandoff(false);
+        onChange({
+          ...workspace,
+          searches: [search, ...workspace.searches.filter((s) => s.id !== search.id)],
+        });
+        onSearchChange(search.id);
+        setActiveTab("search");
+      }, 1500);
+
       logEvent({
         event: "viyaway_search_run",
         query,
@@ -174,10 +212,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         destination: workspace.destination ?? null,
         resultCount: search.scoredResults?.length ?? 0,
       });
-      setActiveTab("search");
     } catch (e) {
       setSearchError(e instanceof Error ? e.message : String(e));
-    } finally {
       setSearching(false);
     }
   }
@@ -790,13 +826,20 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {/* Scrollable content area */}
             <div className="flex-1 min-h-0 flex flex-col px-4 pb-4">
 
-            {/* Searching state */}
-            {searching && (
+            {/* Searching / handoff state */}
+            {(searching || showHandoff) && mode === "search" && (
+              <SearchLoadingScreen
+                phase={showHandoff ? "handoff" : "searching"}
+                destination={workspace.destination ?? ""}
+                travelers={travelers}
+                items={loadingItems}
+                contentReady={loadingContentReady}
+              />
+            )}
+            {searching && mode === "score" && (
               <div className="flex-1 flex flex-col items-center justify-center py-16">
-                <div className="text-5xl mb-4 animate-pulse">{mode === "score" ? "✦" : "🔍"}</div>
-                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] font-medium">
-                  {mode === "score" ? "Researching and scoring…" : "Searching and scoring options…"}
-                </p>
+                <div className="text-5xl mb-4 animate-pulse">✦</div>
+                <p className="text-[#3D5A6E] dark:text-[#B8D4E3] font-medium">Researching and scoring…</p>
                 <p className="text-sm text-[#6B8299] mt-1">This may take 15–30 seconds</p>
               </div>
             )}

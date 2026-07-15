@@ -61,6 +61,12 @@ export interface Search {
   searchedAt: string;
 }
 
+export interface LoadingContentItem {
+  type: "fact" | "recommendation";
+  traveler: string | null; // traveler name, "both", or null for facts
+  text: string;
+}
+
 export interface RawResult {
   name: string;
   source: string;
