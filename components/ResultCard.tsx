@@ -74,6 +74,12 @@ export default function ResultCard({
   const [showScoreLegend, setShowScoreLegend] = useState(false);
   const legendTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Deep dive progressive disclosure
+  const [showMoreWhyItFits, setShowMoreWhyItFits] = useState(false);
+  const [watchOutForExpanded, setWatchOutForExpanded] = useState(false);
+  const [standoutExpanded, setStandoutExpanded] = useState(false);
+  const [overviewExpanded, setOverviewExpanded] = useState(false);
+
   // Chat state — initialize from persisted history
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(option.chatHistory ?? []);
@@ -88,6 +94,14 @@ export default function ResultCard({
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
+
+  // Reset deep dive collapse states when a new deep dive loads
+  useEffect(() => {
+    setShowMoreWhyItFits(false);
+    setWatchOutForExpanded(false);
+    setStandoutExpanded(false);
+    setOverviewExpanded(false);
+  }, [deepDive]);
 
   const handleChatSend = useCallback(async () => {
     const msg = chatInput.trim();
@@ -594,7 +608,7 @@ export default function ResultCard({
                 }}
               >
                 <span className="text-sm">💬</span>
-                <span>{chatOpen ? "Hide chat" : "Ask about this"}</span>
+                <span>{chatOpen ? "Hide chat" : "Ask ViyaWay about this place"}</span>
                 {chatMessages.length > 0 && !chatOpen && (
                   <span className="text-xs opacity-60">
                     ({chatMessages.length})
@@ -769,64 +783,124 @@ export default function ResultCard({
           {/* Deep dive result */}
           {deepDive && (
             <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] overflow-hidden">
-              {/* Overview */}
-              {deepDive.overview && (
-                <div className="px-4 py-3.5 bg-[#F8FAFB] dark:bg-[#2a3f52]/60">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Overview</p>
-                  <p className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-relaxed">{deepDive.overview}</p>
+              {/* THE VERDICT — leads */}
+              {deepDive.bottomLine && (
+                <div className="px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
                 </div>
               )}
 
-              {/* Why it fits */}
+              {/* Why this fits you */}
               {deepDive.whyItFits.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-green-600 dark:text-green-500 mb-2">Why it fits you</p>
-                  <ul className="space-y-1.5">
-                    {deepDive.whyItFits.map((item, i) => (
+                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                  <p className="text-xs font-semibold text-green-600 dark:text-green-500 mb-2.5">Why this fits you</p>
+                  <ul className="space-y-2">
+                    {deepDive.whyItFits.slice(0, 2).map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
                         <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
                         <span>{item}</span>
                       </li>
                     ))}
+                    {showMoreWhyItFits && deepDive.whyItFits.slice(2).map((item, i) => (
+                      <li key={i + 2} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-green-500 flex-shrink-0 mt-0.5 font-medium">✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
+                  {deepDive.whyItFits.length > 2 && (
+                    <button
+                      className="mt-2 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                      onClick={() => setShowMoreWhyItFits((v) => !v)}
+                    >
+                      {showMoreWhyItFits
+                        ? "Show less"
+                        : `Show ${deepDive.whyItFits.length - 2} more reason${deepDive.whyItFits.length - 2 === 1 ? "" : "s"} →`}
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Watch out for */}
               {deepDive.watchOutFor.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-2">Watch out for</p>
-                  <ul className="space-y-1.5">
-                    {deepDive.watchOutFor.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                  <div
+                    className="flex items-center justify-between gap-2 cursor-pointer"
+                    onClick={() => setWatchOutForExpanded((v) => !v)}
+                  >
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-500">Watch out for</p>
+                    <span className="text-[#9BB0C1] text-xs flex-shrink-0">{watchOutForExpanded ? "▲" : "▼"}</span>
+                  </div>
+                  <ul className="mt-2 space-y-2">
+                    <li className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                      <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
+                      <span>{deepDive.watchOutFor[0]}</span>
+                    </li>
+                    {watchOutForExpanded && deepDive.watchOutFor.slice(1).map((item, i) => (
+                      <li key={i + 1} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
                         <span className="text-amber-500 flex-shrink-0 mt-0.5">⚠</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
+                  {!watchOutForExpanded && deepDive.watchOutFor.length > 1 && (
+                    <button
+                      className="mt-1.5 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4]"
+                      onClick={() => setWatchOutForExpanded(true)}
+                    >
+                      {deepDive.watchOutFor.length - 1} more thing{deepDive.watchOutFor.length - 1 === 1 ? "" : "s"} to know ↓
+                    </button>
+                  )}
                 </div>
               )}
 
-              {/* Standout features */}
+              {/* What makes it stand out */}
               {deepDive.standoutFeatures.length > 0 && (
-                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-2">Standout features</p>
-                  <ul className="space-y-1.5">
-                    {deepDive.standoutFeatures.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                        <span className="text-[#9BB0C1] dark:text-[#6B8299] flex-shrink-0 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                  <button
+                    className="w-full text-left"
+                    onClick={() => setStandoutExpanded((v) => !v)}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">What makes it stand out</p>
+                      <span className="text-[#9BB0C1] text-xs flex-shrink-0">{standoutExpanded ? "▲" : "▼"}</span>
+                    </div>
+                    {!standoutExpanded && (
+                      <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">See what&apos;s special ↓</p>
+                    )}
+                  </button>
+                  {standoutExpanded && (
+                    <ul className="mt-2.5 space-y-2">
+                      {deepDive.standoutFeatures.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                          <span className="text-[#9BB0C1] dark:text-[#6B8299] flex-shrink-0 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
 
-              {/* Bottom line */}
-              {deepDive.bottomLine && (
-                <div className="px-4 py-3.5 border-t border-[#E0E8ED] dark:border-[#3D5A6E] bg-[#F8FAFB] dark:bg-[#2a3f52]/60">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9BB0C1] dark:text-[#6B8299] mb-1.5">Bottom line</p>
-                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
+              {/* About this property */}
+              {deepDive.overview && (
+                <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">
+                  <button
+                    className="w-full text-left"
+                    onClick={() => setOverviewExpanded((v) => !v)}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-[#6B8299] dark:text-[#9BB0C1]">About this property</p>
+                      <span className="text-[#9BB0C1] text-xs flex-shrink-0">{overviewExpanded ? "▲" : "▼"}</span>
+                    </div>
+                    {!overviewExpanded && (
+                      <p className="mt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299]">Property details ↓</p>
+                    )}
+                  </button>
+                  {overviewExpanded && (
+                    <p className="mt-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-relaxed">{deepDive.overview}</p>
+                  )}
                 </div>
               )}
             </div>
