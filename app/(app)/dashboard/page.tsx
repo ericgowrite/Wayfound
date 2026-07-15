@@ -29,7 +29,6 @@ export default function Home() {
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
-  const [newPartySize, setNewPartySize] = useState<number>(2);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
@@ -116,7 +115,6 @@ export default function Home() {
           name: newName,
           destination: newDest,
           travelers,
-          partySize: newPartySize,
         }),
       });
       if (!res.ok) {
@@ -133,7 +131,7 @@ export default function Home() {
       setNewName("");
       setNewDest("");
 
-      setNewPartySize(2);
+
     } catch (e) {
       console.error("[createWorkspace] threw:", e);
       setWorkspaceError(`Error: ${e instanceof Error ? e.message : String(e)}`);
@@ -539,23 +537,6 @@ export default function Home() {
                   onChange={(e) => setNewDest(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
                 />
-              </div>
-              {/* Guests — stepper on its own row */}
-              <div className="flex items-center justify-between">
-                <label className="text-[#6B8299] text-xs uppercase">Travelers</label>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    className="w-8 h-8 rounded-full border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] flex items-center justify-center text-lg leading-none transition-colors"
-                    onClick={() => setNewPartySize(Math.max(1, newPartySize - 1))}
-                  >−</button>
-                  <span className="text-sm font-medium text-[#2C3E50] dark:text-white w-6 text-center">{newPartySize}</span>
-                  <button
-                    type="button"
-                    className="w-8 h-8 rounded-full border border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] flex items-center justify-center text-lg leading-none transition-colors"
-                    onClick={() => setNewPartySize(Math.min(20, newPartySize + 1))}
-                  >+</button>
-                </div>
               </div>
               {profiles.length > 1 && (
                 <div>
