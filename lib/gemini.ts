@@ -212,11 +212,34 @@ function parseObject(raw: string): Omit<ScoredOption, "id" | "searchId" | "statu
  * Extract the first valid https?:// URL from a string.
  * Guards against Gemini concatenating multiple URLs into one field.
  */
+// Domains confirmed to be spam/redirect aggregators — never use as a source URL.
+// When blocked, the client-side Places recovery finds the real property page.
+const BLOCKED_SOURCE_DOMAINS = new Set([
+  "uzapas.com",
+]);
+
+// Redirect script path patterns — these are tracking/affiliate relay scripts,
+// not the actual property page. Block regardless of domain.
+const REDIRECT_SCRIPT_RE = /\/(xr|r|go|redirect|click|out|track|ref|redir)\.(php|asp|aspx|cgi)\b/i;
+
 function sanitizeSourceUrl(raw: string | undefined): string {
   if (!raw) return "";
   const match = raw.match(/https?:\/\/[^\s"')]+/);
   if (!match) return "";
-  return match[0].replace(/[.,;)"']+$/, "");
+  const url = match[0].replace(/[.,;)"']+$/, "");
+
+  // Block redirect script patterns (e.g. /xr.php?e=..., /r.php?url=...)
+  if (REDIRECT_SCRIPT_RE.test(url)) return "";
+
+  // Block known spam/redirect aggregator domains
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (BLOCKED_SOURCE_DOMAINS.has(host)) return "";
+  } catch {
+    return "";
+  }
+
+  return url;
 }
 
 /**
