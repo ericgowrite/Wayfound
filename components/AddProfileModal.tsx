@@ -202,10 +202,10 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
       <div className="bg-white dark:bg-[#1e2d3d] rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] w-full max-w-lg max-h-[90vh] overflow-auto">
         <div className="flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]">
           <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">
-            {step === "info" && "Add Traveler Profile"}
-            {step === "know-type" && (isSelf ? "Find Your Travel Style" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
+            {step === "info" && "Who's traveling?"}
+            {step === "know-type" && (isSelf ? "How do you travel?" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
             {step === "assess" && "Travel Style Assessment"}
-            {step === "type-select" && !confirmingType && (isSelf ? "Select Your Type" : `Select ${name ? name + "'s" : "Their"} Type`)}
+            {step === "type-select" && !confirmingType && (isSelf ? "Which one sounds like you?" : `Select ${name ? name + "'s" : "Their"} Type`)}
             {step === "type-select" && confirmingType && `Type ${confirmingType} — ${TYPE_INFO[confirmingType]?.name ?? ""}`}
             {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
           </h2>
@@ -217,7 +217,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
           {step === "info" && (
             <div className="space-y-4">
               <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-1">Traveler Name</label>
+                <label className="text-[#6B8299] text-xs block mb-1">Your name</label>
                 <input
                   className={`w-full ${input} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="Sarah"

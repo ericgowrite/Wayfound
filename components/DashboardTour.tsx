@@ -43,8 +43,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Your Travelers",
             description:
-              "<em>Welcome to ViyaWay — here's a quick tour, takes about 60 seconds.</em><br><br>" +
-              "Each traveler has a personality profile that drives their recommendations. Tap a name to view or edit their travel style.",
+              "This is you — how ViyaWay knows what fits when you travel. Tap your name anytime to view or update your travel style.",
           },
         },
         {
@@ -52,7 +51,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Add a Travel Companion",
             description:
-              "Planning a group trip? Add others here. ViyaWay scores results for everyone — so you can find places that work for the whole group.",
+              "Traveling with someone? Add them here. ViyaWay finds what fits everyone — not just a compromise.",
           },
         },
         {
@@ -60,7 +59,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Your Trips",
             description:
-              "Each trip is its own workspace — search, save, and compare options for a specific destination or travel window.",
+              "Each trip is its own space — search, save, and explore options for where you're headed. Your finds stay organized and ready when you need them.",
           },
         },
         {
@@ -68,7 +67,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Create a Trip",
             description:
-              "Start here. Give your trip a name and dates, then search for hotels, restaurants, activities, and more.",
+              "Give your trip a name, pick your destination, and let ViyaWay find what fits. That's all there is to it.",
           },
         },
       ],

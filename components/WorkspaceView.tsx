@@ -816,7 +816,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                     onClick={onOpenProfile}
                     className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] text-left transition-colors"
                   >
-                    Results not feeling right? Review your travel profile →
+                    Results not feeling right? Update your travel style →
                   </button>
                 )}
               </div>
@@ -1016,10 +1016,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <div className="flex-1 flex flex-col items-center justify-center py-16">
                 <div className="text-6xl mb-4">✈️</div>
                 <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
-                  {workspace.searches.length > 0 ? "No results found" : "Search to get started"}
+                  {workspace.searches.length > 0
+                    ? "No results found"
+                    : workspace.destination
+                      ? `What are you looking for in ${workspace.destination}?`
+                      : "What are you looking for?"}
                 </p>
                 <p className="text-sm text-[#6B8299] mt-1">
-                  Try &quot;boutique hotels in {workspace.destination || "Tuscany"}&quot;
+                  Try &quot;boutique eco resort&quot; or &quot;rooftop restaurant with a view&quot;
                 </p>
               </div>
             )}
@@ -1213,12 +1217,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   {/* Accuracy summary card — only when at least one confirmation exists */}
                   {confirmed.length > 0 && (
                     <div className="mb-4 bg-gradient-to-r from-[#5B8BA0]/10 to-[#5B8BA0]/5 dark:from-[#5B8BA0]/20 dark:to-[#5B8BA0]/10 border border-[#5B8BA0]/30 dark:border-[#5B8BA0]/40 rounded-xl px-4 py-3">
-                      <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] uppercase tracking-wide font-medium mb-0.5">
-                        ViyaWay accuracy
-                      </p>
                       <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">
-                        {goodOrPerfect.length} of {confirmed.length} stay{confirmed.length !== 1 ? "s" : ""} confirmed as{" "}
-                        {goodOrPerfect.length === 1 ? "a " : ""}good or perfect fit
+                        ViyaWay got it right {goodOrPerfect.length} out of {confirmed.length} time{confirmed.length !== 1 ? "s" : ""}.
                       </p>
                       {confirmed.length >= 2 && (
                         <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">

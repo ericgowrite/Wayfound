@@ -38,9 +38,9 @@ export default function WorkspaceTour({ onDone }: Props) {
         {
           ...(mobile ? {} : { element: "#tour-category" }),
           popover: {
-            title: "What Are You Looking For?",
+            title: "Pick a category",
             description:
-              "Choose a category — hotels, restaurants, tours, activities, and more. Each search is focused on one type.",
+              "Hotels, restaurants, tours, activities, and more. Each search focuses on one type so results stay sharp.",
           },
         },
         {
@@ -66,15 +66,15 @@ export default function WorkspaceTour({ onDone }: Props) {
           popover: {
             title: "Your Fit Score",
             description:
-              "Each result shows a fit score. Tap any card to see exactly why it's a good — or bad — match for your travel style.",
+              "Each result shows how well it fits you. Tap any card to see exactly why — including what might not work.",
           },
         },
         {
           element: "#tour-tabs",
           popover: {
-            title: "Search, Save, History",
+            title: "Your whole trip, in one place.",
             description:
-              "Your current results are here. Save favorites to compare later, or revisit any past search from History.",
+              "Results here, saved finds in Saved, everything you've ever searched in History. Move between them however you need.",
           },
         },
       ],

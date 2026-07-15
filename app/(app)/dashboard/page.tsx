@@ -269,7 +269,7 @@ export default function Home() {
         <div className="flex items-start justify-between px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
           <div>
             <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
-            <p className="text-xs text-[#6B8299] mt-0.5">Your true path to travel</p>
+            <p className="text-xs text-[#6B8299] mt-0.5">Travel that fits who you are.</p>
             <button
               id="tour-trigger"
               className="text-xs text-[#5B8BA0] hover:underline mt-1"
@@ -500,8 +500,8 @@ export default function Home() {
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-[#6B8299]">
             <div className="text-6xl mb-4">🗺️</div>
-            <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Start planning a trip</p>
-            <p className="text-sm mt-1">Create a workspace to begin</p>
+            <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Where are you thinking of going?</p>
+            <p className="text-sm mt-1">Tell us a destination — we&apos;ll find what fits you.</p>
             <button
               className="mt-4 px-4 py-2 bg-[#5B8BA0] text-white rounded hover:bg-[#4A7A8F] text-sm"
               onClick={() => setShowNewWorkspace(true)}
@@ -542,7 +542,7 @@ export default function Home() {
               </div>
               {/* Guests — stepper on its own row */}
               <div className="flex items-center justify-between">
-                <label className="text-[#6B8299] text-xs uppercase">Guests</label>
+                <label className="text-[#6B8299] text-xs uppercase">Travelers</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"

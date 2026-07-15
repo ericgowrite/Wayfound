@@ -110,14 +110,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
           onClick={() => setPhase("questions")}
         >
-          Start Assessment →
+          Begin →
         </button>
         <div className="mt-3 text-center">
           <button
             className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
             onClick={onSkip}
           >
-            Set up manually instead
+            I already know my type
           </button>
         </div>
       </div>
@@ -292,7 +292,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={onSkip}
             >
-              Set up manually
+              I already know my type
             </button>
           </div>
         </div>

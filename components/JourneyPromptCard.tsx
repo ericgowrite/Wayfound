@@ -65,7 +65,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
             <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">
-              Did {option.name} feel like the right fit?
+              Did {option.name} deliver?
             </p>
             <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mt-0.5">
               One tap. Helps ViyaWay learn your fit.
@@ -207,7 +207,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
           className="flex-1 py-2 rounded-lg bg-[#5B8BA0] text-white text-sm font-medium hover:bg-[#4A7A8F] transition-colors"
           onClick={() => setShowWindowPicker(true)}
         >
-          Yes, booked ✓
+          Yes, I booked it
         </button>
         <button
           className="px-4 py-2 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] transition-colors whitespace-nowrap"
@@ -221,7 +221,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
             onUpdate(option.id, { journeyState: "not_going", status: "rejected" })
           }
         >
-          No longer interested
+          Changed my mind
         </button>
       </div>
 

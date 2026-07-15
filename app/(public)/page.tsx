@@ -60,17 +60,17 @@ function HeroIllustration({ className }: { className?: string }) {
 /* ── Step card icons (simple geometric) ────────────────────────────────────── */
 
 const STEPS = [
-  { num: "1", title: "Discover your travel style", desc: "Take a quick 5-minute quiz to reveal your travel personality", color: "bg-[#5B8BA0]" },
+  { num: "1", title: "Discover your travel style", desc: "A quick travel style assessment — find out how you travel", color: "bg-[#5B8BA0]" },
   { num: "2", title: "Search destinations", desc: "Find hotels, tours, restaurants, and activities worldwide", color: "bg-[#E8A87C]" },
   { num: "3", title: "See your fit score", desc: "Results ranked by how well they match you — not popularity", color: "bg-[#5B8BA0]" },
-  { num: "4", title: "Book with confidence", desc: "Save, compare, and plan trips that actually feel right", color: "bg-[#E8A87C]" },
+  { num: "4", title: "Find places that feel like yours", desc: "Save, compare, and plan with confidence — knowing everything fits", color: "bg-[#E8A87C]" },
 ];
 
 const BENEFITS = [
   { title: "Based on you", desc: "Not generic reviews" },
   { title: "Personality-matched", desc: "Fit scores built from how you're wired" },
-  { title: "Group travel ready", desc: "See fit for everyone" },
-  { title: "Always free", desc: "No hidden costs" },
+  { title: "Traveling together", desc: "Find what fits everyone — not just a compromise" },
+  { title: "Always free", desc: "No agenda. No hidden costs." },
 ];
 
 /* ── Page ──────────────────────────────────────────────────────────────────── */
@@ -100,7 +100,7 @@ export default function LandingPage() {
           {/* Text */}
           <div className="flex-1 text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight text-[#2C3E50]">
-              Your true path to travel
+              Travel that fits who you are.
             </h1>
             <p className="mt-4 text-lg text-[#6B8299] max-w-lg mx-auto lg:mx-0">
               No more endless scrolling or relying on reviews that aren&apos;t right for you. ViyaWay matches destinations to your personality.
@@ -116,7 +116,7 @@ export default function LandingPage() {
             {/* Trust indicators */}
             <div className="mt-6 flex items-center gap-4 justify-center lg:justify-start text-xs text-[#6B8299]">
               <span className="flex items-center gap-1"><span className="text-[#E8A87C]">&#10003;</span> No credit card</span>
-              <span className="flex items-center gap-1"><span className="text-[#E8A87C]">&#10003;</span> 5-minute setup</span>
+              <span className="flex items-center gap-1"><span className="text-[#E8A87C]">&#10003;</span> 5 minutes to know your travel style</span>
               <span className="flex items-center gap-1"><span className="text-[#E8A87C]">&#10003;</span> Free forever</span>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function LandingPage() {
       <section className="py-20 bg-[#F8FAFB]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#2C3E50] mb-6">
-            Ready to find your path?
+            Ready to find what fits?
           </h2>
           <Link
             href="/dashboard"

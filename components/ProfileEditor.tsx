@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Profile, AXIS_KEYS, AXIS_LABELS, AXIS_DESCRIPTIONS, AxisWeights } from "@/types";
+import { Profile, AxisWeights } from "@/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Props {
@@ -14,10 +14,6 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<Profile>(JSON.parse(JSON.stringify(profile)));
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
-
-  function setWeight(key: keyof AxisWeights, val: number) {
-    setDraft((d) => ({ ...d, axisWeights: { ...d.axisWeights, [key]: val } }));
-  }
 
   function setThreshold(key: keyof AxisWeights, val: string) {
     setDraft((d) => {
@@ -78,27 +74,9 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
           </div>
 
           <div>
-            <label className={`${label} block mb-3`}>Axis Weights</label>
-            <div className="space-y-3">
-              {AXIS_KEYS.map((k) => (
-                <div key={k}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]" title={AXIS_DESCRIPTIONS[k]}>
-                      {AXIS_LABELS[k]}
-                    </span>
-                    <span className="text-sm font-mono text-[#6B8299] dark:text-[#9BB0C1]">
-                      {draft.axisWeights[k].toFixed(2)}
-                    </span>
-                  </div>
-                  <input
-                    type="range" min={0} max={1} step={0.05}
-                    value={draft.axisWeights[k]}
-                    onChange={(e) => setWeight(k, parseFloat(e.target.value))}
-                    className="w-full accent-[#5B8BA0]"
-                  />
-                </div>
-              ))}
-            </div>
+            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed">
+              Your travel style is set by your personality assessment and shapes every recommendation ViyaWay makes.
+            </p>
           </div>
 
           <div>
@@ -125,12 +103,11 @@ export default function ProfileEditor({ profile, onSave, onClose }: Props) {
         </div>
 
         <div className="p-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E] flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-[#1e2d3d]">
-          <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={onClose}>Cancel</button>
           <button
             className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
             onClick={handleSave} disabled={saving}
           >
-            {saving ? "Saving..." : "Save Profile"}
+            {saving ? "Saving..." : "Done"}
           </button>
         </div>
       </div>

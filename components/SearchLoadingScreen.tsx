@@ -34,7 +34,7 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
         setCurrentIndex((i) => (i + 1) % items.length);
         setVisible(true);
       }, 400);
-    }, 5000);
+    }, 8000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);

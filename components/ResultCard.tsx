@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Profile, ScoredOption, TripWorkspace, AXIS_KEYS, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage, PropertyFeedback } from "@/types";
+import { Profile, ScoredOption, TripWorkspace, AxisWeights, DeepDiveResult, SearchCategory, ChatMessage, PropertyFeedback } from "@/types";
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
 import { validateUrl, reportBadUrl, findReplacementUrl } from "@/lib/urlValidation";
 import { isFeedbackEligible, relevantFeedbackAxes, AXIS_FEEDBACK_FLAGS } from "@/lib/feedback";
-import AxisBar from "./AxisBar";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { logEvent } from "@/lib/analytics";
 
@@ -418,6 +417,33 @@ export default function ResultCard({
               ))}
             </div>
           )}
+          {!isList && !isDetail && !expanded && (
+            <div className="flex items-center gap-4 mt-2" onClick={(e) => e.stopPropagation()}>
+              <button
+                className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                onClick={() => {
+                  const next = true;
+                  setExpanded(next);
+                  onExpandedChange?.(next);
+                  logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
+                }}
+              >
+                See why →
+              </button>
+              <button
+                className="text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline"
+                onClick={() => {
+                  const next = true;
+                  setExpanded(next);
+                  onExpandedChange?.(next);
+                  setChatOpen(true);
+                  setTimeout(() => chatInputRef.current?.focus(), 100);
+                }}
+              >
+                Have a question? Ask ViyaWay →
+              </button>
+            </div>
+          )}
         </div>
         {!isList && !isDetail && (
           <span className="text-[#9BB0C1] text-xs mt-1.5 flex-shrink-0">{expanded ? "▲" : "▼"}</span>
@@ -427,28 +453,7 @@ export default function ResultCard({
       {/* Expanded details — always on in detail variant, toggled in default */}
       {(isDetail || (!isList && expanded)) && (
         <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
-          {/* Inner split deliberately waits for xl (not md) — these cards sit inside a
-              2-column results grid on large screens, so a md breakpoint would split this
-              into a third-level column squeeze. xl gives the card room to actually have it. */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* Left: axis bars */}
-            <div>
-              <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs uppercase tracking-wide mb-2">
-                Axis Scores{travelers[0] ? ` — ${travelers[0].name}` : ""}
-              </p>
-              {profileWeights && AXIS_KEYS.map((k) => (
-                <AxisBar
-                  key={k}
-                  axisKey={k}
-                  score={option.axisScores[k]}
-                  weight={profileWeights[k]}
-                  compact
-                />
-              ))}
-            </div>
-
-            {/* Right: description, tradeoffs, source */}
-            <div className="space-y-3">
+          <div className="space-y-3">
               {/* Source CTA — featured at top in detail mode */}
               {isDetail && (
                 <div className="flex flex-col gap-1.5">
@@ -596,7 +601,6 @@ export default function ResultCard({
                   </span>
                 )}
               </button>
-            </div>
           </div>
 
           {/* Inline Chat — full width below the grid */}
@@ -604,9 +608,16 @@ export default function ResultCard({
             <div className="rounded-xl bg-[#F3F7FA] dark:bg-[#1a2a38] border border-[#E0E8ED] dark:border-[#2a3f52] overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-3 py-2 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
-                <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] font-medium">
-                  Ask anything about {option.name}
-                </p>
+                <div>
+                  <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
+                    Ask anything about {option.name}
+                  </p>
+                  <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299]">
+                    {travelers.length === 1
+                      ? `For ${travelers[0].name}`
+                      : `For ${travelers.slice(0, -1).map((t) => t.name).join(", ")} & ${travelers[travelers.length - 1].name}`}
+                  </p>
+                </div>
                 <div className="flex items-center gap-2">
                   {chatMessages.length > 0 && (
                     <button
@@ -669,7 +680,7 @@ export default function ResultCard({
                   ref={chatInputRef}
                   type="text"
                   className="flex-1 bg-transparent text-sm text-[#2C3E50] dark:text-[#B8D4E3] placeholder-[#9BB0C1] dark:placeholder-[#6B8299] outline-none min-w-0"
-                  placeholder="Why does this trigger my dealbreaker?"
+                  placeholder="Ask about pricing, vibe, logistics…"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => {
