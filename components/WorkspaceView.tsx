@@ -798,25 +798,6 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             )}
 
-            {/* Result count — shown in header so it stays visible */}
-            {!searching && sortedResults.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs">
-                  {sortedResults.length} result{sortedResults.length !== 1 ? "s" : ""}
-                  {" · "}{CATEGORY_META[displayedSearch!.category]?.icon} {CATEGORY_META[displayedSearch!.category]?.label ?? displayedSearch!.category}
-                  {" · "}&quot;{displayedSearch!.query}&quot;
-                  {" · "}<span className="italic">AI-curated · may not reflect recent changes</span>
-                </p>
-                {onOpenProfile && (
-                  <button
-                    onClick={onOpenProfile}
-                    className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] text-left transition-colors"
-                  >
-                    Results not feeling right? Update your travel style →
-                  </button>
-                )}
-              </div>
-            )}
             </div>{/* end header */}
 
             {/* Scrollable content area */}

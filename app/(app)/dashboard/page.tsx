@@ -321,7 +321,6 @@ export default function Home() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3] truncate">{p.name}</p>
-                      <p className="text-xs text-[#6B8299] dark:text-[#6B8299]">Type {p.enneagramType}</p>
                     </div>
                     {!p.isDefault && (
                       <button
@@ -334,6 +333,14 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            )}
+            {travelerProfiles.length > 0 && (
+              <button
+                className="w-full text-left px-4 pb-3 pt-1 text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors"
+                onClick={() => setEditingProfile(travelerProfiles[0])}
+              >
+                Results not feeling right? Update your travel style →
+              </button>
             )}
           </div>
 
