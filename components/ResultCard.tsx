@@ -475,7 +475,15 @@ export default function ResultCard({
       {/* Expanded details — always on in detail variant, toggled in default */}
       {(isDetail || (!isList && expanded)) && (
         <div className="px-4 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-4 space-y-4">
-          {/* Traveler fit — position 2, all travelers */}
+          {/* THE VERDICT — position 2, shown when deep dive is available */}
+          {deepDive?.bottomLine && (
+            <div className="rounded-xl px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
+              <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
+            </div>
+          )}
+
+          {/* Traveler fit — position 3, all travelers */}
           {travelers.length > 0 && (
             <div>
               <p className="text-[#9BB0C1] dark:text-[#6B8299] text-xs mb-2.5">Traveler fit</p>
@@ -532,20 +540,32 @@ export default function ResultCard({
             </div>
           )}
 
-          {/* "See why this fits you →" — position 3, full-width primary CTA */}
+          {/* "See why this fits you →" — position 4, full-width primary CTA; demoted to ghost after first research */}
           <div>
             {deepDiveError && (
               <p className="text-xs text-red-500 dark:text-red-400 mb-2">Research failed — try again</p>
             )}
-            <button
-              className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-              onClick={handleDeepDive}
-              disabled={loadingDive}
-            >
-              {loadingDive ? (
-                <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
-              ) : deepDive ? "Research again →" : seeWhyCopy}
-            </button>
+            {deepDive ? (
+              <button
+                className="w-full px-4 py-2.5 text-sm rounded-lg border border-[#5B8BA0]/40 dark:border-[#5B8BA0]/50 text-[#5B8BA0] dark:text-[#7DBAD4] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/15 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                onClick={handleDeepDive}
+                disabled={loadingDive}
+              >
+                {loadingDive ? (
+                  <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
+                ) : "Research again →"}
+              </button>
+            ) : (
+              <button
+                className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                onClick={handleDeepDive}
+                disabled={loadingDive}
+              >
+                {loadingDive ? (
+                  <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
+                ) : seeWhyCopy}
+              </button>
+            )}
           </div>
 
           {/* Chat trigger — position 4 */}
@@ -801,14 +821,6 @@ export default function ResultCard({
           {/* Deep dive result */}
           {deepDive && (
             <div className="rounded-xl border border-[#E0E8ED] dark:border-[#3D5A6E] overflow-hidden">
-              {/* THE VERDICT — leads */}
-              {deepDive.bottomLine && (
-                <div className="px-4 py-4 bg-amber-50/60 dark:bg-amber-900/10 border-l-4 border-amber-400 dark:border-amber-500">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-500 mb-1.5">The Verdict</p>
-                  <p className="text-sm text-[#2C3E50] dark:text-[#B8D4E3] leading-relaxed font-medium">{deepDive.bottomLine}</p>
-                </div>
-              )}
-
               {/* Why this fits you */}
               {deepDive.whyItFits.length > 0 && (
                 <div className="px-4 py-4 border-t border-[#E0E8ED] dark:border-[#3D5A6E]">

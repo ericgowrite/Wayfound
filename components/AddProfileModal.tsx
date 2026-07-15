@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Profile, ProfileTemplate, AXIS_KEYS, AXIS_LABELS, AXIS_DESCRIPTIONS, AxisWeights } from "@/types";
+import { Profile, ProfileTemplate } from "@/types";
 import { AssessmentResult } from "@/lib/assessment";
 import TravelAssessment from "./TravelAssessment";
 import templates from "@/src/data/profileTemplates.json";
@@ -68,10 +68,6 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
       dealbreakers: [...(t?.dealbreakers ?? [])],
     });
     setStep("review");
-  }
-
-  function setWeight(key: keyof AxisWeights, val: number) {
-    setDraft((d) => ({ ...d, axisWeights: { ...d.axisWeights!, [key]: val } }));
   }
 
   function addDealbreaker() {
@@ -237,34 +233,24 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
 
           {step === "review" && draft.axisWeights && (
             <div className="space-y-5">
-              <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">{draft.description}</p>
-
-              <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-3">Axis Weights — adjust to fit</label>
-                <div className="space-y-3">
-                  {AXIS_KEYS.map((k) => (
-                    <div key={k}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-[#3D5A6E] dark:text-[#B8D4E3]" title={AXIS_DESCRIPTIONS[k]}>
-                          {AXIS_LABELS[k]}
-                        </span>
-                        <span className="text-sm font-mono text-[#6B8299] dark:text-[#9BB0C1]">
-                          {(draft.axisWeights![k] ?? 0).toFixed(2)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        value={draft.axisWeights![k] ?? 0}
-                        onChange={(e) => setWeight(k, parseFloat(e.target.value))}
-                        className="w-full accent-[#5B8BA0]"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {(() => {
+                const info = TYPE_INFO[draft.enneagramType ?? ""];
+                return info ? (
+                  <ul className="space-y-2">
+                    {info.bullets.map((bullet, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm">{draft.description}</p>
+                );
+              })()}
+              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
+                ViyaWay uses your travel style to score every result.
+              </p>
 
               <div>
                 <label className="text-[#6B8299] text-xs uppercase block mb-2">Dealbreakers</label>
