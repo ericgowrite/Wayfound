@@ -262,6 +262,11 @@ const DEFAULT_AXIS_SCORES = {
   socialPermeability: 0.5, autonomy: 0.5, novelty: 0.5, locationFriction: 0.5,
 };
 
+// Strip Gemini grounding citation markers like [3], [12, 41], [2, 14, 33, 41]
+function stripCitations(text: string): string {
+  return text.replace(/\s*\[\d+(?:,\s*\d+)*\]/g, "").trim();
+}
+
 function hydrate(
   item: Omit<ScoredOption, "id" | "searchId" | "status" | "notes">,
   searchId: string
@@ -271,10 +276,10 @@ function hydrate(
     ...item,
     // Guard every field Gemini might omit on degraded responses
     name: item.name ?? "Unknown",
-    description: item.description ?? "",
+    description: stripCitations(item.description ?? ""),
     price: item.price ?? "",
     alignmentScore: typeof item.alignmentScore === "number" ? item.alignmentScore : 0,
-    fitExplanation: item.fitExplanation ?? "",
+    fitExplanation: stripCitations(item.fitExplanation ?? ""),
     axisScores: item.axisScores ?? DEFAULT_AXIS_SCORES,
     // Injected fields
     id: uuidv4(),
@@ -282,10 +287,10 @@ function hydrate(
     status: "new" as const,
     notes: "",
     source: sanitizeSourceUrl(item.source),
-    thresholdViolations: item.thresholdViolations ?? [],
-    watchOutFor: item.watchOutFor ?? [],
-    dealbreakersTriggered: item.dealbreakersTriggered ?? [],
-    tradeoffs: item.tradeoffs ?? [],
+    thresholdViolations: (item.thresholdViolations ?? []).map(stripCitations),
+    watchOutFor: (item.watchOutFor ?? []).map(stripCitations),
+    dealbreakersTriggered: (item.dealbreakersTriggered ?? []).map(stripCitations),
+    tradeoffs: (item.tradeoffs ?? []).map(stripCitations),
   };
 }
 
