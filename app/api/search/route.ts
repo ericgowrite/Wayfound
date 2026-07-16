@@ -15,7 +15,7 @@ const ANON_SEARCH_LIMIT = 2;
 export async function POST(request: Request) {
   try {
     const { uid: userId, isAnonymous } = await getTokenClaims(request);
-    const { workspaceId, query, category } = await request.json();
+    const { workspaceId, query, category, intent } = await request.json();
 
     if (!workspaceId || typeof workspaceId !== "string") {
       return NextResponse.json({ error: "workspaceId is required" }, { status: 400 });
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const profiles = travelerProfiles.length > 0 ? travelerProfiles : (defaultProfile ? [defaultProfile] : []);
 
     const searchId = uuidv4();
-    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize);
+    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize, false, typeof intent === "string" ? intent : undefined);
     // URL validation is deferred to card expand (client-side ResultCard handles
     // it lazily via /api/validate-url). Removing it here eliminates 0.5–3s of
     // blocking HTTP checks from the search critical path.

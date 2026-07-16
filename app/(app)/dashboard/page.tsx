@@ -14,6 +14,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import DashboardTour from "@/components/DashboardTour";
 import { useTourState } from "@/lib/useTourState";
 import { CATEGORY_META } from "@/lib/categories";
+import IntentScreen from "@/components/IntentScreen";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -498,17 +499,16 @@ export default function Home() {
             onSearchChange={setActiveSearchId}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-[#6B8299]">
-            <div className="text-6xl mb-4">🗺️</div>
-            <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Where are you thinking of going?</p>
-            <p className="text-sm mt-1">Tell us a destination — we&apos;ll find what fits you.</p>
-            <button
-              className="mt-4 px-4 py-2 bg-[#5B8BA0] text-white rounded hover:bg-[#4A7A8F] text-sm"
-              onClick={() => setShowNewWorkspace(true)}
-            >
-              + New Trip
-            </button>
-          </div>
+          <IntentScreen
+            profiles={profiles}
+            onWorkspaceReady={(workspace, search) => {
+              const ws = { ...workspace, searches: [search] };
+              setWorkspaces((prev) => [ws, ...prev]);
+              setActiveWorkspaceId(ws.id);
+              setActiveSearchId(search.id);
+            }}
+            onSkipToModal={() => setShowNewWorkspace(true)}
+          />
         )}
         </div>
       </div>

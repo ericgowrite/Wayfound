@@ -23,7 +23,8 @@ function searchCacheKey(
   category: SearchCategory,
   profiles: Profile[],
   destination?: string,
-  partySize?: number
+  partySize?: number,
+  intent?: string
 ): string {
   const combined = combineProfiles(profiles);
   const input = JSON.stringify({
@@ -31,6 +32,7 @@ function searchCacheKey(
     cat: category,
     dest: (destination || "").toLowerCase().trim(),
     party: partySize || 1,
+    intent: intent || "",
     // Round axis weights to 2dp so tiny float differences don't split entries.
     weights: Object.fromEntries(
       (Object.entries(combined.axisWeights) as [string, number][]).map(
@@ -409,11 +411,12 @@ export async function searchAndScore(
   destination?: string,
   dates?: { start: string; end: string },
   partySize?: number,
-  skipCache?: boolean
+  skipCache?: boolean,
+  intent?: string
 ): Promise<ScoredOption[]> {
   // Cache check — dates excluded from key intentionally (24h TTL prevents
   // stale seasonal results; including dates destroys hit rate for re-searches).
-  const cacheKey = searchCacheKey(query, category, profiles, destination, partySize);
+  const cacheKey = searchCacheKey(query, category, profiles, destination, partySize, intent);
   if (!skipCache) {
     const cached = await getCachedSearch(cacheKey);
     if (cached) {
@@ -425,8 +428,12 @@ export async function searchAndScore(
   const systemPrompt = buildSystemPrompt("search");
   const { scoringProfile, profileSection, fitExplanationInstruction } = buildGroupContext(profiles);
 
+  const intentLine = intent
+    ? `\nTRAVELER INTENT: "${intent}" — Weight results toward options that genuinely serve this intent alongside the personality profile. Do not reference the intent key literally in output text; let it inform selection and fit scoring naturally.`
+    : "";
+
   const prompt = `
-${profileSection}
+${profileSection}${intentLine}
 
 QUERY: "${query}" (category: ${category})
 ${tripContextLine(destination, dates, partySize)}
