@@ -24,6 +24,10 @@ body {
   color: var(--foreground);
 }
 
+button {
+  cursor: pointer;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #E0E8ED transparent;
