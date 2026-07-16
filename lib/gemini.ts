@@ -251,6 +251,15 @@ function hydrate(
 
 // ── Shared prompt fragments ───────────────────────────────────────────────────
 
+const SOURCE_INSTRUCTION = `"source": "Official property website URL retrieved from search results. Prefer the property's own domain over OTA/aggregator pages (booking.com, tripadvisor.com, expedia.com, hotels.com, marriott.com, etc.). Skip redirect/tracking URLs and sponsored search results. If no official property URL appeared, omit this field entirely."`;
+
+const TEXT_FIELD_RULES = `LANGUAGE RULES for all text fields (fitExplanation, tradeoffs, watchOutFor, description):
+- Never use internal axis dimension names: calm, designSincerity, valueIntegrity, socialPermeability, autonomy, novelty, locationFriction.
+- Use plain language instead: pace, atmosphere / aesthetic, value for money, social setting, independence, familiarity, convenience.
+- Do not mention numeric axis scores or weights.`;
+
+const RESULT_SELECTION_RULE = `RESULT SELECTION: Skip pure sponsored listings, OTA-only booking pages with no property-specific content, and redirect/tracking URLs. Include results that have an identifiable official property website.`;
+
 const AXIS_SCHEMA = `"axisScores": {
     "calm": 0.0-1.0,
     "designSincerity": 0.0-1.0,
@@ -396,7 +405,7 @@ Search the web for this query, then score each result against the profile.
 For each option found (aim for 4-8 results), return a JSON array:
 [{
   "name": "Option name",
-  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
+  ${SOURCE_INSTRUCTION},
   "description": "Brief description",
   "price": "Price if available",
   ${AXIS_SCHEMA},
@@ -405,10 +414,14 @@ For each option found (aim for 4-8 results), return a JSON array:
   "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
   "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
   ${fitExplanationInstruction},
-  "tradeoffs": ["tradeoff 1", "tradeoff 2"]
+  "tradeoffs": ["plain language tradeoff — e.g. 'Higher price point for what it offers' not 'low valueIntegrity'"]
 }]
 
 Return ONLY a valid JSON array. No markdown, no explanation outside the JSON.
+
+${TEXT_FIELD_RULES}
+
+${RESULT_SELECTION_RULE}
 
 ${AXIS_GUIDE}
 
@@ -452,7 +465,7 @@ ${profiles.length > 1 ? `This is a group trip — find options that work well fo
 Return a JSON array using the same structure:
 [{
   "name": "Option name",
-  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
+  ${SOURCE_INSTRUCTION},
   "description": "Brief description",
   "price": "Price if available",
   ${AXIS_SCHEMA},
@@ -461,10 +474,14 @@ Return a JSON array using the same structure:
   "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
   "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
   ${fitExplanationInstruction},
-  "tradeoffs": ["tradeoff 1", "tradeoff 2"]
+  "tradeoffs": ["plain language tradeoff — e.g. 'Higher price point for what it offers' not 'low valueIntegrity'"]
 }]
 
 Return ONLY valid JSON array. No markdown.
+
+${TEXT_FIELD_RULES}
+
+${RESULT_SELECTION_RULE}
 
 ${AXIS_GUIDE}
 
@@ -618,7 +635,7 @@ ${isUrl ? "Fetch the page and use that content to score this option." : "Search 
 Return a single JSON object (not an array):
 {
   "name": "Option name",
-  "source": "full https:// URL found in search results — NEVER guess or construct a URL. Only include a URL you actually retrieved from a search result. If no official website appeared in your search results, omit this field entirely.",
+  ${SOURCE_INSTRUCTION},
   "description": "Brief description (2-3 sentences)",
   "price": "Price if found, otherwise omit",
   ${AXIS_SCHEMA},
@@ -627,10 +644,12 @@ Return a single JSON object (not an array):
   "watchOutFor": ["potential concern based on inference — use sparingly, default []"],
   "dealbreakersTriggered": ["confirmed dealbreaker with explicit evidence only — prefer []"],
   ${fitExplanationInstruction},
-  "tradeoffs": ["tradeoff 1", "tradeoff 2"]
+  "tradeoffs": ["plain language tradeoff — e.g. 'Higher price point for what it offers' not 'low valueIntegrity'"]
 }
 
 Return ONLY valid JSON. No markdown, no extra text.
+
+${TEXT_FIELD_RULES}
 
 ${AXIS_GUIDE}
 
