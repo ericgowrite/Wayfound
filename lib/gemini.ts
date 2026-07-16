@@ -622,11 +622,11 @@ Each array item should be a single concise bullet (1-2 lines max). Be specific a
     if (match) {
       const parsed = JSON.parse(match[0]) as DeepDiveResult;
       return {
-        overview: parsed.overview ?? "",
-        whyItFits: Array.isArray(parsed.whyItFits) ? parsed.whyItFits : [],
-        watchOutFor: Array.isArray(parsed.watchOutFor) ? parsed.watchOutFor : [],
-        standoutFeatures: Array.isArray(parsed.standoutFeatures) ? parsed.standoutFeatures : [],
-        bottomLine: parsed.bottomLine ?? "",
+        overview: stripCitations(parsed.overview ?? ""),
+        whyItFits: Array.isArray(parsed.whyItFits) ? parsed.whyItFits.map(stripCitations) : [],
+        watchOutFor: Array.isArray(parsed.watchOutFor) ? parsed.watchOutFor.map(stripCitations) : [],
+        standoutFeatures: Array.isArray(parsed.standoutFeatures) ? parsed.standoutFeatures.map(stripCitations) : [],
+        bottomLine: stripCitations(parsed.bottomLine ?? ""),
       };
     }
   } catch {
