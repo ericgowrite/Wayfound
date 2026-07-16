@@ -1313,10 +1313,10 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         )}
       </div>
 
-      {showComparison && comparisonOptions.length >= 2 && profileWeights && (
+      {showComparison && comparisonOptions.length >= 2 && (
         <ComparisonView
           options={comparisonOptions}
-          profileWeights={profileWeights}
+          travelers={travelers}
           workspaceId={workspace.id}
           onClose={() => setShowComparison(false)}
         />

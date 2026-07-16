@@ -490,13 +490,18 @@ export async function generateComparison(
   const prompt = `Compare these ${options.length} travel options for ${travelerContext}:
 
 ${options.map((o, i) => `OPTION ${i + 1}: ${o.name}
-- Alignment: ${o.alignmentScore}%
-- Fit: ${o.fitExplanation}
-- Tradeoffs: ${o.tradeoffs.join(", ")}`).join("\n\n")}
+- Overall fit: ${o.alignmentScore}%
+- Why it fits: ${o.fitExplanation}
+- Watch out for: ${o.tradeoffs.join(", ")}`).join("\n\n")}
 
 Write a 3-4 sentence comparison focusing on which option best fits ${isGroup ? `the group (${names})` : "the traveler"} and why.
 ${isGroup ? `Reference individual travelers by name where their priorities differ.` : ""}
-Highlight the key differentiators. Be direct and specific.`;
+Highlight the key differentiators. Be direct and specific.
+
+CRITICAL RULES:
+- Do NOT use any internal dimension names in your response. Never write: calm, designSincerity, valueIntegrity, socialPermeability, autonomy, novelty, locationFriction. Instead use plain language: pace, atmosphere, value, social setting, independence, familiarity, convenience.
+- Do NOT mention numeric axis scores or weight values.
+- Write in plain conversational language a traveler would understand.`;
 
   const raw = await callPlain(systemPrompt, prompt);
   auditResponse(raw, "comparison");
