@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Profile,
   TripWorkspace,
@@ -35,6 +35,13 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useAuth } from "@/lib/AuthContext";
 import { useTourState } from "@/lib/useTourState";
 
+interface AutoSearch {
+  workspaceId: string;
+  query: string;
+  category: SearchCategory;
+  intent?: string;
+}
+
 interface Props {
   workspace: TripWorkspace;
   travelers: Profile[];
@@ -43,20 +50,22 @@ interface Props {
   onOpenProfile?: () => void;
   activeSearchId: string | null;
   onSearchChange: (id: string) => void;
+  autoSearch?: AutoSearch;
 }
 
 type SortMode = "fit" | "group";
 
-export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, onOpenProfile, activeSearchId, onSearchChange }: Props) {
+export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, onOpenProfile, activeSearchId, onSearchChange, autoSearch }: Props) {
   const { isAnonymous } = useAuth();
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
 
   const [mode, setMode] = useState<"search" | "score">("search");
   const [sortMode, setSortMode] = useState<SortMode>("fit");
-  const [query, setQuery] = useState(workspace.searches[0]?.query ?? "");
+  const [query, setQuery] = useState(autoSearch?.query ?? workspace.searches[0]?.query ?? "");
   const [scoreInput, setScoreInput] = useState("");
-  const [category, setCategory] = useState<SearchCategory>("accommodation");
+  const [category, setCategory] = useState<SearchCategory>(autoSearch?.category ?? "accommodation");
+  const autoSearchFiredRef = useRef(false);
   const [searching, setSearching] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -95,6 +104,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     const t = setTimeout(() => setShowTour(true), 600);
     return () => clearTimeout(t);
   }, [tourDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fire the first search when the workspace was just created from the intent screen.
+  // The ref guard ensures it fires at most once per WorkspaceView mount.
+  useEffect(() => {
+    if (!autoSearch || autoSearchFiredRef.current) return;
+    autoSearchFiredRef.current = true;
+    handleSearch(autoSearch.intent);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleTourDone() {
     setShowTour(false);
@@ -149,7 +166,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     workspace.savedOptions[0] ??
     null;
 
-  async function handleSearch() {
+  async function handleSearch(intentOverride?: string) {
     if (!query.trim()) return;
     setSearching(true);
     setSearchError("");
@@ -183,7 +200,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       const res = await fetchWithAuth("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: workspace.id, query, category }),
+        body: JSON.stringify({ workspaceId: workspace.id, query, category, ...(intentOverride ? { intent: intentOverride } : {}) }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -652,7 +669,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <CategorySelect value={category} onChange={setCategory} />
               <button
                 className="flex-1 sm:flex-initial px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
-                onClick={handleSearch}
+                onClick={() => handleSearch()}
                 disabled={searching || !query.trim()}
               >
                 {searching ? (

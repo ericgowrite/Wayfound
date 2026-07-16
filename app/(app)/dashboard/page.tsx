@@ -32,6 +32,7 @@ export default function Home() {
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
+  const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
   const [showFitLegend, setShowFitLegend] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -496,16 +497,16 @@ export default function Home() {
             onProfileUpdate={handleProfileUpdate}
             onOpenProfile={travelerProfiles[0] ? () => setEditingProfile(travelerProfiles[0]) : undefined}
             activeSearchId={activeSearchId}
-            onSearchChange={setActiveSearchId}
+            onSearchChange={(id) => { setActiveSearchId(id); setPendingAutoSearch(null); }}
+            autoSearch={pendingAutoSearch?.workspaceId === activeWorkspace.id ? pendingAutoSearch : undefined}
           />
         ) : (
           <IntentScreen
             profiles={profiles}
-            onWorkspaceReady={(workspace, search) => {
-              const ws = { ...workspace, searches: [search] };
-              setWorkspaces((prev) => [ws, ...prev]);
-              setActiveWorkspaceId(ws.id);
-              setActiveSearchId(search.id);
+            onWorkspaceCreated={(workspace, autoSearch) => {
+              setWorkspaces((prev) => [workspace, ...prev]);
+              setActiveWorkspaceId(workspace.id);
+              setPendingAutoSearch(autoSearch);
             }}
             onSkipToModal={() => setShowNewWorkspace(true)}
           />
@@ -520,24 +521,14 @@ export default function Home() {
             <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-4">New Trip</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-1">Trip Name</label>
-                <input
-                  className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
-                  placeholder="e.g. Tuscany 2026"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
-                  autoFocus
-                />
-              </div>
-              <div>
                 <label className="text-[#6B8299] text-xs uppercase block mb-1">Destination</label>
                 <input
                   className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="e.g. Tuscany, Italy"
                   value={newDest}
-                  onChange={(e) => setNewDest(e.target.value)}
+                  onChange={(e) => { setNewDest(e.target.value); setNewName(e.target.value); }}
                   onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
+                  autoFocus
                 />
               </div>
               {profiles.length > 1 && (
@@ -578,7 +569,7 @@ export default function Home() {
               <button
                 className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
                 onClick={createWorkspace}
-                disabled={!newName.trim() || creatingWorkspace}
+                disabled={!newDest.trim() || creatingWorkspace}
               >
                 {creatingWorkspace ? "Creating…" : "Create Trip"}
               </button>
