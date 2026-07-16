@@ -127,61 +127,14 @@ async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
 
 // ── Transport helpers ─────────────────────────────────────────────────────────
 
-/**
- * Pull domains out of Gemini's search-grounding citations.
- * Note: groundingChunks[].web.uri is typically a Google redirect link
- * (vertexaisearch.cloud.google.com/grounding-api-redirect/...), not the
- * destination domain — so this reads .title instead, which is usually the
- * source's display name or domain. Best-effort signal, not a guarantee.
- */
-function extractCitedDomains(candidate: { groundingMetadata?: { groundingChunks?: { web?: { uri?: string; title?: string } }[] } } | undefined): Set<string> {
-  const domains = new Set<string>();
-  const chunks = candidate?.groundingMetadata?.groundingChunks ?? [];
-  for (const chunk of chunks) {
-    const title = chunk.web?.title?.toLowerCase().trim();
-    if (title) domains.add(title);
-    const uri = chunk.web?.uri;
-    if (uri) {
-      try {
-        const host = new URL(uri).hostname.replace(/^www\./, "");
-        if (!host.includes("vertexaisearch") && !host.includes("google.com")) domains.add(host);
-      } catch {
-        // not a parseable URL — skip
-      }
-    }
-  }
-  return domains;
-}
 
-async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string; citedDomains: Set<string> }> {
+async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string }> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
     const result = await m.generateContent(userPrompt);
-    const citedDomains = extractCitedDomains(result.response.candidates?.[0]);
-    return { text: result.response.text(), citedDomains };
+    return { text: result.response.text() };
   });
-}
-
-/**
- * Cross-check a result's claimed source URL against Gemini's search-grounding
- * citations. Returns true if corroborated (or if we can't tell — citations
- * may be incomplete). Returns false only when citations are present AND the
- * domain has zero overlap with any of them, which is strong evidence Gemini
- * constructed the URL rather than finding it in search results.
- */
-function isCitedDomainCorroborated(resultName: string, sourceUrl: string | undefined, citedDomains: Set<string>): boolean {
-  if (!sourceUrl || citedDomains.size === 0) return true; // can't tell — give benefit of doubt
-  try {
-    const host = new URL(sourceUrl).hostname.replace(/^www\./, "");
-    const corroborated = Array.from(citedDomains).some((d) => d.includes(host) || host.includes(d));
-    if (!corroborated) {
-      console.warn(`[VIYA-AI] nulling source for "${resultName}" — domain "${host}" not found in search citations (likely hallucinated)`);
-    }
-    return corroborated;
-  } catch {
-    return true; // unparseable URL — let client-side validation handle it
-  }
 }
 
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
@@ -461,16 +414,9 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "search");
   const items = parseArray(raw);
-  // Null out any source URL not corroborated by search citations — these are
-  // likely hallucinated. The client-side Places recovery handles empty sources.
-  for (const item of items) {
-    if (!isCitedDomainCorroborated(item.name, item.source, citedDomains)) {
-      item.source = "";
-    }
-  }
   // Write to cache before hydrating so the stored items have no UUID fields.
   await setCachedSearch(cacheKey, query, category, items);
   return items.map((item) => hydrate(item, searchId));
@@ -524,14 +470,9 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
   const items = parseArray(raw);
-  for (const item of items) {
-    if (!isCitedDomainCorroborated(item.name, item.source, citedDomains)) {
-      item.source = "";
-    }
-  }
   return items.map((item) => hydrate(item, searchId));
 }
 
@@ -690,13 +631,10 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw, citedDomains } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "scoreSpecific", { userProvidedUrl });
 
   const parsed = parseObject(raw);
-  if (!userProvidedUrl && !isCitedDomainCorroborated(parsed.name, parsed.source, citedDomains)) {
-    parsed.source = "";
-  }
 
   // Sacred Rule 1: Always restore user-provided URL — never let Gemini overwrite it.
   if (userProvidedUrl) {
