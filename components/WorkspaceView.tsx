@@ -19,6 +19,9 @@ import {
   shouldTriggerCalibration,
   markCalibrationShown,
   analyzeCalibration,
+  analyzeFeedbackCalibration,
+  shouldTriggerFeedbackCalibration,
+  markFeedbackCalibrationShown,
   logCalibrationEvent,
   CalibrationSuggestion,
 } from "@/lib/calibration";
@@ -90,6 +93,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     setWorkspaceNotes(workspace.notes);
   }
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
+  const [calibrationSource, setCalibrationSource] = useState<"saves" | "feedback">("saves");
   const [showFitCallout, setShowFitCallout] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
@@ -132,6 +136,17 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       setShowFitCallout(true);
     }
   }, [workspace.searches]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Check feedback-based calibration when saved options with feedback change.
+  // Runs after behavioral (save-count) calibration so both don't fire at once.
+  useEffect(() => {
+    if (!primaryProfile || pendingCalibration || workspace.savedOptions.length === 0) return;
+    if (!shouldTriggerFeedbackCalibration(primaryProfile.id, workspace.savedOptions)) return;
+    markFeedbackCalibrationShown(primaryProfile.id);
+    const suggestions = analyzeFeedbackCalibration(primaryProfile, workspace.savedOptions);
+    if (suggestions.length > 0) { setCalibrationSource("feedback"); setPendingCalibration(suggestions); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace.savedOptions]);
 
   const activeSearch = workspace.searches.find((s) => s.id === activeSearchId) ?? null;
 
@@ -268,6 +283,15 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     if (!activeSearchId) return;
     setLoadingMore(true);
     setSearchError("");
+    // Unsatisfied signal — user asked for more results after seeing these
+    if (activeSearch) {
+      logEvent({
+        event: "viyaway_load_more",
+        query: activeSearch.query,
+        category: activeSearch.category,
+        existingCount: activeSearch.scoredResults.length,
+      });
+    }
     try {
       const res = await fetchWithAuth("/api/search/more", {
         method: "POST",
@@ -334,11 +358,16 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         fitScore: option.alignmentScore,
         enneagramType: primaryProfile.enneagramType,
       });
+      // Track save rank for ranking quality analytics
+      const rank = sortedResults.findIndex((o) => o.id === option.id);
+      if (rank >= 0) {
+        logEvent({ event: "viyaway_result_saved_rank", itemId: option.id, rank, fitScore: option.alignmentScore });
+      }
       trackSave(option, primaryProfile.id);
       if (shouldTriggerCalibration(primaryProfile.id)) {
         markCalibrationShown(primaryProfile.id);
         const suggestions = analyzeCalibration(primaryProfile);
-        if (suggestions.length > 0) setPendingCalibration(suggestions);
+        if (suggestions.length > 0) { setCalibrationSource("saves"); setPendingCalibration(suggestions); }
       }
     }
   }
@@ -815,7 +844,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 </span>
                 <button
                   className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
-                  onClick={() => { setComparisonOptions(selectedOptions); setShowComparison(true); }}
+                  onClick={() => { setComparisonOptions(selectedOptions); setShowComparison(true); logEvent({ event: "viyaway_comparison_opened", itemCount: selectedOptions.length }); }}
                 >
                   Compare →
                 </button>
@@ -1080,7 +1109,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   </span>
                   <button
                     className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
-                    onClick={() => { setComparisonOptions(selectedSavedOptions); setShowComparison(true); }}
+                    onClick={() => { setComparisonOptions(selectedSavedOptions); setShowComparison(true); logEvent({ event: "viyaway_comparison_opened", itemCount: selectedSavedOptions.length }); }}
                   >
                     Compare →
                   </button>
@@ -1327,6 +1356,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           profile={primaryProfile}
           suggestions={pendingCalibration}
           savesCount={pendingCalibration.length}
+          sourceDescription={
+            calibrationSource === "feedback"
+              ? "Based on your post-trip feedback, I noticed:"
+              : undefined
+          }
           onAccept={handleCalibrationAccept}
           onDismiss={handleCalibrationDismiss}
         />

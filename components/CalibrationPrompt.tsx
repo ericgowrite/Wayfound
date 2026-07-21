@@ -8,11 +8,13 @@ interface Props {
   profile: Profile;
   suggestions: CalibrationSuggestion[];
   savesCount: number;
+  /** Overrides the "Based on your last N saves" line when calibration comes from a different signal. */
+  sourceDescription?: string;
   onAccept: (newWeights: AxisWeights) => void;
   onDismiss: () => void;
 }
 
-export default function CalibrationPrompt({ profile, suggestions, savesCount, onAccept, onDismiss }: Props) {
+export default function CalibrationPrompt({ profile, suggestions, savesCount, sourceDescription, onAccept, onDismiss }: Props) {
   const [showDetails, setShowDetails] = useState(false);
 
   function handleAccept() {
@@ -30,7 +32,7 @@ export default function CalibrationPrompt({ profile, suggestions, savesCount, on
                 Profile calibration for {profile.name}
               </h2>
               <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mt-0.5">
-                Based on your last {savesCount} saves, I noticed:
+                {sourceDescription ?? `Based on your last ${savesCount} saves, I noticed:`}
               </p>
             </div>
           </div>

@@ -1,10 +1,12 @@
-import { AxisWeights, AXIS_KEYS, AXIS_LABELS, Profile, ScoredOption } from "@/types";
+import { AxisWeights, AXIS_KEYS, AXIS_LABELS, Profile, ScoredOption, SavedOption } from "@/types";
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
 const SAVES_KEY = "vg:saves";
 const REJECTS_KEY = "vg:rejects";
 const CAL_LOG_KEY = "vg:cal_log";
 const CAL_COUNT_PREFIX = "vg:cal_count:";
+// Tracks when feedback-based calibration was last shown (ISO string per profile)
+const CAL_FEEDBACK_SHOWN_PREFIX = "vg:cal_fb_shown:";
 
 export const CALIBRATION_THRESHOLD = 10;
 const GAP_THRESHOLD = 0.05;
@@ -152,6 +154,112 @@ export function analyzeCalibration(profile: Profile): CalibrationSuggestion[] {
       axis,
       axisLabel: AXIS_LABELS[axis],
       avgSaved: Math.round(avgSaved * 100) / 100,
+      currentWeight,
+      suggestedWeight,
+      direction: (gap > 0 ? "higher" : "lower") as "higher" | "lower",
+    }];
+  });
+}
+
+// ── Feedback-based calibration ─────────────────────────────────────────────
+// Outcome signal: uses post-trip axisFlags ("noisier than expected") to detect
+// systematic scoring bias — stronger than the save-based behavioral signal.
+//
+// Rule: if the same axis flag appears on 2+ options where metExpectations !== "yes",
+// suggest tightening the weight for that axis (we're over-predicting fit there).
+const MIN_FEEDBACK_MISSES = 2;
+// Don't re-fire within 14 days of the last feedback-based prompt
+const FEEDBACK_CAL_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+
+export function markFeedbackCalibrationShown(profileId: string): void {
+  try {
+    localStorage.setItem(
+      `${CAL_FEEDBACK_SHOWN_PREFIX}${profileId}`,
+      new Date().toISOString()
+    );
+  } catch {}
+}
+
+export function shouldTriggerFeedbackCalibration(
+  profileId: string,
+  savedOptions: SavedOption[]
+): boolean {
+  const missedOptions = savedOptions.filter(
+    (o) => o.feedback && o.feedback.metExpectations !== "yes" && o.feedback.axisFlags.length > 0
+  );
+  if (missedOptions.length < MIN_FEEDBACK_MISSES) return false;
+
+  // Check cooldown — avoid pestering users with repeated prompts
+  try {
+    const lastShown = localStorage.getItem(`${CAL_FEEDBACK_SHOWN_PREFIX}${profileId}`);
+    if (lastShown) {
+      const elapsed = Date.now() - new Date(lastShown).getTime();
+      if (elapsed < FEEDBACK_CAL_COOLDOWN_MS) return false;
+    }
+  } catch {}
+
+  // Count per-axis misses to see if any axis crosses the threshold
+  const axisHits = new Map<keyof AxisWeights, number>();
+  for (const o of missedOptions) {
+    for (const flag of o.feedback!.axisFlags) {
+      axisHits.set(flag, (axisHits.get(flag) ?? 0) + 1);
+    }
+  }
+  return [...axisHits.values()].some((count) => count >= MIN_FEEDBACK_MISSES);
+}
+
+/**
+ * Analyze post-trip feedback to produce calibration suggestions.
+ *
+ * When a user reports that reality didn't match expectations on a specific axis
+ * (e.g. "busier than expected" → calm flag), we infer the axis score we gave that
+ * property was too optimistic. Suggest moving the profile weight in the direction
+ * that would have de-ranked this property, i.e. toward what the user actually
+ * experienced.
+ *
+ * Caller should check shouldTriggerFeedbackCalibration() first.
+ */
+export function analyzeFeedbackCalibration(
+  profile: Profile,
+  savedOptions: SavedOption[]
+): CalibrationSuggestion[] {
+  const missedOptions = savedOptions.filter(
+    (o) => o.feedback && o.feedback.metExpectations !== "yes" && o.feedback.axisFlags.length > 0
+  );
+
+  // Count misses per axis and sum up their scores so we can average them
+  const axisData = new Map<keyof AxisWeights, { count: number; scoreSum: number }>();
+  for (const o of missedOptions) {
+    for (const flag of o.feedback!.axisFlags) {
+      const prev = axisData.get(flag) ?? { count: 0, scoreSum: 0 };
+      axisData.set(flag, {
+        count: prev.count + 1,
+        scoreSum: prev.scoreSum + o.axisScores[flag],
+      });
+    }
+  }
+
+  return AXIS_KEYS.flatMap((axis) => {
+    const data = axisData.get(axis);
+    if (!data || data.count < MIN_FEEDBACK_MISSES) return [];
+
+    const avgFlagged = data.scoreSum / data.count;
+    const currentWeight = profile.axisWeights[axis];
+    const gap = avgFlagged - currentWeight;
+
+    // Only surface if there's a meaningful gap between what we scored
+    // and what the profile expects — tiny gaps don't warrant a suggestion.
+    if (Math.abs(gap) <= GAP_THRESHOLD) return [];
+
+    // Nudge weight halfway toward the axis score we assigned to options
+    // that missed — this tightens the filter for this axis in future searches.
+    const raw = currentWeight + gap * 0.5;
+    const suggestedWeight = Math.round(Math.min(1, Math.max(0, raw)) * 100) / 100;
+
+    return [{
+      axis,
+      axisLabel: AXIS_LABELS[axis],
+      avgSaved: Math.round(avgFlagged * 100) / 100,
       currentWeight,
       suggestedWeight,
       direction: (gap > 0 ? "higher" : "lower") as "higher" | "lower",

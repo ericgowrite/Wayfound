@@ -6,6 +6,7 @@ import { buildSystemPrompt, auditResponse } from "@/lib/ai-instructions";
 import { combineProfiles } from "@/lib/scoring";
 import { adminDb } from "@/lib/firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
+import { logSearchQuality } from "@/lib/qualityMonitor";
 
 // ── Gemini search result cache ────────────────────────────────────────────────
 // Caches searchAndScore() results for 24 hours, keyed by a hash of the query,
@@ -443,7 +444,10 @@ ${thresholdLine(scoringProfile)}`.trim();
   const items = parseArray(raw);
   // Write to cache before hydrating so the stored items have no UUID fields.
   await setCachedSearch(cacheKey, query, category, items);
-  return items.map((item) => hydrate(item, searchId));
+  const hydrated = items.map((item) => hydrate(item, searchId));
+  // Fire quality audit in background — non-fatal, never blocks the response.
+  void logSearchQuality(searchId, query, category, hydrated);
+  return hydrated;
 }
 
 export async function searchMoreOptions(
@@ -501,7 +505,9 @@ ${thresholdLine(scoringProfile)}`.trim();
   const { text: raw } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
   const items = parseArray(raw);
-  return items.map((item) => hydrate(item, searchId));
+  const hydrated = items.map((item) => hydrate(item, searchId));
+  void logSearchQuality(searchId, query, category, hydrated);
+  return hydrated;
 }
 
 export async function generateComparison(
