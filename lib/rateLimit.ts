@@ -12,8 +12,8 @@ import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_CALLS_AUTHED = 40;
-const MAX_CALLS_ANON = 6; // anon already has a 2-search hard cap; this is a safety net
+const MAX_CALLS_AUTHED = 100; // generous for beta — real cost protection comes from caching + Gemini quotas
+const MAX_CALLS_ANON = 5;  // anon has a 2-search hard cap already; this covers deep dive + chat
 
 interface RateLimitDoc {
   count: number;
