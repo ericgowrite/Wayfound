@@ -739,15 +739,15 @@ Respond helpfully and concisely (2-4 sentences unless more detail is requested).
 // ── Loading Screen Content ────────────────────────────────────────────────────
 
 const PERSONALITY_TYPE_REFERENCE = `
-Type 1 — The Reformer: values craft, purpose, doing things right. Drawn to well-made things. Frustrated by waste or sloppiness. Wants to feel the trip was worth every moment.
-Type 2 — The Helper: energized by warmth and human connection. Wants to feel genuinely welcomed. Remembers how a place made them feel, not what it looked like.
-Type 3 — The Achiever: motivated by quality and the story. Wants the best version of the experience and something worth sharing. Arrives prepared.
-Type 4 — The Individualist: craves depth, authenticity, distinctiveness. Wants to feel something real. Avoids the generic. The best stays feel like they were made for them specifically.
-Type 5 — The Investigator: needs space and intellectual stimulation. Prefers depth over breadth. Recharges alone. Crowds and over-programmed itineraries drain them.
-Type 6 — The Loyalist: values trust and reliability. Does the research before committing. Feels better with a solid plan. Once they trust somewhere, they return.
-Type 7 — The Enthusiast: energized by novelty and options. Spontaneous, open to changing the plan. Hates missing out. Wants more to do than time allows.
-Type 8 — The Challenger: wants significant, real, unpolished experiences. Makes decisions fast. Needs to feel like they earned it. Polished and predictable bores them.
-Type 9 — The Peacemaker: travels to genuinely restore — not just change location. Needs calm and unhurried pace. Conflict and crowds drain them faster than others. The best trips leave them feeling like themselves again.`.trim();
+Type 1 — The Connoisseur: values craft, purpose, doing things right. Drawn to well-made things. Frustrated by waste or sloppiness. Wants to feel the trip was worth every moment.
+Type 2 — The Connector: energized by warmth and human connection. Wants to feel genuinely welcomed. Remembers how a place made them feel, not what it looked like.
+Type 3 — The Pathfinder: motivated by quality and the story. Wants the best version of the experience and something worth sharing. Arrives prepared.
+Type 4 — The Romantic: craves depth, authenticity, distinctiveness. Wants to feel something real. Avoids the generic. The best stays feel like they were made for them specifically.
+Type 5 — The Curator: needs space and intellectual stimulation. Prefers depth over breadth. Recharges alone. Crowds and over-programmed itineraries drain them.
+Type 6 — The Grounded: values trust and reliability. Does the research before committing. Feels better with a solid plan. Once they trust somewhere, they return.
+Type 7 — The Collector: energized by novelty and options. Spontaneous, open to changing the plan. Hates missing out. Wants more to do than time allows.
+Type 8 — The Pioneer: wants significant, real, unpolished experiences. Makes decisions fast. Needs to feel like they earned it. Polished and predictable bores them.
+Type 9 — The Harmonist: travels to genuinely restore — not just change location. Needs calm and unhurried pace. Conflict and crowds drain them faster than others. The best trips leave them feeling like themselves again.`.trim();
 
 // Loading content is destination+category scoped and changes rarely — cache 7 days.
 const LOADING_CACHE_COLLECTION = "loadingContentCache";

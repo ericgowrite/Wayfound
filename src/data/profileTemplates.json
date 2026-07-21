@@ -1,7 +1,7 @@
 [
   {
     "type": "1",
-    "description": "The Reformer — principled, purposeful, self-controlled",
+    "description": "The Connoisseur — principled, purposeful, self-controlled",
     "axisWeights": { "calm": 0.60, "designSincerity": 0.85, "valueIntegrity": 0.90, "socialPermeability": 0.60, "autonomy": 0.50, "novelty": 0.40, "locationFriction": 0.50 },
     "thresholds": { "valueIntegrity": 0.65 },
     "dealbreakers": ["Sloppy or disorganized experiences", "Poor value for money", "Chaotic itineraries with no logic"]
@@ -22,7 +22,7 @@
   },
   {
     "type": "2",
-    "description": "The Helper — caring, interpersonal, people-focused",
+    "description": "The Connector — caring, interpersonal, people-focused",
     "axisWeights": { "calm": 0.50, "designSincerity": 0.70, "valueIntegrity": 0.60, "socialPermeability": 0.30, "autonomy": 0.40, "novelty": 0.50, "locationFriction": 0.60 },
     "thresholds": {},
     "dealbreakers": ["Isolating or unfriendly environments", "No opportunity for genuine connection"]
@@ -43,7 +43,7 @@
   },
   {
     "type": "3",
-    "description": "The Achiever — adaptive, excelling, driven by success and image",
+    "description": "The Pathfinder — adaptive, excelling, driven by success and image",
     "axisWeights": { "calm": 0.40, "designSincerity": 0.70, "valueIntegrity": 0.60, "socialPermeability": 0.40, "autonomy": 0.60, "novelty": 0.60, "locationFriction": 0.30 },
     "thresholds": { "locationFriction": 0.50 },
     "dealbreakers": ["Wasting time on inefficient logistics", "Experiences that feel amateur or low-status"]
@@ -64,7 +64,7 @@
   },
   {
     "type": "4",
-    "description": "The Individualist — expressive, authentic, in search of identity",
+    "description": "The Romantic — expressive, authentic, in search of identity",
     "axisWeights": { "calm": 0.70, "designSincerity": 0.90, "valueIntegrity": 0.70, "socialPermeability": 0.70, "autonomy": 0.70, "novelty": 0.60, "locationFriction": 0.50 },
     "thresholds": { "designSincerity": 0.70 },
     "dealbreakers": ["Tourist traps or inauthentic experiences", "Forced group dynamics", "Generic chain hotels or restaurants"]
@@ -85,7 +85,7 @@
   },
   {
     "type": "5",
-    "description": "The Investigator — perceptive, analytical, values privacy and knowledge",
+    "description": "The Curator — perceptive, analytical, values privacy and knowledge",
     "axisWeights": { "calm": 0.80, "designSincerity": 0.80, "valueIntegrity": 0.75, "socialPermeability": 0.80, "autonomy": 0.80, "novelty": 0.50, "locationFriction": 0.50 },
     "thresholds": { "calm": 0.55, "socialPermeability": 0.55 },
     "dealbreakers": ["Forced social interactions", "Crowded or overstimulating environments", "Group tours with no alone time"]
@@ -106,7 +106,7 @@
   },
   {
     "type": "6",
-    "description": "The Loyalist — responsible, security-oriented, values trust and preparation",
+    "description": "The Grounded — responsible, security-oriented, values trust and preparation",
     "axisWeights": { "calm": 0.60, "designSincerity": 0.70, "valueIntegrity": 0.80, "socialPermeability": 0.50, "autonomy": 0.40, "novelty": 0.30, "locationFriction": 0.60 },
     "thresholds": { "locationFriction": 0.55, "valueIntegrity": 0.60 },
     "dealbreakers": ["Unpredictable or unsafe conditions", "Hidden costs", "No fallback options or escape routes"]
@@ -127,7 +127,7 @@
   },
   {
     "type": "7",
-    "description": "The Enthusiast — spontaneous, versatile, driven by variety and experience",
+    "description": "The Collector — spontaneous, versatile, driven by variety and experience",
     "axisWeights": { "calm": 0.30, "designSincerity": 0.60, "valueIntegrity": 0.50, "socialPermeability": 0.30, "autonomy": 0.80, "novelty": 0.80, "locationFriction": 0.40 },
     "thresholds": {},
     "dealbreakers": ["Boring or repetitive itineraries", "Being stuck in one place too long", "Rigid schedules with no spontaneity"]
@@ -148,7 +148,7 @@
   },
   {
     "type": "8",
-    "description": "The Challenger — self-confident, decisive, direct, and bold",
+    "description": "The Pioneer — self-confident, decisive, direct, and bold",
     "axisWeights": { "calm": 0.50, "designSincerity": 0.80, "valueIntegrity": 0.85, "socialPermeability": 0.50, "autonomy": 0.90, "novelty": 0.60, "locationFriction": 0.40 },
     "thresholds": { "designSincerity": 0.55, "valueIntegrity": 0.55 },
     "dealbreakers": ["Weak or pretentious experiences", "Being micromanaged or over-guided", "Performative luxury without substance"]
@@ -169,7 +169,7 @@
   },
   {
     "type": "9",
-    "description": "The Peacemaker — receptive, reassuring, harmonious and easy-going",
+    "description": "The Harmonist — receptive, reassuring, harmonious and easy-going",
     "axisWeights": { "calm": 0.80, "designSincerity": 0.85, "valueIntegrity": 0.90, "socialPermeability": 0.70, "autonomy": 0.60, "novelty": 0.50, "locationFriction": 0.40 },
     "thresholds": { "calm": 0.50 },
     "dealbreakers": ["High-conflict or tense environments", "Rushed or overscheduled itineraries", "Forced decision-making under pressure"]

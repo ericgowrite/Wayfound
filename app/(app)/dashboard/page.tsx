@@ -15,6 +15,7 @@ import DashboardTour from "@/components/DashboardTour";
 import { useTourState } from "@/lib/useTourState";
 import { CATEGORY_META } from "@/lib/categories";
 import IntentScreen from "@/components/IntentScreen";
+import { TYPE_INFO } from "@/lib/typeInfo";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -323,6 +324,9 @@ export default function Home() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3] truncate">{p.name}</p>
+                      {TYPE_INFO[p.enneagramType] && (
+                        <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] truncate leading-tight">{TYPE_INFO[p.enneagramType].name}</p>
+                      )}
                     </div>
                     {!p.isDefault && (
                       <button
