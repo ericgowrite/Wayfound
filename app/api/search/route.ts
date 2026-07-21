@@ -4,6 +4,7 @@ import { getTokenClaims, AuthError } from "@/lib/serverAuth";
 import { searchAndScore } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
 import { friendlyError } from "@/lib/errorMessages";
+import { checkRateLimit } from "@/lib/rateLimit";
 import { Search, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -37,6 +38,14 @@ export async function POST(request: Request) {
           { status: 403 }
         );
       }
+    }
+
+    const { allowed } = await checkRateLimit(userId, isAnonymous);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "You're searching fast — give it a minute and try again.", code: "RATE_LIMIT" },
+        { status: 429 }
+      );
     }
 
     const workspace = await getWorkspace(userId, workspaceId);

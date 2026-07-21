@@ -128,11 +128,22 @@ async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
 // ── Transport helpers ─────────────────────────────────────────────────────────
 
 
+const GEMINI_TIMEOUT_MS = 30_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Gemini call timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string }> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
-    const result = await m.generateContent(userPrompt);
+    const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
     return { text: result.response.text() };
   });
 }
@@ -140,7 +151,7 @@ async function callWithSearch(systemPrompt: string, userPrompt: string): Promise
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
   return withRetry(async (model) => {
     const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt });
-    const result = await m.generateContent(userPrompt);
+    const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
     return result.response.text();
   });
 }
@@ -732,6 +743,42 @@ Type 7 — The Enthusiast: energized by novelty and options. Spontaneous, open t
 Type 8 — The Challenger: wants significant, real, unpolished experiences. Makes decisions fast. Needs to feel like they earned it. Polished and predictable bores them.
 Type 9 — The Peacemaker: travels to genuinely restore — not just change location. Needs calm and unhurried pace. Conflict and crowds drain them faster than others. The best trips leave them feeling like themselves again.`.trim();
 
+// Loading content is destination+category scoped and changes rarely — cache 7 days.
+const LOADING_CACHE_COLLECTION = "loadingContentCache";
+const LOADING_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function loadingCacheKey(destination: string, category: string): string {
+  return createHash("sha256")
+    .update(`${destination.toLowerCase().trim()}:${category}`)
+    .digest("hex")
+    .slice(0, 24);
+}
+
+async function getCachedLoadingContent(key: string): Promise<LoadingContentItem[] | null> {
+  try {
+    const doc = await adminDb.collection(LOADING_CACHE_COLLECTION).doc(key).get();
+    if (!doc.exists) return null;
+    const d = doc.data()!;
+    if ((d.expiresAt as Timestamp).toMillis() < Date.now()) return null;
+    return d.items as LoadingContentItem[];
+  } catch {
+    return null;
+  }
+}
+
+async function setCachedLoadingContent(key: string, items: LoadingContentItem[]): Promise<void> {
+  if (items.length === 0) return;
+  try {
+    await adminDb.collection(LOADING_CACHE_COLLECTION).doc(key).set({
+      items,
+      cachedAt: Timestamp.now(),
+      expiresAt: Timestamp.fromMillis(Date.now() + LOADING_CACHE_TTL_MS),
+    });
+  } catch {
+    // non-fatal
+  }
+}
+
 /**
  * Fire a lightweight parallel Gemini call (no search grounding) while the
  * main searchAndScore() call is running. Returns 5 loading screen items:
@@ -744,6 +791,13 @@ export async function generateLoadingContent(params: {
   travelers: { name: string; type: number }[];
 }): Promise<LoadingContentItem[]> {
   const { destination, category, travelers } = params;
+
+  const cacheKey = loadingCacheKey(destination, category);
+  const cached = await getCachedLoadingContent(cacheKey);
+  if (cached) {
+    console.log(`[VIYA-AI] loading content cache hit: "${destination}" (${category})`);
+    return cached;
+  }
 
   const travelerLines = travelers
     .map((t) => `- ${t.name}: ${t.type ? `Type ${t.type}` : "unknown type"}`)
@@ -813,7 +867,9 @@ Return exactly this shape:
     const match = cleaned.match(/\[[\s\S]*\]/);
     if (!match) return [];
     const items = JSON.parse(match[0]) as LoadingContentItem[];
-    return Array.isArray(items) ? items.slice(0, 5) : [];
+    const result = Array.isArray(items) ? items.slice(0, 5) : [];
+    void setCachedLoadingContent(cacheKey, result);
+    return result;
   } catch {
     return [];
   }

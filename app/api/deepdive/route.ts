@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { getProfile, getProfiles, getWorkspace } from "@/lib/storage";
-import { getUserId, AuthError } from "@/lib/serverAuth";
+import { getTokenClaims, AuthError } from "@/lib/serverAuth";
 import { generateDeepDive } from "@/lib/gemini";
 import { friendlyError } from "@/lib/errorMessages";
+import { checkRateLimit } from "@/lib/rateLimit";
 import { ScoredOption } from "@/types";
 
 export async function POST(request: Request) {
   try {
-    const userId = await getUserId(request);
+    const { uid: userId, isAnonymous } = await getTokenClaims(request);
+
+    const { allowed } = await checkRateLimit(userId, isAnonymous);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests — give it a minute.", code: "RATE_LIMIT" },
+        { status: 429 }
+      );
+    }
     const { option, workspaceId } = await request.json() as { option: ScoredOption; workspaceId?: string };
 
     const defaultProfile = await getProfile(userId);
