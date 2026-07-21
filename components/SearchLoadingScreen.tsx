@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LoadingContentItem, Profile } from "@/types";
+import { TYPE_INFO } from "@/lib/typeInfo";
 
 interface Props {
   phase: "searching" | "handoff";
@@ -15,9 +16,6 @@ function travelerInitial(name: string): string {
   return name.charAt(0).toUpperCase();
 }
 
-function parseTravelerType(enneagramType: string): number {
-  return parseInt(enneagramType.replace(/\D/g, ""), 10) || 0;
-}
 
 export default function SearchLoadingScreen({ phase, destination, travelers, items, contentReady }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -107,7 +105,7 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
                 <span className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
                   {itemTraveler.name}
                   <span className="text-[#9BB0C1] dark:text-[#6B8299] font-normal ml-1">
-                    · Type {parseTravelerType(itemTraveler.enneagramType)}
+                    · {TYPE_INFO[itemTraveler.enneagramType]?.name ?? ""}
                   </span>
                 </span>
               </div>

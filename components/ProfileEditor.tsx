@@ -60,7 +60,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className={`${modal} rounded-xl border w-full max-w-2xl max-h-[90vh] overflow-auto`}>
         <div className={`flex justify-between items-center p-4 border-b border-[#E0E8ED] dark:border-[#3D5A6E] sticky top-0 bg-white dark:bg-[#1e2d3d]`}>
-          <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">Profile: {draft.name} ({draft.enneagramType})</h2>
+          <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">Profile: {draft.name}</h2>
           <button className="text-[#9BB0C1] hover:text-[#6B8299] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
 

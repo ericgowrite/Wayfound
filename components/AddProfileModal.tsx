@@ -110,8 +110,8 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
             {step === "know-type" && (isSelf ? "How do you travel?" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
             {step === "assess" && "Travel Style Assessment"}
             {step === "type-select" && !confirmingType && (isSelf ? "Which one sounds like you?" : `Select ${name ? name + "'s" : "Their"} Type`)}
-            {step === "type-select" && confirmingType && `Type ${confirmingType} — ${TYPE_INFO[confirmingType]?.name ?? ""}`}
-            {step === "review" && `Review: ${draft.name} (${draft.enneagramType})`}
+            {step === "type-select" && confirmingType && (TYPE_INFO[confirmingType]?.name ?? "")}
+            {step === "review" && `Review: ${draft.name}`}
           </h2>
           <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
@@ -238,7 +238,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                   const info = TYPE_INFO[draft.enneagramType ?? ""];
                   return info ? (
                     <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
-                      Type {draft.enneagramType} — {info.name}
+                      {info.name}
                     </p>
                   ) : null;
                 })()}
