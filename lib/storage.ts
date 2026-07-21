@@ -79,6 +79,27 @@ export async function deleteProfileFromList(userId: string, id: string): Promise
 
 // ── Workspaces ────────────────────────────────────────────────────────────────
 
+// Firestore documents cap at 1MB. Each search result set is ~15KB; each chat
+// message is ~0.5KB. These limits prevent runaway growth from crashing saves.
+const MAX_SEARCHES_PER_WORKSPACE = 15;
+const MAX_CHAT_MESSAGES_PER_OPTION = 20;
+
+function pruneWorkspace(ws: TripWorkspace): TripWorkspace {
+  const capChat = <T extends { chatHistory?: import("@/types").ChatMessage[] }>(o: T): T =>
+    o.chatHistory && o.chatHistory.length > MAX_CHAT_MESSAGES_PER_OPTION
+      ? { ...o, chatHistory: o.chatHistory.slice(-MAX_CHAT_MESSAGES_PER_OPTION) }
+      : o;
+
+  return {
+    ...ws,
+    searches: ws.searches.slice(0, MAX_SEARCHES_PER_WORKSPACE).map((s) => ({
+      ...s,
+      scoredResults: s.scoredResults.map(capChat),
+    })),
+    savedOptions: ws.savedOptions.map(capChat),
+  };
+}
+
 export async function getWorkspaces(userId: string): Promise<TripWorkspace[]> {
   const snap = await workspacesCol(userId).orderBy("updatedAt", "desc").get();
   return snap.docs.map((d) => hydrateWorkspace(d.data() as TripWorkspace));
@@ -91,8 +112,9 @@ export async function getWorkspace(userId: string, id: string): Promise<TripWork
 
 export async function saveWorkspace(userId: string, workspace: TripWorkspace): Promise<void> {
   workspace.updatedAt = new Date().toISOString();
+  const pruned = pruneWorkspace(workspace);
   // JSON round-trip removes undefined fields that Firestore rejects
-  const data = JSON.parse(JSON.stringify(workspace));
+  const data = JSON.parse(JSON.stringify(pruned));
   await workspacesCol(userId).doc(workspace.id).set(data);
 }
 

@@ -29,8 +29,8 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--port=8080'
-      - '--memory=512Mi'
-      - '--min-instances=0'
+      - '--memory=1Gi'
+      - '--min-instances=1'
       - '--max-instances=10'
       - '--set-env-vars=GOOGLE_API_KEY=$_GOOGLE_API_KEY'
 
