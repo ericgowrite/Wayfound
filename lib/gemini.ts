@@ -140,10 +140,15 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
+// gemini-2.5-flash thinks by default; disable for structured JSON tasks where
+// reasoning tokens add latency without improving output quality.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const NO_THINKING = { generationConfig: { thinkingConfig: { thinkingBudget: 0 } } as any };
+
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string }> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt });
+    const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt, ...NO_THINKING });
     const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
     return { text: result.response.text() };
   });
@@ -151,7 +156,7 @@ async function callWithSearch(systemPrompt: string, userPrompt: string): Promise
 
 async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
   return withRetry(async (model) => {
-    const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt });
+    const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt, ...NO_THINKING });
     const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
     return result.response.text();
   });
