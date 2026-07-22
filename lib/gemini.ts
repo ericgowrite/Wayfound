@@ -7,6 +7,7 @@ import { combineProfiles } from "@/lib/scoring";
 import { adminDb } from "@/lib/firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { logSearchQuality } from "@/lib/qualityMonitor";
+import { sanitizeUrl } from "@/lib/urlSanitize";
 
 // ── Gemini search result cache ────────────────────────────────────────────────
 // Caches searchAndScore() results for 24 hours, keyed by a hash of the query,
@@ -182,44 +183,9 @@ function parseObject(raw: string): Omit<ScoredOption, "id" | "searchId" | "statu
 
 // ── Sanitizers ────────────────────────────────────────────────────────────────
 
-/**
- * Extract the first valid https?:// URL from a string.
- * Guards against Gemini concatenating multiple URLs into one field.
- */
-// Domains confirmed to be spam/redirect aggregators — never use as a source URL.
-// When blocked, the client-side Places recovery finds the real property page.
-const BLOCKED_SOURCE_DOMAINS = new Set([
-  "uzapas.com",
-  "onestoparticle.com",
-]);
-
-// Redirect script path patterns — tracking/affiliate relay scripts.
-const REDIRECT_SCRIPT_RE = /\/(xr|r|go|redirect|click|out|track|ref|redir|rewarded)\.(php|asp|aspx|cgi)\b|\/(rewarded|bounced|gateway|relay)(\/|\?|$)/i;
-
-// Query params that only appear in ad network / affiliate URLs — never in real property sites.
-const AD_PARAM_RE = /[?&](ctaText|ctaButtonText|ctaImg|clientId=\d|brand=test|destination=[a-z-]+-jobs)/i;
-
+// Thin wrapper — logic lives in lib/urlSanitize.ts (shared with client).
 function sanitizeSourceUrl(raw: string | undefined): string {
-  if (!raw) return "";
-  const match = raw.match(/https?:\/\/[^\s"')]+/);
-  if (!match) return "";
-  const url = match[0].replace(/[.,;)"']+$/, "");
-
-  // Block redirect script path patterns
-  if (REDIRECT_SCRIPT_RE.test(url)) return "";
-
-  // Block ad network / affiliate query param signatures
-  if (AD_PARAM_RE.test(url)) return "";
-
-  // Block known spam/redirect aggregator domains
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    if (BLOCKED_SOURCE_DOMAINS.has(host)) return "";
-  } catch {
-    return "";
-  }
-
-  return url;
+  return sanitizeUrl(raw);
 }
 
 /**

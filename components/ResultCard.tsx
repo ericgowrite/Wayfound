@@ -6,6 +6,7 @@ import { Profile, ScoredOption, TripWorkspace, AxisWeights, DeepDiveResult, Sear
 import { fitTier, FIT_TIERS } from "@/lib/fitScore";
 import { CATEGORY_META } from "@/lib/categories";
 import { validateUrl, reportBadUrl, findReplacementUrl } from "@/lib/urlValidation";
+import { isSpamUrl } from "@/lib/urlSanitize";
 import { isFeedbackEligible, relevantFeedbackAxes, AXIS_FEEDBACK_FLAGS } from "@/lib/feedback";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { logEvent } from "@/lib/analytics";
@@ -178,7 +179,9 @@ export default function ResultCard({
   // URL validation + automatic link recovery
   type UrlStatus = "idle" | "checking" | "valid" | "recovering" | "recovered" | "not_found";
   const [urlStatus, setUrlStatus] = useState<UrlStatus>("idle");
-  const [resolvedUrl, setResolvedUrl] = useState<string>(option.source ?? "");
+  const [resolvedUrl, setResolvedUrl] = useState<string>(
+    option.source && !isSpamUrl(option.source) ? option.source : ""
+  );
   const [reportSent, setReportSent] = useState(false);
 
   /** Attempt to find a replacement URL via Google Places. */
@@ -203,13 +206,13 @@ export default function ResultCard({
   useEffect(() => {
     if ((!expanded && !isDetail) || urlStatus !== "idle") return;
     const raw = option.source?.trim();
-    if (!raw || !/^https?:\/\//i.test(raw)) {
+    if (!raw || !/^https?:\/\//i.test(raw) || isSpamUrl(raw)) {
       recoverUrl();
       return;
     }
     setUrlStatus("checking");
     validateUrl(raw).then((result) => {
-      if (result.valid && result.finalUrl) {
+      if (result.valid && result.finalUrl && !isSpamUrl(result.finalUrl)) {
         setResolvedUrl(result.finalUrl);
         setUrlStatus("valid");
       } else {
