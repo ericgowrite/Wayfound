@@ -100,8 +100,8 @@ function getClient(): GoogleGenerativeAI {
 
 // Errors worth retrying: Gemini capacity spikes and rate limits are transient
 const RETRYABLE = /503|high.?demand|overload|429|quota|rate.?limit|resource.?exhaust/i;
-const PRIMARY_MODEL = "gemini-3.5-flash-lite";
-const FALLBACK_MODEL = "gemini-3.5-flash-lite";
+const PRIMARY_MODEL = "gemini-2.5-flash";
+const FALLBACK_MODEL = "gemini-2.0-flash";
 const MAX_ATTEMPTS = 3;   // 1 initial + 2 retries
 const BASE_DELAY_MS = 800;
 
