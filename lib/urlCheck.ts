@@ -19,6 +19,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
+import { isSpamUrl } from "@/lib/urlSanitize";
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const CACHE_COLLECTION = "urlValidationCache";
@@ -234,7 +235,7 @@ export async function validateOrFallback(
 ): Promise<string> {
   if (!url) return mapsFallbackUrl(propertyName, destination, dates, partySize);
   const result = await checkUrlWithVariants(url);
-  if (result.valid && result.finalUrl) return result.finalUrl;
+  if (result.valid && result.finalUrl && !isSpamUrl(result.finalUrl)) return result.finalUrl;
   return mapsFallbackUrl(propertyName, destination, dates, partySize);
 }
 

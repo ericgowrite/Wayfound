@@ -192,7 +192,7 @@ export default function ResultCard({
       category: category,
       destination: workspace.destination,
     }).then((found) => {
-      if (found) {
+      if (found && !isSpamUrl(found)) {
         setResolvedUrl(found);
         setUrlStatus("recovered");
       } else {
