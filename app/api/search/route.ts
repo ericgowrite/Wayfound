@@ -59,6 +59,10 @@ export async function POST(request: Request) {
     const defaultProfile = await getProfile(userId);
     const profiles = travelerProfiles.length > 0 ? travelerProfiles : (defaultProfile ? [defaultProfile] : []);
 
+    if (profiles.length === 0) {
+      return NextResponse.json({ error: "No traveler profile found. Please complete your travel style assessment first." }, { status: 400 });
+    }
+
     const searchId = uuidv4();
     const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize, false, typeof intent === "string" ? intent : undefined);
     // URL validation is deferred to card expand (client-side ResultCard handles

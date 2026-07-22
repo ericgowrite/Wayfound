@@ -111,6 +111,7 @@ export function sortByGroupFit(options: ScoredOption[], profiles: Profile[]): Sc
 }
 
 export function combineProfiles(profiles: Profile[]): Profile {
+  if (profiles.length === 0) throw new Error("combineProfiles called with empty array");
   if (profiles.length === 1) return profiles[0];
 
   const keys = Object.keys(profiles[0].axisWeights) as (keyof AxisWeights)[];

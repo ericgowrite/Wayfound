@@ -316,6 +316,7 @@ function buildGroupContext(profiles: Profile[]): {
   profileSection: string;
   fitExplanationInstruction: string;
 } {
+  if (profiles.length === 0) throw new Error("buildGroupContext called with empty profiles array");
   if (profiles.length <= 1) {
     const p = profiles[0];
     return {
