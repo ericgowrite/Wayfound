@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Allow Firebase signInWithPopup to close its auth popup window.
+        // same-origin-allow-popups permits the popup to call window.close()
+        // back to this origin while still blocking unrelated cross-origin openers.
+        source: "/(.*)",
+        headers: [
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+        ],
+      },
+      {
         // Prevent Firebase Hosting CDN from caching HTML pages
         source: "/((?!_next/static|_next/image|favicon.ico).*)",
         headers: [
