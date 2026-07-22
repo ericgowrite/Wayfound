@@ -190,11 +190,14 @@ function parseObject(raw: string): Omit<ScoredOption, "id" | "searchId" | "statu
 // When blocked, the client-side Places recovery finds the real property page.
 const BLOCKED_SOURCE_DOMAINS = new Set([
   "uzapas.com",
+  "onestoparticle.com",
 ]);
 
-// Redirect script path patterns — these are tracking/affiliate relay scripts,
-// not the actual property page. Block regardless of domain.
-const REDIRECT_SCRIPT_RE = /\/(xr|r|go|redirect|click|out|track|ref|redir)\.(php|asp|aspx|cgi)\b/i;
+// Redirect script path patterns — tracking/affiliate relay scripts.
+const REDIRECT_SCRIPT_RE = /\/(xr|r|go|redirect|click|out|track|ref|redir|rewarded)\.(php|asp|aspx|cgi)\b|\/(rewarded|bounced|gateway|relay)(\/|\?|$)/i;
+
+// Query params that only appear in ad network / affiliate URLs — never in real property sites.
+const AD_PARAM_RE = /[?&](ctaText|ctaButtonText|ctaImg|clientId=\d|brand=test|destination=[a-z-]+-jobs)/i;
 
 function sanitizeSourceUrl(raw: string | undefined): string {
   if (!raw) return "";
@@ -202,8 +205,11 @@ function sanitizeSourceUrl(raw: string | undefined): string {
   if (!match) return "";
   const url = match[0].replace(/[.,;)"']+$/, "");
 
-  // Block redirect script patterns (e.g. /xr.php?e=..., /r.php?url=...)
+  // Block redirect script path patterns
   if (REDIRECT_SCRIPT_RE.test(url)) return "";
+
+  // Block ad network / affiliate query param signatures
+  if (AD_PARAM_RE.test(url)) return "";
 
   // Block known spam/redirect aggregator domains
   try {
