@@ -5,7 +5,7 @@ import { Profile, TripWorkspace, SearchCategory } from "@/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export const INTENTS = [
-  { key: "get_away",       label: "I need to get away — properly",                      chip: "Getting away properly" },
+  { key: "get_away",       label: "I need to get away",                                 chip: "Getting away properly" },
   { key: "celebrating",    label: "I'm celebrating something",                           chip: "Celebrating something" },
   { key: "reconnect",      label: "I'm going with someone I want to reconnect with",     chip: "Reconnecting with someone" },
   { key: "new_place",      label: "I want somewhere completely new",                     chip: "Somewhere completely new" },
