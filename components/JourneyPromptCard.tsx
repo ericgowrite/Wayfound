@@ -24,6 +24,8 @@ const WINDOW_OPTIONS: { value: EstimatedTravelWindow; label: string }[] = [
 export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagramType, destination, onUpdate, onUpdateMultiple }: Props) {
   const [showWindowPicker, setShowWindowPicker] = useState(false);
   const [showOtherPicker, setShowOtherPicker] = useState(false);
+  const [ackMessage, setAckMessage] = useState<string | null>(null);
+  const [ackOpacity, setAckOpacity] = useState(0);
 
   if (!prompt) return null;
   const { option } = prompt;
@@ -60,6 +62,21 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
       });
     }
 
+    function handleFitTap(fitOutcome: FitOutcome) {
+      const messages: Record<FitOutcome, string> = {
+        perfect: "Good to know — ViyaWay is getting to know you better.",
+        good: "Noted — ViyaWay is learning what works for you.",
+        off: "Thanks for the honest feedback — that helps ViyaWay find better fits.",
+      };
+      setAckMessage(messages[fitOutcome]);
+      // Fade in after a paint frame so the element is in the DOM at opacity 0 first
+      setTimeout(() => setAckOpacity(1), 16);
+      // Begin fade-out after fade-in (150ms) + display (2500ms)
+      setTimeout(() => setAckOpacity(0), 16 + 150 + 2500);
+      // Propagate the update after the full animation completes
+      setTimeout(() => confirmFit(fitOutcome), 16 + 150 + 2500 + 300);
+    }
+
     return (
       <div className="mb-4 bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-xl px-4 py-4 shadow-sm">
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -88,24 +105,38 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
         </div>
         <div className="flex gap-2">
           <button
-            className="flex-1 py-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 text-sm font-medium hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors"
-            onClick={() => confirmFit("perfect")}
+            className="flex-1 py-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 text-sm font-medium hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors disabled:pointer-events-none"
+            onClick={() => handleFitTap("perfect")}
+            disabled={!!ackMessage}
           >
             ✦ Perfect
           </button>
           <button
-            className="flex-1 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
-            onClick={() => confirmFit("good")}
+            className="flex-1 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 text-sm font-medium hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors disabled:pointer-events-none"
+            onClick={() => handleFitTap("good")}
+            disabled={!!ackMessage}
           >
             ~ Good
           </button>
           <button
-            className="flex-1 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 text-sm font-medium hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors"
-            onClick={() => confirmFit("off")}
+            className="flex-1 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 text-sm font-medium hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors disabled:pointer-events-none"
+            onClick={() => handleFitTap("off")}
+            disabled={!!ackMessage}
           >
             ✕ Off
           </button>
         </div>
+        {ackMessage && (
+          <p
+            className="text-xs text-center text-[#6B8299] dark:text-[#9BB0C1] mt-3"
+            style={{
+              opacity: ackOpacity,
+              transition: `opacity ${ackOpacity === 1 ? "150ms" : "300ms"} ease`,
+            }}
+          >
+            {ackMessage}
+          </p>
+        )}
       </div>
     );
   }

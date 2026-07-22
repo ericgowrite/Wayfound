@@ -101,6 +101,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [selectedSavedCardId, setSelectedSavedCardId] = useState<string | null>(null);
   const [rescoring, setRescoring] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  // true while localStorage not yet read (avoids SSR mismatch); flips to false post-hydration if not dismissed
+  const [onboardingPromptDismissed, setOnboardingPromptDismissed] = useState(true);
 
   // Auto-start workspace tour on first visit — 600ms delay so the DOM is painted
   useEffect(() => {
@@ -136,6 +138,14 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       setShowFitCallout(true);
     }
   }, [workspace.searches]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    // Read after hydration to avoid SSR mismatch — same pattern as showFitCallout above.
+    if (localStorage.getItem("viya:onboarding-prompt-dismissed") !== "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOnboardingPromptDismissed(false);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check feedback-based calibration when saved options with feedback change.
   // Runs after behavioral (save-count) calibration so both don't fire at once.
@@ -1125,10 +1135,40 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
             {/* Empty state */}
             {workspace.savedOptions.length === 0 && (
-              <div className="flex flex-col items-center justify-center min-h-[65vh]">
+              <div className="flex flex-col items-center justify-center min-h-[65vh] px-6">
                 <div className="text-6xl mb-4">📋</div>
                 <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">No saved options yet</p>
                 <p className="text-sm text-[#6B8299] mt-1">Save results from your searches to compare later</p>
+
+                {/* Post-search calibration prompt — one-time, only after 2+ searches with nothing saved */}
+                {!onboardingPromptDismissed && workspace.searches.length >= 2 && (
+                  <div className="mt-8 max-w-xs text-center">
+                    <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Not quite finding what fits?</p>
+                    <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 leading-relaxed">
+                      ViyaWay&apos;s results are only as good as what it knows about you.
+                      If something feels off, updating your travel style takes 2 minutes.
+                    </p>
+                    <button
+                      className="mt-3 text-sm text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline font-medium"
+                      onClick={() => {
+                        setOnboardingPromptDismissed(true);
+                        localStorage.setItem("viya:onboarding-prompt-dismissed", "1");
+                        onOpenProfile?.();
+                      }}
+                    >
+                      Update your travel style →
+                    </button>
+                    <button
+                      className="mt-2 block mx-auto text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#9BB0C1] transition-colors"
+                      onClick={() => {
+                        setOnboardingPromptDismissed(true);
+                        localStorage.setItem("viya:onboarding-prompt-dismissed", "1");
+                      }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
