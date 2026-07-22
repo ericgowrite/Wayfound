@@ -100,8 +100,8 @@ function getClient(): GoogleGenerativeAI {
 
 // Errors worth retrying: Gemini capacity spikes and rate limits are transient
 const RETRYABLE = /503|high.?demand|overload|429|quota|rate.?limit|resource.?exhaust/i;
-const PRIMARY_MODEL = "gemini-2.5-flash";
-const FALLBACK_MODEL = "gemini-2.0-flash";
+const PRIMARY_MODEL = "gemini-3.5-flash-lite";
+const FALLBACK_MODEL = "gemini-2.5-flash";
 const MAX_ATTEMPTS = 3;   // 1 initial + 2 retries
 const BASE_DELAY_MS = 800;
 
@@ -140,14 +140,13 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-// gemini-2.5-flash thinks by default; disable for structured JSON tasks where
-// reasoning tokens add latency without improving output quality.
-// Only applies to 2.5 models — 2.0 models don't support thinkingConfig.
+// Disable thinking tokens for structured JSON tasks — reasoning adds latency
+// without improving output quality. Not supported on gemini-2.0 models.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function noThinking(model: string): object {
-  return model.includes("2.5")
-    ? { generationConfig: { thinkingConfig: { thinkingBudget: 0 } } as any }
-    : {};
+  return model.startsWith("gemini-2.0")
+    ? {}
+    : { generationConfig: { thinkingConfig: { thinkingBudget: 0 } } as any };
 }
 
 async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string }> {
