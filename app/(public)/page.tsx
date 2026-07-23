@@ -100,7 +100,7 @@ export default function LandingPage() {
           {/* Text */}
           <div className="flex-1 text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight text-[#2C3E50]">
-              Travel that fits who you are.
+              Travel that fits who you are. Go your way.
             </h1>
             <p className="mt-4 text-lg text-[#6B8299] max-w-lg mx-auto lg:mx-0">
               No more endless scrolling or relying on reviews that aren&apos;t right for you. ViyaWay matches destinations to your personality.
