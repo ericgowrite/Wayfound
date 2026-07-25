@@ -6,11 +6,13 @@ import { QUESTIONS, scoreAssessment, AssessmentResult, getArchetypeForType, getT
 interface Props {
   prefilledName?: string;
   isSelf?: boolean; // true = primary user (I/me/my), false = another traveler (they/them/their)
-  onComplete: (result: AssessmentResult, name: string) => void;
+  onComplete: (result: AssessmentResult, name: string, pastTripContext?: string) => void;
   onSkip: () => void;
 }
 
-type Phase = "intro" | "questions" | "result" | "alternatives";
+type Phase = "intro" | "questions" | "past_trips" | "result" | "alternatives";
+
+const ACK_MESSAGES = ["Good to know.", "Makes sense.", "Got it.", "Noted."];
 
 const CONFIDENCE_LABEL = {
   high:   { text: "Strong match",        color: "text-green-600 dark:text-green-400" },
@@ -25,8 +27,10 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [activeType, setActiveType] = useState<number | null>(null); // overrides result.type
   const [name, setName] = useState(prefilledName ?? "");
+  const [pastTripContext, setPastTripContext] = useState("");
   const [animating, setAnimating] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [ackMessage, setAckMessage] = useState<string | null>(null);
 
   function handleAnswer(choice: "A" | "B") {
     if (animating) return;
@@ -34,18 +38,23 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     setAnswers(newAnswers);
 
     if (idx + 1 < QUESTIONS.length) {
-      setVisible(false);
+      const ack = ACK_MESSAGES[Math.floor(Math.random() * ACK_MESSAGES.length)];
+      setAckMessage(ack);
       setAnimating(true);
       setTimeout(() => {
-        setIdx(idx + 1);
-        setVisible(true);
-        setAnimating(false);
-      }, 180);
+        setAckMessage(null);
+        setVisible(false);
+        setTimeout(() => {
+          setIdx(idx + 1);
+          setVisible(true);
+          setAnimating(false);
+        }, 180);
+      }, 800);
     } else {
       const r = scoreAssessment(newAnswers);
       setResult(r);
       setActiveType(r.type);
-      setPhase("result");
+      setPhase("past_trips");
     }
   }
 
@@ -67,12 +76,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     setAnimating(false);
     setResult(null);
     setActiveType(null);
+    setPastTripContext("");
     setPhase("intro");
   }
 
   function handleAccept() {
     if (!result || activeType === null) return;
     const finalName = name.trim() || prefilledName || "Traveler";
+    const context = pastTripContext.trim() || undefined;
     // If user picked an alternative type, synthesise a result for that type
     if (activeType !== result.type) {
       const alt = getArchetypeForType(activeType);
@@ -83,9 +94,9 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         confidence: result.confidence,
         runnerUpTypes: result.runnerUpTypes,
       };
-      onComplete(altResult, finalName);
+      onComplete(altResult, finalName, context);
     } else {
-      onComplete(result, finalName);
+      onComplete(result, finalName, context);
     }
   }
 
@@ -105,7 +116,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
             ? "The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you."
             : `The following questions help us understand how ${displayName} experiences travel. There are no right or wrong answers — just pick what feels more like ${displayName}.`}
         </p>
-        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">Takes about 5 minutes.</p>
+        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">10 questions. About 3 minutes.</p>
         <button
           className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
           onClick={() => setPhase("questions")}
@@ -198,6 +209,43 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               Retake assessment
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Past trips screen ────────────────────────────────────────────────────────
+  if (phase === "past_trips") {
+    return (
+      <div className="flex flex-col h-full justify-center px-6 py-10">
+        <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">
+          Tell us about a trip you loved.
+        </h3>
+        <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-5">
+          Where was it, and what made it feel right for you? The more ViyaWay knows, the better your first results.
+        </p>
+        <textarea
+          className="w-full bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#5B8BA0] transition-colors resize-none"
+          rows={4}
+          maxLength={280}
+          placeholder="e.g. A week in rural Japan — the quiet, the food, the feeling of being somewhere completely different from home."
+          value={pastTripContext}
+          onChange={(e) => setPastTripContext(e.target.value)}
+        />
+        <p className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] text-right mt-1">{pastTripContext.length}/280</p>
+        <button
+          className="mt-4 w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
+          onClick={() => setPhase("result")}
+        >
+          Continue →
+        </button>
+        <div className="mt-2 text-center">
+          <button
+            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+            onClick={() => { setPastTripContext(""); setPhase("result"); }}
+          >
+            Skip for now →
+          </button>
         </div>
       </div>
     );
@@ -325,37 +373,42 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       </div>
 
       {/* Question */}
-      <div
-        className="flex-1 flex flex-col justify-center px-6 pb-2"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}
-      >
-        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-widest text-center mb-5">
-          {isSelf ? "Which resonates more?" : `Which resonates more for ${prefilledName || "them"}?`}
-        </p>
+      <div className="flex-1 flex flex-col justify-center px-6 pb-2">
+        {ackMessage ? (
+          <p className="text-sm text-center text-[#5B8BA0] dark:text-[#7DBAD4] font-medium">
+            {ackMessage}
+          </p>
+        ) : (
+          <div style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}>
+            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-widest text-center mb-5">
+              {isSelf ? "Which resonates more?" : `Which resonates more for ${prefilledName || "them"}?`}
+            </p>
 
-        <div className="space-y-3">
-          {(["A", "B"] as const).map((side) => {
-            const text = side === "A" ? q.a : q.b;
-            const chosen = answers[idx] === side;
-            return (
-              <button
-                key={side}
-                onClick={() => handleAnswer(side)}
-                disabled={animating}
-                className={`w-full text-left px-4 py-4 rounded-xl border transition-all text-sm leading-relaxed ${
-                  chosen
-                    ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#2C3E50] dark:text-[#B8D4E3]"
-                    : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/5 dark:hover:bg-[#5B8BA0]/8"
-                }`}
-              >
-                <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${chosen ? "text-[#5B8BA0]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
-                  {side}
-                </span>
-                {text}
-              </button>
-            );
-          })}
-        </div>
+            <div className="space-y-3">
+              {(["A", "B"] as const).map((side) => {
+                const text = side === "A" ? q.a : q.b;
+                const chosen = answers[idx] === side;
+                return (
+                  <button
+                    key={side}
+                    onClick={() => handleAnswer(side)}
+                    disabled={animating}
+                    className={`w-full text-left px-4 py-4 rounded-xl border transition-all text-sm leading-relaxed ${
+                      chosen
+                        ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#2C3E50] dark:text-[#B8D4E3]"
+                        : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/5 dark:hover:bg-[#5B8BA0]/8"
+                    }`}
+                  >
+                    <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${chosen ? "text-[#5B8BA0]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
+                      {side}
+                    </span>
+                    {text}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Back / counter */}

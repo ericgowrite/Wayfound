@@ -25,6 +25,7 @@ export interface Profile {
   thresholds: Partial<AxisWeights>;
   dealbreakers: string[];
   isDefault?: boolean;
+  pastTripContext?: string;
 }
 
 // Legacy alias used in older API call sites

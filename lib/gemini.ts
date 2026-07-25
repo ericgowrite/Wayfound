@@ -298,9 +298,12 @@ function buildGroupContext(profiles: Profile[]): {
   if (profiles.length === 0) throw new Error("buildGroupContext called with empty profiles array");
   if (profiles.length <= 1) {
     const p = profiles[0];
+    const pastTripLine = p.pastTripContext
+      ? `\n\nPAST TRIP CONTEXT (use this to sharpen fit explanations and result selection — this is what great travel felt like for this person):\n${p.pastTripContext}`
+      : "";
     return {
       scoringProfile: p,
-      profileSection: `TRAVELER PROFILE:\n${JSON.stringify(p, null, 2)}`,
+      profileSection: `TRAVELER PROFILE:\n${JSON.stringify(p, null, 2)}${pastTripLine}`,
       fitExplanationInstruction: `"fitExplanation": "2-3 sentences explaining why this fits or doesn't fit the profile"`,
     };
   }
@@ -316,7 +319,8 @@ function buildGroupContext(profiles: Profile[]): {
         .slice(0, 3)
         .map(([k]) => k)
         .join(", ");
-      return `  - ${p.name} (${p.enneagramType}): top priorities — ${topAxes}; dealbreakers: ${p.dealbreakers.join("; ")}`;
+      const tripLine = p.pastTripContext ? `; past trip context: ${p.pastTripContext}` : "";
+      return `  - ${p.name} (${p.enneagramType}): top priorities — ${topAxes}; dealbreakers: ${p.dealbreakers.join("; ")}${tripLine}`;
     })
     .join("\n");
 

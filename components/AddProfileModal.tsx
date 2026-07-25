@@ -55,7 +55,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
     setStep("know-type");
   }
 
-  function handleAssessmentComplete(result: AssessmentResult) {
+  function handleAssessmentComplete(result: AssessmentResult, _name: string, pastTripContext?: string) {
     const typeKey = String(result.type);
     const t = TEMPLATES.find((tmpl) => tmpl.type === typeKey) ?? TEMPLATES[0];
     setSelectedType(typeKey);
@@ -66,6 +66,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
       axisWeights: { ...result.axisWeights },
       thresholds: { ...(t?.thresholds ?? {}) },
       dealbreakers: [...(t?.dealbreakers ?? [])],
+      ...(pastTripContext ? { pastTripContext } : {}),
     });
     setStep("review");
   }
