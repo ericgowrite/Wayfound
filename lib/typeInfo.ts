@@ -23,7 +23,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
     name: "The Pathfinder",
     descriptor: "If it's worth doing, it's worth remembering.",
     bullets: [
-      "You're drawn to places that are worth the trip — and the story",
+      "You're drawn to places that are worth the journey — and the story",
       "Quality matters: you want the best version of whatever you're doing",
       "You research before you go and prefer to arrive prepared",
       "The experience should reflect well — on the destination and on you",
@@ -56,14 +56,14 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
       "You do your research — reviews, safety, logistics — before you commit",
       "Once you find somewhere you trust, you return",
       "You travel better when you feel secure in the plan",
-      "Surprises are fine when they're good; bad surprises ruin the trip",
+      "Surprises are fine when they're good; bad surprises ruin the experience",
     ],
   },
   "7": {
     name: "The Collector",
     descriptor: "The best experiences have more to offer than you have time for.",
     bullets: [
-      "You want options — the best trip has more to do than you have time for",
+      "You want options — the best experience has more to do than you have time for",
       "Novelty energizes you; repetition bores you fast",
       "You're spontaneous and open to changing the plan if something better comes up",
       "FOMO is real: you'd rather try five things than perfect one",
@@ -86,7 +86,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
       "You travel to genuinely restore — not just to change location",
       "Calm, unhurried environments are where you actually relax",
       "Conflict, crowds, and friction drain you faster than others",
-      "The best trips leave you feeling like yourself again",
+      "The best experiences leave you feeling like yourself again",
     ],
   },
 };

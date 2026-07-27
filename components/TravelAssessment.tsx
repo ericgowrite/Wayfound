@@ -110,13 +110,13 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     const displayName = prefilledName || "them";
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
-        <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-3">
-          {isSelf ? "Let’s get to know you" : `Let’s get to know ${displayName}`}
+        <h3 className="text-xl font-bold text-[#2C3E50] dark:text-white mb-3 leading-snug">
+          {isSelf
+            ? "Great experiences are everywhere. The right ones are specific to you."
+            : `Great experiences are everywhere. The right ones are specific to ${displayName}.`}
         </h3>
         <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-3">
-          {isSelf
-            ? "The following questions help us understand how you experience travel. There are no right or wrong answers — just pick what feels more like you."
-            : `The following questions help us understand how ${displayName} experiences travel. There are no right or wrong answers — just pick what feels more like ${displayName}.`}
+          A few questions and we&apos;ll know which ones those are.
         </p>
         <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">10 questions. About 3 minutes.</p>
         <button
@@ -221,7 +221,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
         <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">
-          Tell us about a trip you loved.
+          Tell us about an experience you loved.
         </h3>
         <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-5">
           Where was it, and what made it feel right for you? The more ViyaWay knows, the better your first results.

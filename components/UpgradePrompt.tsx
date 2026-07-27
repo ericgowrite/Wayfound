@@ -76,7 +76,7 @@ export default function UpgradePrompt({ onClose }: Props) {
             You&apos;ve used your 2 free searches
           </h2>
           <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 leading-relaxed">
-            Create a free account to keep searching — your travel profile and trips are saved automatically.
+            Create a free account to keep searching — your travel profile and experiences are saved automatically.
           </p>
         </div>
 

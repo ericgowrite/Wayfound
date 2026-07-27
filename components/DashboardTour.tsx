@@ -57,17 +57,17 @@ export default function DashboardTour({ onDone }: Props) {
         {
           ...(mobile ? {} : { element: "#tour-trips" }),
           popover: {
-            title: "Your Trips",
+            title: "Your Experiences",
             description:
-              "Each trip is its own space — search, save, and explore options for where you're headed. Your finds stay organized and ready when you need them.",
+              "Each experience is its own space — search, save, and explore options for wherever you're headed. Your finds stay organized and ready when you need them.",
           },
         },
         {
           ...(mobile ? {} : { element: "#tour-create-trip" }),
           popover: {
-            title: "Create a Trip",
+            title: "Create an Experience",
             description:
-              "Give your trip a name, pick your destination, and let ViyaWay find what fits. That's all there is to it.",
+              "Pick your destination and let ViyaWay find what fits. That's all there is to it.",
           },
         },
       ],

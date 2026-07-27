@@ -109,7 +109,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
           <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white">
             {step === "info" && "Who's traveling?"}
             {step === "know-type" && (isSelf ? "How do you travel?" : `Find ${name ? name + "'s" : "Their"} Travel Style`)}
-            {step === "assess" && "Travel Style Assessment"}
+            {step === "assess" && "Find Your Style"}
             {step === "type-select" && !confirmingType && (isSelf ? "Which one sounds like you?" : `Select ${name ? name + "'s" : "Their"} Type`)}
             {step === "type-select" && confirmingType && (TYPE_INFO[confirmingType]?.name ?? "")}
             {step === "review" && `Review: ${draft.name}`}

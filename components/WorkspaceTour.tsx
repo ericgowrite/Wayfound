@@ -72,7 +72,7 @@ export default function WorkspaceTour({ onDone }: Props) {
         {
           element: "#tour-tabs",
           popover: {
-            title: "Your whole trip, in one place.",
+            title: "Your whole experience, in one place.",
             description:
               "Results here, saved finds in Saved, everything you've ever searched in History. Move between them however you need.",
           },

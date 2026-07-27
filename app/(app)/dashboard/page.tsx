@@ -123,7 +123,7 @@ export default function Home() {
       if (!res.ok) {
         const err = await res.text();
         console.error("[createWorkspace] failed:", err);
-        setWorkspaceError(`Failed to create trip (${res.status}). Please try again.`);
+        setWorkspaceError(`Failed to create experience (${res.status}). Please try again.`);
         return;
       }
       const ws: TripWorkspace = await res.json();
@@ -350,12 +350,12 @@ export default function Home() {
 
           {/* Trips section */}
           <div id="tour-trips" className="flex items-center justify-between px-4 pt-3 pb-2">
-            <span className="text-xs text-[#6B8299] uppercase font-medium tracking-wide">Trips</span>
+            <span className="text-xs text-[#6B8299] uppercase font-medium tracking-wide">Experiences</span>
             <button
               id="tour-create-trip"
               className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-sm transition-colors"
               onClick={() => setShowNewWorkspace(true)}
-              title="New Trip"
+              title="New Experience"
             >
               +
             </button>
@@ -363,7 +363,7 @@ export default function Home() {
 
           <div className="px-2">
             {workspaces.length === 0 ? (
-              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] px-2 py-1">No trips yet</p>
+              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] px-2 py-1">No experiences yet</p>
             ) : (
               workspaces.map((w) => {
                 const primaryProfile = profiles.find((p) => p.id === (w.travelers ?? [])[0]);
@@ -522,7 +522,7 @@ export default function Home() {
       {showNewWorkspace && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-4">New Trip</h2>
+            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-4">What are we planning?</h2>
             <div className="space-y-3">
               <div>
                 <label className="text-[#6B8299] text-xs uppercase block mb-1">Destination</label>
@@ -575,7 +575,7 @@ export default function Home() {
                 onClick={createWorkspace}
                 disabled={!newDest.trim() || creatingWorkspace}
               >
-                {creatingWorkspace ? "Creating…" : "Create Trip"}
+                {creatingWorkspace ? "Creating…" : "Let's go →"}
               </button>
             </div>
           </div>
@@ -586,7 +586,7 @@ export default function Home() {
       {deleteWorkspaceId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Delete Trip?</h2>
+            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Delete Experience?</h2>
             <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mb-4">
               This will permanently delete &quot;{workspaces.find((w) => w.id === deleteWorkspaceId)?.name}&quot; and all its searches.
             </p>
