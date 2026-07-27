@@ -262,11 +262,10 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         {/* Header */}
         <div className="text-center px-6 pt-6 pb-3">
           <p className="text-xs text-[#E8A87C] uppercase tracking-widest font-semibold mb-2">
-            {isSelf ? "Your travel style" : `${prefilledName ? prefilledName + "'s" : "Their"} travel style`}
+            {displayed.name}
           </p>
-          <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-1">{displayed.name}</h2>
-          <p className="text-sm text-[#5B8BA0] dark:text-[#7DBAD4] font-medium">{displayed.tagline}</p>
-          <p className={`text-xs mt-2 ${conf.color}`}>
+          <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-3 leading-snug">{displayed.headline}</h2>
+          <p className={`text-xs ${conf.color}`}>
             {conf.text}
           </p>
         </div>
