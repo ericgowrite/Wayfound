@@ -194,6 +194,42 @@ export function getArchetypeForType(type: number): Archetype {
   return CORE_ARCHETYPES[type] ?? CORE_ARCHETYPES[9];
 }
 
+// ── Personalized axis ranking ─────────────────────────────────────────────────
+// Blends the base type's axis weights (75%) with the average axis weights of
+// all types the user chose (25%). This shifts priority rankings toward what
+// the user's specific answers signaled — two users of the same type who
+// answered differently see subtly different priority orderings.
+
+function derivePersonalizedTopAxes(
+  answers: Record<number, "A" | "B">,
+  baseWeights: AxisWeights
+): AssessmentResult["topAxes"] {
+  const axes = Object.keys(baseWeights) as (keyof AxisWeights)[];
+  const sums: Partial<Record<keyof AxisWeights, number>> = {};
+  let count = 0;
+
+  for (const [idxStr, choice] of Object.entries(answers)) {
+    const q = QUESTIONS[Number(idxStr)];
+    if (!q) continue;
+    const chosenWeights = CORE_ARCHETYPES[choice === "A" ? q.typeA : q.typeB]?.axisWeights;
+    if (!chosenWeights) continue;
+    for (const axis of axes) {
+      sums[axis] = (sums[axis] ?? 0) + chosenWeights[axis];
+    }
+    count++;
+  }
+
+  if (count === 0) return getTopAxes(baseWeights);
+
+  const blended = {} as AxisWeights;
+  for (const axis of axes) {
+    const userAvg = (sums[axis] ?? 0) / count;
+    blended[axis] = 0.75 * baseWeights[axis] + 0.25 * userAvg;
+  }
+
+  return getTopAxes(blended);
+}
+
 // ── Scoring ───────────────────────────────────────────────────────────────────
 
 export function scoreAssessment(answers: Record<number, "A" | "B">): AssessmentResult {
@@ -216,7 +252,7 @@ export function scoreAssessment(answers: Record<number, "A" | "B">): AssessmentR
     gap >= 2 ? "high" : gap >= 1 ? "medium" : "low";
 
   const base = CORE_ARCHETYPES[topType];
-  const topAxes = getTopAxes(base.axisWeights);
+  const topAxes = derivePersonalizedTopAxes(answers, base.axisWeights);
 
   return { ...base, typeScores: scores, topAxes, confidence, runnerUpTypes };
 }
