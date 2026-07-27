@@ -1,7 +1,7 @@
 export const TYPE_INFO: Record<string, { name: string; descriptor: string; bullets: string[] }> = {
   "1": {
     name: "The Connoisseur",
-    descriptor: "Values doing things right — seeks well-crafted, purposeful experiences with no wasted moments",
+    descriptor: "You know the difference between good and right — and you want right.",
     bullets: [
       "You notice when things are done well — and when they're not",
       "You travel with intention; aimless wandering frustrates you",
@@ -11,7 +11,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "2": {
     name: "The Connector",
-    descriptor: "Warmth-driven — drawn to places that feel welcoming, personal, and human",
+    descriptor: "The best part of any experience is who you share it with.",
     bullets: [
       "You're energized by warm, personal interactions with locals and staff",
       "You'd rather share a great experience than have it alone",
@@ -21,7 +21,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "3": {
     name: "The Pathfinder",
-    descriptor: "Motivated by quality and status — seeks experiences worth having and worth sharing",
+    descriptor: "If it's worth doing, it's worth remembering.",
     bullets: [
       "You're drawn to places that are worth the trip — and the story",
       "Quality matters: you want the best version of whatever you're doing",
@@ -31,7 +31,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "4": {
     name: "The Romantic",
-    descriptor: "Craves depth and authenticity — drawn to places that feel distinctive and personally meaningful",
+    descriptor: "You're not looking for a great experience. You're looking for the right one.",
     bullets: [
       "You're drawn to places that feel distinctive, not generic",
       "You want to feel something — not just see something",
@@ -41,7 +41,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "5": {
     name: "The Curator",
-    descriptor: "Needs space and stimulation — seeks immersive, offbeat experiences away from the crowd",
+    descriptor: "You'd rather go deep into one thing than skim across many.",
     bullets: [
       "You prefer depth over breadth — one place explored fully beats five places skimmed",
       "You need time and space to yourself to recharge",
@@ -51,7 +51,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "6": {
     name: "The Grounded",
-    descriptor: "Values trust and reliability — most comfortable in places that feel safe, consistent, and well-reviewed",
+    descriptor: "You do the research. Then you can actually enjoy it.",
     bullets: [
       "You do your research — reviews, safety, logistics — before you commit",
       "Once you find somewhere you trust, you return",
@@ -61,7 +61,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "7": {
     name: "The Collector",
-    descriptor: "Energized by variety and novelty — drawn to destinations packed with options and new experiences",
+    descriptor: "The best experiences have more to offer than you have time for.",
     bullets: [
       "You want options — the best trip has more to do than you have time for",
       "Novelty energizes you; repetition bores you fast",
@@ -71,7 +71,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "8": {
     name: "The Pioneer",
-    descriptor: "Bold and direct — seeks experiences that feel powerful, expansive, and worth the effort",
+    descriptor: "You want to feel like you earned it.",
     bullets: [
       "You want experiences that feel significant, not safe",
       "You'd rather go somewhere raw and real than polished and predictable",
@@ -81,7 +81,7 @@ export const TYPE_INFO: Record<string, { name: string; descriptor: string; bulle
   },
   "9": {
     name: "The Harmonist",
-    descriptor: "Restores through calm — drawn to unhurried, harmonious places where they can fully decompress",
+    descriptor: "The best experiences bring you back to yourself.",
     bullets: [
       "You travel to genuinely restore — not just to change location",
       "Calm, unhurried environments are where you actually relax",
