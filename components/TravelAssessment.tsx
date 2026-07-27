@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { QUESTIONS, scoreAssessment, AssessmentResult, getArchetypeForType, getTopAxes } from "@/lib/assessment";
+import { TYPE_INFO } from "@/lib/typeInfo";
 
 interface Props {
   prefilledName?: string;
@@ -31,6 +32,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   const [animating, setAnimating] = useState(false);
   const [visible, setVisible] = useState(true);
   const [ackMessage, setAckMessage] = useState<string | null>(null);
+  const [showAlternativesInline, setShowAlternativesInline] = useState(false);
 
   function handleAnswer(choice: "A" | "B") {
     if (animating) return;
@@ -265,10 +267,48 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
             {displayed.name}
           </p>
           <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-3 leading-snug">{displayed.headline}</h2>
-          <p className={`text-xs ${conf.color}`}>
-            {conf.text}
-          </p>
+          {result.confidence === "low" ? (
+            <button
+              className={`text-xs ${conf.color} underline underline-offset-2 hover:opacity-80 transition-opacity`}
+              onClick={() => setShowAlternativesInline((v) => !v)}
+            >
+              {conf.text}
+            </button>
+          ) : (
+            <p className={`text-xs ${conf.color}`}>{conf.text}</p>
+          )}
         </div>
+
+        {/* Inline alternatives — low confidence only */}
+        {showAlternativesInline && result.runnerUpTypes.length > 0 && (
+          <div className="mx-6 mb-4 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 p-4 space-y-3">
+            <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-snug">
+              You were close between a couple of types — here&apos;s what else came up:
+            </p>
+            {result.runnerUpTypes.slice(0, 2).map((type) => {
+              const arch = getArchetypeForType(type);
+              const info = TYPE_INFO[String(type)];
+              return (
+                <div key={type} className="bg-white dark:bg-[#1e2d3d] rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-3">
+                  <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">{arch.name}</p>
+                  {info && <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] mt-0.5 leading-snug">{info.descriptor}</p>}
+                  <button
+                    className="mt-2 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline font-medium transition-colors"
+                    onClick={() => { setActiveType(type); setShowAlternativesInline(false); }}
+                  >
+                    This sounds more like me →
+                  </button>
+                </div>
+              );
+            })}
+            <button
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+              onClick={() => setShowAlternativesInline(false)}
+            >
+              Stay with {getArchetypeForType(result.type).name} →
+            </button>
+          </div>
+        )}
 
         {/* Description */}
         <div className="px-6 pb-4">
@@ -328,13 +368,17 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
             {isSelf ? "This feels right — create my profile →" : `This feels right — create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
           </button>
           <div className="flex gap-3 justify-center">
-            <button
-              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-              onClick={() => setPhase("alternatives")}
-            >
-              {isSelf ? "Not quite me — see alternatives" : "Not quite right — see alternatives"}
-            </button>
-            <span className="text-[#B8D4E3] dark:text-[#3D5A6E]">·</span>
+            {result.confidence !== "low" && (
+              <>
+                <button
+                  className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+                  onClick={() => setPhase("alternatives")}
+                >
+                  {isSelf ? "Not quite me — see alternatives" : "Not quite right — see alternatives"}
+                </button>
+                <span className="text-[#B8D4E3] dark:text-[#3D5A6E]">·</span>
+              </>
+            )}
             <button
               className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={onSkip}
