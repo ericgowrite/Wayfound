@@ -61,6 +61,12 @@ body {
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Tailwind v4 @theme inline can't resolve runtime CSS vars at build time —
+   wire font-serif → Lora directly so the class produces the right font-family. */
+.font-serif {
+  font-family: var(--font-lora), "Georgia", ui-serif, serif;
+}
+
 button {
   cursor: pointer;
 }

@@ -125,6 +125,7 @@ export interface ScoredOption {
   watchOutFor: string[];
   dealbreakersTriggered: string[];
   fitExplanation: string;
+  judgmentLine?: string;
   tradeoffs: string[];
   status: "new" | "interested" | "rejected" | "booked";
   notes: string;
