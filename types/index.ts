@@ -26,6 +26,10 @@ export interface Profile {
   dealbreakers: string[];
   isDefault?: boolean;
   pastTripContext?: string;
+  calibrationCount?: number;
+  lastCalibratedAt?: string;
+  calibrationPath?: "wing" | "fresh";
+  answeredAspirrationally?: boolean;
 }
 
 // Legacy alias used in older API call sites

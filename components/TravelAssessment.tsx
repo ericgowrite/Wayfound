@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QUESTIONS, scoreAssessment, AssessmentResult, getArchetypeForType, getTopAxes } from "@/lib/assessment";
 import { TYPE_INFO } from "@/lib/typeInfo";
+import CalibrationAssessment from "@/components/CalibrationAssessment";
 
 interface Props {
   prefilledName?: string;
@@ -33,6 +34,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   const [visible, setVisible] = useState(true);
   const [ackMessage, setAckMessage] = useState<string | null>(null);
   const [showAlternativesInline, setShowAlternativesInline] = useState(false);
+  const [calibratingPath, setCalibratingPath] = useState<"wing" | "fresh" | null>(null);
 
   function handleAnswer(choice: "A" | "B") {
     if (animating) return;
@@ -79,6 +81,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     setResult(null);
     setActiveType(null);
     setPastTripContext("");
+    setCalibratingPath(null);
     setPhase("intro");
   }
 
@@ -253,6 +256,24 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
     );
   }
 
+  // ── Calibration intercept (Entry Points 1 + 3) ──────────────────────────────
+  if (phase === "result" && result && calibratingPath !== null) {
+    return (
+      <CalibrationAssessment
+        calibrationPath={calibratingPath}
+        originalResult={result}
+        runnerUpType={result.runnerUpTypes[0]}
+        onComplete={(newResult) => {
+          setResult(newResult);
+          setActiveType(newResult.type);
+          setCalibratingPath(null);
+        }}
+        onSkip={() => setCalibratingPath(null)}
+        ctaLabel={isSelf ? "This feels right — create my profile →" : `This feels right →`}
+      />
+    );
+  }
+
   // ── Result screen ────────────────────────────────────────────────────────────
   if (phase === "result" && result && activeType !== null) {
     const displayed = activeType !== result.type ? getArchetypeForType(activeType) : result;
@@ -301,6 +322,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
                 </div>
               );
             })}
+            <div className="pt-1 border-t border-amber-200/60 dark:border-amber-800/30">
+              <button
+                className="text-xs text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity"
+                onClick={() => { setShowAlternativesInline(false); setCalibratingPath("wing"); }}
+              >
+                Want a more accurate result? Answer a few more questions →
+              </button>
+            </div>
             <button
               className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
               onClick={() => setShowAlternativesInline(false)}
@@ -367,6 +396,15 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           >
             {isSelf ? "This feels right — create my profile →" : `This feels right — create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
           </button>
+          {/* Entry Point 1 — Path B calibration trigger */}
+          <div className="text-center">
+            <button
+              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+              onClick={() => setCalibratingPath("fresh")}
+            >
+              Not quite right? Answer a few more questions →
+            </button>
+          </div>
           <div className="flex gap-3 justify-center">
             {result.confidence !== "low" && (
               <>

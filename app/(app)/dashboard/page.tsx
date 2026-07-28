@@ -7,7 +7,7 @@ import ProfileEditor from "@/components/ProfileEditor";
 import AddProfileModal from "@/components/AddProfileModal";
 import FitLegendModal from "@/components/FitLegendModal";
 import TravelAssessment from "@/components/TravelAssessment";
-import { AssessmentResult } from "@/lib/assessment";
+import { AssessmentResult, CORE_ARCHETYPES, getTopAxes } from "@/lib/assessment";
 import { useTheme } from "@/lib/useTheme";
 import { useAuth } from "@/lib/AuthContext";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
@@ -16,6 +16,7 @@ import { useTourState } from "@/lib/useTourState";
 import { CATEGORY_META } from "@/lib/categories";
 import IntentScreen from "@/components/IntentScreen";
 import { TYPE_INFO } from "@/lib/typeInfo";
+import CalibrationAssessment from "@/components/CalibrationAssessment";
 
 export default function Home() {
   const { dark, toggle } = useTheme();
@@ -36,6 +37,7 @@ export default function Home() {
   const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
   const [showFitLegend, setShowFitLegend] = useState(false);
+  const [calibratingProfile, setCalibratingProfile] = useState<Profile | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profilesOpen, setProfilesOpen] = useState(true);
   const [profilesLoaded, setProfilesLoaded] = useState(false);
@@ -205,6 +207,38 @@ export default function Home() {
     });
     setEditingProfile(null);
     setShowAddProfile(false);
+  }
+
+  async function handleCalibrationComplete(
+    profile: Profile,
+    newResult: AssessmentResult,
+    meta: { answeredAspirrationally: boolean }
+  ) {
+    const updated: Profile = {
+      ...profile,
+      enneagramType: String(newResult.type),
+      description: newResult.description,
+      axisWeights: newResult.axisWeights,
+      calibrationCount: (profile.calibrationCount ?? 0) + 1,
+      lastCalibratedAt: new Date().toISOString(),
+      calibrationPath: "fresh",
+      answeredAspirrationally: meta.answeredAspirrationally,
+    };
+    try {
+      const res = await fetchWithAuth(`/api/profiles/${profile.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (res.ok) {
+        const saved: Profile = await res.json();
+        handleProfileSaved(saved);
+      }
+    } catch {
+      // Optimistically update local state even on network error
+      handleProfileSaved(updated);
+    }
+    setCalibratingProfile(null);
   }
 
   function toggleTraveler(id: string) {
@@ -615,14 +649,48 @@ export default function Home() {
       )}
 
       {/* Profile editor */}
-      {editingProfile && (
+      {editingProfile && !calibratingProfile && (
         <ProfileEditor
           profile={editingProfile}
           onSave={handleProfileSaved}
           onClose={() => setEditingProfile(null)}
           onRetakeAssessment={() => { setEditingProfile(null); setShowAddProfile(true); }}
+          onCalibrate={() => setCalibratingProfile(editingProfile)}
         />
       )}
+
+      {/* Calibration modal (Entry Point 2 — from ProfileEditor) */}
+      {calibratingProfile && (() => {
+        const typeNum = parseInt(calibratingProfile.enneagramType ?? "1", 10);
+        const arch = CORE_ARCHETYPES[typeNum];
+        if (!arch) return null;
+        const scores = Array(10).fill(0) as number[];
+        scores[typeNum] = 3;
+        const originalResult: AssessmentResult = {
+          ...arch,
+          typeScores: scores,
+          topAxes: getTopAxes(arch.axisWeights),
+          confidence: "medium",
+          runnerUpTypes: [],
+        };
+        return (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-2xl w-full max-w-md shadow-xl overflow-hidden" style={{ minHeight: 480 }}>
+              <div className="px-6 pt-5 pb-0 border-b border-[#E0E8ED] dark:border-[#2a3f52] flex items-center justify-between">
+                <span className="text-sm font-semibold text-[#2C3E50] dark:text-white">Refine your style</span>
+                <button className="text-[#9BB0C1] hover:text-[#6B8299] dark:hover:text-white text-2xl leading-none" onClick={() => setCalibratingProfile(null)}>×</button>
+              </div>
+              <CalibrationAssessment
+                calibrationPath="fresh"
+                originalResult={originalResult}
+                onComplete={(newResult, meta) => handleCalibrationComplete(calibratingProfile, newResult, meta)}
+                onSkip={() => setCalibratingProfile(null)}
+                ctaLabel="Update my style →"
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Add profile modal */}
       {showAddProfile && (

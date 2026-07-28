@@ -4,15 +4,17 @@ import { useState } from "react";
 import { Profile, AxisWeights } from "@/types";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { TYPE_INFO } from "@/lib/typeInfo";
+import { isCalibrationSuppressed } from "@/lib/typeCalibration";
 
 interface Props {
   profile: Profile;
   onSave: (p: Profile) => void;
   onClose: () => void;
   onRetakeAssessment?: () => void;
+  onCalibrate?: () => void;
 }
 
-export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssessment }: Props) {
+export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssessment, onCalibrate }: Props) {
   const [draft, setDraft] = useState<Profile>(JSON.parse(JSON.stringify(profile)));
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
@@ -81,15 +83,31 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
           <div>
             {(() => {
               const info = TYPE_INFO[draft.enneagramType ?? ""];
+              const suppressed = isCalibrationSuppressed(draft.lastCalibratedAt);
               return info ? (
-                <ul className="space-y-2">
-                  {info.bullets.map((bullet, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
-                      <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  {info.descriptor && (
+                    <div className="mb-3">
+                      <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] italic leading-snug">{info.descriptor}</p>
+                      {onCalibrate && !suppressed && (
+                        <button
+                          className="mt-1.5 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline transition-colors"
+                          onClick={onCalibrate}
+                        >
+                          Refine your experience style →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <ul className="space-y-2">
+                    {info.bullets.map((bullet, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-[#3D5A6E] dark:text-[#B8D4E3] leading-snug">
+                        <span className="text-[#5B8BA0] dark:text-[#7DBAD4] flex-shrink-0 mt-0.5">✓</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
               ) : null;
             })()}
           </div>
