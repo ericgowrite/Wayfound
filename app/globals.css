@@ -2,26 +2,63 @@
 
 @custom-variant dark (&:is(.dark, .dark *));
 
+/* ── Design token definitions ─────────────────────────────────────────────── */
 :root {
-  --background: #F8FAFB;
-  --foreground: #2C3E50;
+  /* Color palette */
+  --color-primary:       #2C3E50; /* Deep Navy — headings, CTAs, primary buttons */
+  --color-accent:        #C4956A; /* Warm Amber — delight/warmth ONLY, never warnings */
+  --color-caution:       #B5654A; /* Clay — watch-out flag icon ONLY */
+  --color-caution-text:  #8a4530; /* Clay text — watch-out label text */
+  --color-bg:            #FFFFFF; /* Page / card background */
+  --color-bg-muted:      #F5F4F0; /* Icon badge fills, secondary surfaces */
+  --color-border:        #E8E8E8; /* All hairline borders and dividers */
+  --color-text-body:     #1A1A1A; /* Primary body copy */
+  --color-text-muted:    #888888; /* Secondary text, labels, placeholders */
+  --color-nudge-bg:      #FBF4EC; /* Amber-wash engagement nudge banners */
+  --color-fit:           #6E9C74; /* Traveler-fit progress bar fill */
+
+  /* Base page tokens (used by Tailwind bg-background / text-foreground) */
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
+
+  /* Dark mode overrides — keep infrastructure, light spec is primary target */
+  /* (dark values preserved during token migration, will be refined per component) */
 }
 
 .dark {
   --background: #0f1923;
   --foreground: #B8D4E3;
+  --color-bg:     #0f1923;
+  --color-border: #2a3f52;
 }
 
 @theme inline {
+  /* Base */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Design system tokens — available as Tailwind utilities */
+  --color-primary:      var(--color-primary);
+  --color-accent:       var(--color-accent);
+  --color-caution:      var(--color-caution);
+  --color-caution-text: var(--color-caution-text);
+  --color-bg-muted:     var(--color-bg-muted);
+  --color-ds-border:    var(--color-border);
+  --color-text-body:    var(--color-text-body);
+  --color-text-muted:   var(--color-text-muted);
+  --color-nudge-bg:     var(--color-nudge-bg);
+  --color-fit:          var(--color-fit);
+
+  /* Fonts */
+  --font-sans:  var(--font-inter);
+  --font-serif: var(--font-lora);
+  --font-mono:  var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg);
+  color: var(--color-text-body);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 button {
