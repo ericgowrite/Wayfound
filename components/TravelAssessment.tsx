@@ -112,30 +112,32 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   if (phase === "intro") {
     const displayName = prefilledName || "them";
     return (
-      <div className="flex flex-col h-full justify-center px-6 py-10">
-        <h3 className="text-xl font-bold text-[#2C3E50] dark:text-white mb-3 leading-snug">
+      <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
+        <p
+          className="font-semibold text-[#2C3E50] leading-snug mb-4"
+          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 30, maxWidth: 420 }}
+        >
           {isSelf
             ? "Great experiences are everywhere. The right ones are specific to you."
             : `Great experiences are everywhere. The right ones are specific to ${displayName}.`}
-        </h3>
-        <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-3">
+        </p>
+        <p className="text-sm text-[#888888] leading-relaxed mb-7" style={{ maxWidth: 380 }}>
           A few questions and we&apos;ll know which ones those are.
         </p>
-        <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mb-8">10 questions. About 3 minutes.</p>
         <button
-          className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
+          className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full transition-opacity hover:opacity-90 w-full"
+          style={{ maxWidth: 260, paddingTop: 15, paddingBottom: 15 }}
           onClick={() => setPhase("questions")}
         >
-          Begin →
+          Let&apos;s go →
         </button>
-        <div className="mt-3 text-center">
-          <button
-            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-            onClick={onSkip}
-          >
-            I already know my type
-          </button>
-        </div>
+        <p className="text-xs text-[#888888] mt-4">Takes about 2 minutes</p>
+        <button
+          className="text-xs text-[#888888] underline mt-3 transition-opacity hover:opacity-70"
+          onClick={onSkip}
+        >
+          I already know my type
+        </button>
       </div>
     );
   }
@@ -277,44 +279,26 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   // ── Result screen ────────────────────────────────────────────────────────────
   if (phase === "result" && result && activeType !== null) {
     const displayed = activeType !== result.type ? getArchetypeForType(activeType) : result;
-    const displayedTopAxes = activeType !== result.type ? getTopAxes(displayed.axisWeights) : result.topAxes;
-    const conf = CONFIDENCE_LABEL[result.confidence];
+    const typeInfo = TYPE_INFO[String(activeType)];
 
     return (
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="text-center px-6 pt-6 pb-3">
-          <p className="text-xs text-[#E8A87C] uppercase tracking-widest font-semibold mb-2">
-            {displayed.name}
-          </p>
-          <h2 className="text-2xl font-bold text-[#2C3E50] dark:text-white mb-3 leading-snug">{displayed.headline}</h2>
-          {result.confidence === "low" ? (
-            <button
-              className={`text-xs ${conf.color} underline underline-offset-2 hover:opacity-80 transition-opacity`}
-              onClick={() => setShowAlternativesInline((v) => !v)}
-            >
-              {conf.text}
-            </button>
-          ) : (
-            <p className={`text-xs ${conf.color}`}>{conf.text}</p>
-          )}
-        </div>
+      <div className="flex flex-col items-center justify-center h-full px-6 py-10 text-center">
 
         {/* Inline alternatives — low confidence only */}
         {showAlternativesInline && result.runnerUpTypes.length > 0 && (
-          <div className="mx-6 mb-4 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 p-4 space-y-3">
-            <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-snug">
+          <div className="mb-6 w-full border border-[#E8E8E8] rounded p-4 text-left space-y-3">
+            <p className="text-xs text-[#888888] leading-snug">
               You were close between a couple of types — here&apos;s what else came up:
             </p>
             {result.runnerUpTypes.slice(0, 2).map((type) => {
               const arch = getArchetypeForType(type);
               const info = TYPE_INFO[String(type)];
               return (
-                <div key={type} className="bg-white dark:bg-[#1e2d3d] rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] p-3">
-                  <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">{arch.name}</p>
-                  {info && <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] mt-0.5 leading-snug">{info.descriptor}</p>}
+                <div key={type} className="border border-[#E8E8E8] rounded p-3">
+                  <p className="text-sm font-semibold text-[#2C3E50]">{arch.name}</p>
+                  {info && <p className="text-xs text-[#888888] mt-0.5 leading-snug">{info.descriptor}</p>}
                   <button
-                    className="mt-2 text-xs text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline font-medium transition-colors"
+                    className="mt-2 text-xs text-[#2C3E50] underline font-medium"
                     onClick={() => { setActiveType(type); setShowAlternativesInline(false); }}
                   >
                     This sounds more like me →
@@ -322,16 +306,8 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
                 </div>
               );
             })}
-            <div className="pt-1 border-t border-amber-200/60 dark:border-amber-800/30">
-              <button
-                className="text-xs text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity"
-                onClick={() => { setShowAlternativesInline(false); setCalibratingPath("wing"); }}
-              >
-                Want a more accurate result? Answer a few more questions →
-              </button>
-            </div>
             <button
-              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+              className="text-xs text-[#888888] underline"
               onClick={() => setShowAlternativesInline(false)}
             >
               Stay with {getArchetypeForType(result.type).name} →
@@ -339,45 +315,36 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           </div>
         )}
 
-        {/* Description */}
-        <div className="px-6 pb-4">
-          <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed text-center">{displayed.description}</p>
-        </div>
+        {/* Type name */}
+        <p
+          className="font-semibold text-[#2C3E50] leading-tight mb-2"
+          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 32 }}
+        >
+          You&apos;re {displayed.name}.
+        </p>
 
-        {/* Top priorities */}
-        <div className="px-6 pb-4">
-          <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wide text-center mb-3">
-            {isSelf ? "What matters most to you" : `What matters most to ${prefilledName || "them"}`}
-          </p>
-          <div className="flex flex-col gap-2">
-            {displayedTopAxes.map(({ axis, label }, i) => (
-              <div
-                key={axis}
-                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm ${
-                  i === 0
-                    ? "bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border-[#5B8BA0]/30 dark:border-[#5B8BA0]/50 text-[#3D5A6E] dark:text-[#B8D4E3]"
-                    : "bg-[#F8FAFB] dark:bg-[#2a3f52] border-[#E0E8ED] dark:border-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3]"
-                }`}
-              >
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                  i === 0 ? "bg-[#5B8BA0] text-white" : "bg-[#E0E8ED] dark:bg-[#4A7A8F] text-[#3D5A6E] dark:text-[#B8D4E3]"
-                }`}>
-                  {i + 1}
-                </span>
-                {label}
-              </div>
+        {/* Descriptor */}
+        <p className="text-sm text-[#888888] mb-5">
+          {typeInfo?.descriptor ?? displayed.tagline}
+        </p>
+
+        {/* Bullets */}
+        {typeInfo?.bullets && (
+          <ul className="text-left text-sm text-[#1A1A1A] mb-6 space-y-1" style={{ maxWidth: 360, lineHeight: 1.8 }}>
+            {typeInfo.bullets.map((b) => (
+              <li key={b}>· {b}</li>
             ))}
-          </div>
-        </div>
+          </ul>
+        )}
 
         {/* Name input (only if not pre-filled) */}
         {!prefilledName && (
-          <div className="px-6 pb-3">
-            <label className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] uppercase tracking-wide mb-1.5">
+          <div className="w-full mb-5 text-left" style={{ maxWidth: 360 }}>
+            <label className="block text-xs text-[#888888] uppercase tracking-wide mb-1.5">
               What should we call you?
             </label>
             <input
-              className="w-full bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-[#5B8BA0] transition-colors"
+              className="w-full border border-[#E8E8E8] text-sm rounded px-3 py-2 text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] transition-colors"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -387,85 +354,71 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           </div>
         )}
 
-        {/* Actions */}
-        <div className="px-6 pb-6 pt-1 flex flex-col gap-2 mt-auto">
+        {/* Primary CTA */}
+        <button
+          className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 w-full"
+          style={{ maxWidth: 260, paddingTop: 15, paddingBottom: 15 }}
+          onClick={handleAccept}
+          disabled={!prefilledName && !name.trim()}
+        >
+          {isSelf ? "Start discovering →" : `Create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
+        </button>
+
+        {/* Calibrate link */}
+        <button
+          className="text-xs text-[#888888] underline mt-4 transition-opacity hover:opacity-70"
+          onClick={() => setCalibratingPath("fresh")}
+        >
+          Not a fit? Let&apos;s calibrate.
+        </button>
+
+        {/* Secondary: see alternatives */}
+        {result.runnerUpTypes.length > 0 && (
           <button
-            className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-            onClick={handleAccept}
-            disabled={!prefilledName && !name.trim()}
+            className="text-xs text-[#888888] mt-3 transition-opacity hover:opacity-70"
+            onClick={() => setShowAlternativesInline((v) => !v)}
           >
-            {isSelf ? "This feels right — create my profile →" : `This feels right — create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
+            {showAlternativesInline ? "Hide alternatives" : "See other types that came up →"}
           </button>
-          {/* Entry Point 1 — Path B calibration trigger */}
-          <div className="text-center">
-            <button
-              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-              onClick={() => setCalibratingPath("fresh")}
-            >
-              Not quite right? Answer a few more questions →
-            </button>
-          </div>
-          <div className="flex gap-3 justify-center">
-            {result.confidence !== "low" && (
-              <>
-                <button
-                  className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-                  onClick={() => setPhase("alternatives")}
-                >
-                  {isSelf ? "Not quite me — see alternatives" : "Not quite right — see alternatives"}
-                </button>
-                <span className="text-[#B8D4E3] dark:text-[#3D5A6E]">·</span>
-              </>
-            )}
-            <button
-              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-              onClick={onSkip}
-            >
-              I already know my type
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     );
   }
 
   // ── Questions screen ─────────────────────────────────────────────────────────
+  // Map N questions to 4 progress dots
+  const filledDots = Math.min(4, Math.floor((idx / QUESTIONS.length) * 4) + 1);
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Progress */}
-      <div className="px-6 pt-5 pb-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">
-            Question {idx + 1} of {QUESTIONS.length}
-          </span>
-          <button
-            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
-            onClick={onSkip}
-          >
-            Skip →
-          </button>
-        </div>
-        <div className="h-1 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-full overflow-hidden">
+    <div className="flex flex-col h-full px-6 py-8">
+      {/* 4-dot progress indicator */}
+      <div className="flex items-center justify-center gap-1.5 mb-8">
+        {[0, 1, 2, 3].map((i) => (
           <div
-            className="h-full bg-[#E8A87C] rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            key={i}
+            className="rounded-full"
+            style={{
+              width: 6, height: 6,
+              background: i < filledDots ? "#C4956A" : "#E8E8E8",
+            }}
           />
-        </div>
+        ))}
       </div>
 
       {/* Question */}
-      <div className="flex-1 flex flex-col justify-center px-6 pb-2">
+      <div className="flex-1 flex flex-col justify-center text-center">
         {ackMessage ? (
-          <p className="text-sm text-center text-[#5B8BA0] dark:text-[#7DBAD4] font-medium">
-            {ackMessage}
-          </p>
+          <p className="text-sm text-[#888888] font-medium">{ackMessage}</p>
         ) : (
           <div style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}>
-            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-widest text-center mb-5">
-              {isSelf ? "Which resonates more?" : `Which resonates more for ${prefilledName || "them"}?`}
+            <p
+              className="font-medium text-[#2C3E50] mb-8"
+              style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22, lineHeight: 1.4 }}
+            >
+              {isSelf ? "Which sounds more like you?" : `Which sounds more like ${prefilledName || "them"}?`}
             </p>
 
-            <div className="space-y-3">
+            <div className="flex flex-col gap-2.5">
               {(["A", "B"] as const).map((side) => {
                 const text = side === "A" ? q.a : q.b;
                 const chosen = answers[idx] === side;
@@ -474,15 +427,15 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
                     key={side}
                     onClick={() => handleAnswer(side)}
                     disabled={animating}
-                    className={`w-full text-left px-4 py-4 rounded-xl border transition-all text-sm leading-relaxed ${
-                      chosen
-                        ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#2C3E50] dark:text-[#B8D4E3]"
-                        : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] text-[#3D5A6E] dark:text-[#B8D4E3] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/5 dark:hover:bg-[#5B8BA0]/8"
-                    }`}
+                    className="w-full text-left text-sm text-[#1A1A1A] transition-all"
+                    style={{
+                      border: `1px solid ${chosen ? "#C4956A" : "#2C3E50"}`,
+                      borderRadius: 4,
+                      padding: "18px 20px",
+                      background: chosen ? "#FBF4EC" : "transparent",
+                      lineHeight: 1.55,
+                    }}
                   >
-                    <span className={`text-[10px] font-bold uppercase tracking-wider mr-2 ${chosen ? "text-[#5B8BA0]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
-                      {side}
-                    </span>
                     {text}
                   </button>
                 );
@@ -492,18 +445,21 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         )}
       </div>
 
-      {/* Back / counter */}
-      <div className="px-6 pb-5 pt-2 flex justify-between items-center">
+      {/* Back link */}
+      <div className="flex justify-between items-center pt-6">
         <button
-          className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors disabled:opacity-30"
+          className="text-xs text-[#888888] transition-opacity disabled:opacity-0"
           onClick={handleBack}
           disabled={idx === 0}
         >
           ← Back
         </button>
-        <span className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] tabular-nums">
-          {Object.keys(answers).length}/{QUESTIONS.length} answered
-        </span>
+        <button
+          className="text-xs text-[#888888] underline"
+          onClick={onSkip}
+        >
+          Skip
+        </button>
       </div>
     </div>
   );
