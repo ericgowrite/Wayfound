@@ -32,6 +32,7 @@ export default function Home() {
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
+  const [showAddTraveler, setShowAddTraveler] = useState(false);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
@@ -111,7 +112,8 @@ export default function Home() {
   async function createWorkspace() {
     if (!newName.trim()) return;
     setCreatingWorkspace(true);
-    const travelers = newTravelers.length > 0 ? newTravelers : [profiles[0]?.id].filter(Boolean);
+    const defaultId = profiles[0]?.id;
+    const travelers = [defaultId, ...newTravelers].filter((id): id is string => !!id && id !== undefined).filter((id, i, arr) => arr.indexOf(id) === i);
     try {
       const res = await fetchWithAuth("/api/workspaces", {
         method: "POST",
@@ -135,6 +137,8 @@ export default function Home() {
       setShowNewWorkspace(false);
       setNewName("");
       setNewDest("");
+      setNewTravelers([]);
+      setShowAddTraveler(false);
 
 
     } catch (e) {
@@ -591,64 +595,116 @@ export default function Home() {
 
       {/* New workspace modal */}
       {showNewWorkspace && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-4">What are we planning?</h2>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[#6B8299] text-xs uppercase block mb-1">Destination</label>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 4, padding: '28px 32px', width: '100%', maxWidth: 480, fontFamily: "'Inter', sans-serif" }}>
+
+            <button
+              onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); }}
+              style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+            >
+              ← Back
+            </button>
+
+            <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 22, color: '#2C3E50', marginTop: 16 }}>
+              What are we planning?
+            </div>
+
+            <input
+              placeholder={"Costa Rica, Sonoma, \"Sam's 30th\"…"}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
+              autoFocus
+              style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '13px 16px', fontSize: 14, color: '#1A1A1A', width: '100%', marginTop: 16, boxSizing: 'border-box', outline: 'none' }}
+            />
+
+            <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where (optional)</div>
                 <input
-                  className={`w-full ${inputCls} text-sm rounded border px-3 py-2 focus:outline-none`}
                   placeholder="e.g. Tuscany, Italy"
                   value={newDest}
-                  onChange={(e) => { setNewDest(e.target.value); setNewName(e.target.value); }}
-                  onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
-                  autoFocus
+                  onChange={(e) => setNewDest(e.target.value)}
+                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 13, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
                 />
               </div>
-              {profiles.length > 1 && (
-                <div>
-                  <label className="text-[#6B8299] text-xs uppercase block mb-2">Traveling With</label>
-                  <div className="flex flex-wrap gap-2">
-                    {profiles.map((p) => (
-                      <button
-                        key={p.id}
-                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-colors ${
-                          newTravelers.includes(p.id)
-                            ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                            : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1]"
-                        }`}
-                        onClick={() => toggleTraveler(p.id)}
-                      >
-                        <span className="w-4 h-4 rounded-full bg-[#5B8BA0] flex items-center justify-center text-xs font-bold text-white">
-                          {p.name[0]}
-                        </span>
-                        {p.name}
-                      </button>
-                    ))}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>When (optional)</div>
+                <input
+                  placeholder="Flexible"
+                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 13, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid #E8E8E8', marginTop: 24, paddingTop: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Who&apos;s joining you
+              </div>
+
+              {profiles[0] && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#2C3E50', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {profiles[0].name[0]}
                   </div>
-                  <p className="text-[#6B8299] dark:text-[#6B8299] text-xs mt-1">Results scored against first selected traveler</p>
+                  <span style={{ fontSize: 13, color: '#1A1A1A' }}>{profiles[0].name} (you)</span>
+                </div>
+              )}
+
+              {newTravelers.map(id => {
+                const p = profiles.find(pr => pr.id === id);
+                if (!p) return null;
+                return (
+                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#C4956A', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {p.name[0]}
+                    </div>
+                    <span style={{ fontSize: 13, color: '#1A1A1A', flex: 1 }}>{p.name}</span>
+                    <button onClick={() => toggleTraveler(id)} style={{ fontSize: 16, color: '#888888', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+                  </div>
+                );
+              })}
+
+              {profiles.length > 1 && (
+                <div style={{ marginTop: 12 }}>
+                  {!showAddTraveler ? (
+                    <button
+                      onClick={() => setShowAddTraveler(true)}
+                      style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                    >
+                      + Add someone
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => { toggleTraveler(p.id); setShowAddTraveler(false); }}
+                          style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '6px 12px', fontSize: 12, color: '#2C3E50', background: '#fff', cursor: 'pointer' }}
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                      {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length === 0 && (
+                        <span style={{ fontSize: 12, color: '#888888' }}>All travelers added.</span>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+
             {workspaceError && (
-              <p className="text-red-500 text-xs mt-3">{workspaceError}</p>
+              <p style={{ fontSize: 12, color: '#B5654A', marginTop: 12 }}>{workspaceError}</p>
             )}
-            <div className="flex gap-2 justify-end mt-4">
-              <button
-                className={`px-4 py-2 text-sm rounded ${btnSecondary}`}
-                onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] disabled:opacity-50"
-                onClick={createWorkspace}
-                disabled={!newDest.trim() || creatingWorkspace}
-              >
-                {creatingWorkspace ? "Creating…" : "Let's go →"}
-              </button>
-            </div>
+
+            <button
+              onClick={createWorkspace}
+              disabled={!newName.trim() || creatingWorkspace}
+              style={{ background: '#2C3E50', color: '#fff', textAlign: 'center', fontSize: 15, fontWeight: 600, padding: 15, borderRadius: 999, marginTop: 28, width: 220, border: 'none', cursor: newName.trim() && !creatingWorkspace ? 'pointer' : 'not-allowed', opacity: !newName.trim() || creatingWorkspace ? 0.6 : 1, display: 'block' }}
+            >
+              {creatingWorkspace ? 'Creating…' : "Let's go →"}
+            </button>
           </div>
         </div>
       )}
