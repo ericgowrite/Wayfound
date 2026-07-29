@@ -14,7 +14,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import DashboardTour from "@/components/DashboardTour";
 import { useTourState } from "@/lib/useTourState";
 import { CATEGORY_META } from "@/lib/categories";
-import IntentScreen from "@/components/IntentScreen";
+import HomeScreen from "@/components/HomeScreen";
 import { TYPE_INFO } from "@/lib/typeInfo";
 import CalibrationAssessment from "@/components/CalibrationAssessment";
 
@@ -71,7 +71,7 @@ export default function Home() {
     fetchWithAuth("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
       if (!Array.isArray(ws)) return;
       setWorkspaces(ws);
-      if (ws.length > 0) setActiveWorkspaceId(ws[0].id);
+      // Don't auto-select a workspace — HomeScreen is the entry point
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
@@ -539,14 +539,15 @@ export default function Home() {
             autoSearch={pendingAutoSearch?.workspaceId === activeWorkspace.id ? pendingAutoSearch : undefined}
           />
         ) : (
-          <IntentScreen
+          <HomeScreen
             profiles={profiles}
+            workspaces={workspaces}
             onWorkspaceCreated={(workspace, autoSearch) => {
               setWorkspaces((prev) => [workspace, ...prev]);
               setActiveWorkspaceId(workspace.id);
               setPendingAutoSearch(autoSearch);
             }}
-            onSkipToModal={() => setShowNewWorkspace(true)}
+            onSelectWorkspace={(id) => setActiveWorkspaceId(id)}
           />
         )}
         </div>
