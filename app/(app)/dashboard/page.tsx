@@ -742,15 +742,22 @@ export default function Home() {
       )}
 
       {/* Profile editor */}
-      {editingProfile && !calibratingProfile && (
-        <ProfileEditor
-          profile={editingProfile}
-          onSave={handleProfileSaved}
-          onClose={() => setEditingProfile(null)}
-          onRetakeAssessment={() => { setEditingProfile(null); setShowAddProfile(true); }}
-          onCalibrate={() => setCalibratingProfile(editingProfile)}
-        />
-      )}
+      {editingProfile && !calibratingProfile && (() => {
+        const activeWs = workspaces.find(w => w.id === activeWorkspaceId);
+        const wsProfiles = activeWs
+          ? (activeWs.travelers ?? []).map(id => profiles.find(p => p.id === id)).filter((p): p is Profile => !!p && p.id !== editingProfile.id)
+          : undefined;
+        return (
+          <ProfileEditor
+            profile={editingProfile}
+            onSave={handleProfileSaved}
+            onClose={() => setEditingProfile(null)}
+            onRetakeAssessment={() => { setEditingProfile(null); setShowAddProfile(true); }}
+            onCalibrate={() => setCalibratingProfile(editingProfile)}
+            workspaceProfiles={wsProfiles && wsProfiles.length > 0 ? wsProfiles : undefined}
+          />
+        );
+      })()}
 
       {/* Calibration modal (Entry Point 2 — from ProfileEditor) */}
       {calibratingProfile && (() => {
