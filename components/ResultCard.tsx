@@ -276,7 +276,6 @@ export default function ResultCard({
       const data = await res.json();
       if (data.deepDive) {
         setDeepDive(data.deepDive);
-        setDeepDiveMode(true);
         onDeepDive();
         setTimeout(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
       } else {
@@ -348,15 +347,47 @@ export default function ResultCard({
   }
 
   // ── Expanded card content ─────────────────────────────────────────────────────
-  function renderExpandedCardMode(inOverlay = false) {
+  function renderExpandedCardMode(_inOverlay = false) {
+    const watchOutItems = deepDive?.watchOutFor?.length
+      ? deepDive.watchOutFor
+      : option.tradeoffs;
+
     return (
       <div className="space-y-5">
-        {/* Verdict — amber left border per design */}
+        {/* Amber border paragraph */}
         {option.fitExplanation && (
           <div className="text-sm leading-[1.6] text-[#1A1A1A]" style={{ borderLeft: "3px solid #C4956A", paddingLeft: "14px" }}>
             {option.fitExplanation}
           </div>
         )}
+
+        {/* Why this fits you */}
+        <div>
+          <p className="text-sm font-semibold text-[#2C3E50] mb-2">Why this fits you</p>
+          {deepDive && deepDive.whyItFits.length > 0 ? (
+            <div className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.7 }}>
+              {deepDive.whyItFits.map((item, i) => (
+                <div key={i}>· {item}</div>
+              ))}
+            </div>
+          ) : (
+            <div>
+              {deepDiveError && (
+                <p className="text-xs text-[#B5654A] mb-2">Research failed — try again</p>
+              )}
+              <button
+                className="w-full bg-[#2C3E50] text-white text-sm font-medium rounded-full transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ paddingTop: "13px", paddingBottom: "13px" }}
+                onClick={handleDeepDive}
+                disabled={loadingDive}
+              >
+                {loadingDive
+                  ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
+                  : seeWhyCopy}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Traveler fit bars */}
         {travelers.length > 0 && (
@@ -405,32 +436,8 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* See why this fits you CTA — navy, full-width, 999px radius (Tokens Spec wins over dc.html 4px) */}
-        <div>
-          {deepDiveError && (
-            <p className="text-xs text-[#B5654A] mb-2">Research failed — try again</p>
-          )}
-          {deepDive ? (
-            <button
-              className="w-full border border-[#2C3E50]/30 text-[#2C3E50] text-sm font-medium rounded-full transition-opacity hover:opacity-70 disabled:opacity-40 flex items-center justify-center gap-2" style={{ paddingTop: "13px", paddingBottom: "13px" }}
-              onClick={handleDeepDive}
-              disabled={loadingDive}
-            >
-              {loadingDive ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></> : "Research again →"}
-            </button>
-          ) : (
-            <button
-              className="w-full bg-[#2C3E50] text-white text-sm font-medium rounded-full transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2" style={{ paddingTop: "13px", paddingBottom: "13px" }}
-              onClick={handleDeepDive}
-              disabled={loadingDive}
-            >
-              {loadingDive ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></> : seeWhyCopy}
-            </button>
-          )}
-        </div>
-
         {/* Ask ViyaWay text link */}
-        <div className="text-center -mt-2">
+        <div className="text-center">
           <button
             className="text-sm text-[#888888] underline hover:text-[#2C3E50] transition-colors"
             onClick={() => { setChatOpen((v) => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100); }}
@@ -513,53 +520,42 @@ export default function ResultCard({
 
         <hr className="border-t border-[#E8E8E8]" />
 
-        {/* Watch out for — collapsible, closed by default */}
-        {option.tradeoffs.length > 0 && (
+        {/* Watch out for — always expanded */}
+        {watchOutItems.length > 0 && (
           <div>
-            <button
-              className="w-full text-left flex items-center justify-between"
-              onClick={() => setTradeoffsExpanded((v) => !v)}
-            >
-              <p className="text-sm font-semibold text-[#8a4530]">Watch out for</p>
-              <span className="text-[#888888] text-xs">{tradeoffsExpanded ? "▲" : "▼"}</span>
-            </button>
-            {tradeoffsExpanded && (
-              <ul className="mt-2 space-y-2">
-                {option.tradeoffs.map((t, i) => (
-                  <li key={i} className="flex gap-1.5 text-sm text-[#1A1A1A] leading-snug">
-                    <span className="text-[#B5654A] flex-shrink-0">▲</span>
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <p className="text-sm font-semibold mb-1.5" style={{ color: "#8a4530" }}>Watch out for</p>
+            <div className="space-y-1.5">
+              {watchOutItems.map((t, i) => (
+                <div key={i} className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>▲ {t}</div>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* About this property — collapsible, closed by default */}
+        {/* What makes it stand out — from deepDive */}
+        {deepDive && deepDive.standoutFeatures.length > 0 && (
+          <div>
+            <p className="text-sm font-semibold text-[#2C3E50] mb-1.5">What makes it stand out</p>
+            <p className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>
+              {deepDive.standoutFeatures[0]}
+            </p>
+          </div>
+        )}
+
+        {/* About this property — always expanded */}
         {option.description && (
           <div>
-            <button
-              className="w-full text-left flex items-center justify-between"
-              onClick={() => setAboutExpanded((v) => !v)}
-            >
-              <p className="text-sm font-semibold text-[#2C3E50]">{aboutLabel}</p>
-              <span className="text-[#888888] text-xs">{aboutExpanded ? "▲" : "▼"}</span>
-            </button>
-            {aboutExpanded && (
-              <p className="mt-2 text-sm text-[#1A1A1A] leading-relaxed">{option.description}</p>
-            )}
+            <p className="text-sm font-semibold text-[#2C3E50] mb-1.5">{aboutLabel}</p>
+            <p className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>{option.description}</p>
           </div>
         )}
 
         {/* Source link */}
         {renderSourceBlock()}
 
-        {/* Notes from travelers */}
+        {/* Notes */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-2">
-            Notes from travelers
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-2">Notes</p>
           <textarea
             className="w-full text-sm text-[#1A1A1A] border border-[#E8E8E8] rounded-[4px] p-3 resize-none focus:outline-none focus:border-[#2C3E50] transition-colors bg-white placeholder-[#888888]"
             rows={2}
@@ -570,7 +566,7 @@ export default function ResultCard({
           />
         </div>
 
-        {/* Post-trip feedback (low-priority visual — Step 6+ will redesign) */}
+        {/* Post-trip feedback */}
         {option.feedback ? (
           <div className="rounded-[4px] border border-[#E8E8E8] bg-[#F5F4F0] px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-1.5">Your feedback</p>
@@ -628,13 +624,10 @@ export default function ResultCard({
           </div>
         ) : null}
 
-        {/* Status row — text actions with hairline dividers */}
-        <div
-          className="flex items-center justify-center pt-4 border-t border-[#E8E8E8]"
-          style={{ marginTop: "20px" }}
-        >
+        {/* Status bar — 4 equal columns */}
+        <div className="flex border-t border-[#E8E8E8] pt-4">
           <button
-            className={`text-sm px-3 py-1 transition-colors ${
+            className={`flex-1 text-center text-sm transition-colors ${
               isSaved ? "font-semibold text-[#2C3E50]" : "text-[#888888] hover:text-[#2C3E50]"
             }`}
             onClick={onSave}
@@ -644,17 +637,15 @@ export default function ResultCard({
           {(["interested", "rejected", "booked"] as ScoredOption["status"][]).map((s) => {
             const isActive = option.status === s;
             return (
-              <span key={s} className="contents">
-                <div className="w-px h-3 bg-[#E8E8E8] mx-3 flex-shrink-0" />
-                <button
-                  className={`text-sm px-3 py-1 transition-colors ${
-                    isActive ? "font-semibold text-[#2C3E50]" : "text-[#888888] hover:text-[#2C3E50]"
-                  }`}
-                  onClick={() => onStatusChange(s)}
-                >
-                  {s === "interested" ? "Interested" : s === "rejected" ? "Reject" : "Booked"}
-                </button>
-              </span>
+              <button
+                key={s}
+                className={`flex-1 text-center text-sm transition-colors ${
+                  isActive ? "font-semibold text-[#2C3E50]" : "text-[#888888] hover:text-[#2C3E50]"
+                }`}
+                onClick={() => onStatusChange(s)}
+              >
+                {s === "interested" ? "Interested" : s === "rejected" ? "Reject" : "Booked"}
+              </button>
             );
           })}
         </div>
