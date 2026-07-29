@@ -383,66 +383,102 @@ export default function Home() {
           <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mx-4" />
 
           {/* Trips section */}
-          <div id="tour-trips" className="flex items-center justify-between px-4 pt-3 pb-2">
-            <span className="text-xs text-[#6B8299] uppercase font-medium tracking-wide">Experiences</span>
+          <div id="tour-trips" className="flex items-center justify-between px-4 pt-4 pb-3">
+            <span style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 15, color: '#2C3E50' }}>
+              Experiences
+            </span>
             <button
               id="tour-create-trip"
-              className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-sm transition-colors"
               onClick={() => setShowNewWorkspace(true)}
-              title="New Experience"
+              style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '5px 10px', fontSize: 11, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', lineHeight: 1 }}
             >
-              +
+              + New
             </button>
           </div>
 
-          <div className="px-2">
+          <div className="px-4">
             {workspaces.length === 0 ? (
-              <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] px-2 py-1">No experiences yet</p>
+              <div style={{ paddingTop: 20, paddingBottom: 20, textAlign: 'center' }}>
+                <p style={{ fontFamily: '"Lora", serif', fontWeight: 500, fontSize: 15, color: '#2C3E50' }}>
+                  No experiences yet.
+                </p>
+                <p style={{ fontSize: 12, color: '#888888', marginTop: 8, lineHeight: 1.5 }}>
+                  Each experience is its own space — start one whenever you&apos;re ready.
+                </p>
+                <button
+                  onClick={() => setShowNewWorkspace(true)}
+                  style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '9px 14px', fontSize: 12, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', marginTop: 14 }}
+                >
+                  + New experience
+                </button>
+              </div>
             ) : (
               workspaces.map((w) => {
-                const primaryProfile = profiles.find((p) => p.id === (w.travelers ?? [])[0]);
-                const extraCount = (w.travelers?.length ?? 1) - 1;
+                const travelerProfiles = (w.travelers ?? []).map(id => profiles.find(p => p.id === id)).filter((p): p is Profile => !!p);
+                const travelerNames = travelerProfiles.map(p => p.name);
+                const travelerStr = travelerNames.slice(0, 2).join(', ');
+                const savedCount = w.savedOptions.length;
+                const isBooked = w.savedOptions.some(s => s.journeyState === 'booked');
+
+                const subtitleParts: string[] = [];
+                if (isBooked) {
+                  subtitleParts.push('Booked');
+                  if (w.dates?.start) {
+                    const d = new Date(w.dates.start);
+                    subtitleParts.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                  }
+                } else if (savedCount > 0) {
+                  subtitleParts.push('Planning');
+                  subtitleParts.push(`${savedCount} saved`);
+                } else {
+                  subtitleParts.push('Just started');
+                }
+                if (travelerStr) subtitleParts.push(`with ${travelerStr}`);
+
                 return (
                   <div key={w.id}>
-                    {/* Trip row */}
+                    {/* Workspace row */}
                     <div
-                      className={`group flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5 transition-colors ${
-                        w.id === activeWorkspaceId
-                          ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4]"
-                          : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
-                      }`}
+                      className="group"
+                      style={{ borderBottom: '1px solid #E8E8E8', padding: '14px 0', cursor: 'pointer' }}
                       onClick={() => setActiveWorkspaceId(w.id)}
                     >
-                      <span className="text-sm">📁</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{w.name}</p>
-                        <p className="text-xs text-[#6B8299] dark:text-[#6B8299] truncate">
-                          {primaryProfile?.name ?? ""}
-                          {extraCount > 0 ? ` +${extraCount}` : ""}
-                          {w.destination ? ` · ${w.destination}` : ""}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                        <p className="truncate" style={{ fontFamily: '"Lora", serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#888888' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
+                          {w.name || w.destination || 'Untitled'}
                         </p>
+                        <button
+                          className="opacity-0 group-hover:opacity-100 flex-shrink-0 ml-1"
+                          style={{ color: '#9BB0C1', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+                          onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
+                        >
+                          ×
+                        </button>
                       </div>
+                      <p style={{ fontSize: 12, color: '#888888', marginTop: 3, lineHeight: 1.4 }}>
+                        {subtitleParts.join(' · ')}
+                      </p>
                       <button
-                        className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
-                        onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
+                        onClick={(e) => { e.stopPropagation(); setActiveWorkspaceId(w.id); }}
+                        style={{ fontSize: 13, color: isBooked ? '#888888' : '#2C3E50', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 6 }}
                       >
-                        ×
+                        {isBooked ? 'View →' : 'Continue →'}
                       </button>
                     </div>
 
                     {/* Search sub-list — only under the active workspace */}
                     {w.id === activeWorkspaceId && w.searches.length > 0 && (
-                      <div className="ml-4 mb-1 border-l border-[#E0E8ED] dark:border-[#2a3f52] pl-2 space-y-0.5">
+                      <div className="mb-1 border-l border-[#E0E8ED] dark:border-[#2a3f52] pl-2 space-y-0.5 mt-1">
                         {w.searches.map((s) => {
                           const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
-                          const isActive = s.id === activeSearchId;
+                          const isActiveSearch = s.id === activeSearchId;
                           return (
                             <button
                               key={s.id}
                               className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors text-xs ${
-                                isActive
-                                  ? "bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/20 text-[#5B8BA0] dark:text-[#7DBAD4] font-medium"
-                                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
+                                isActiveSearch
+                                  ? "text-[#2C3E50] font-medium"
+                                  : "text-[#888888] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
