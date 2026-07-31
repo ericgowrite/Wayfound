@@ -43,7 +43,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Your Travelers",
             description:
-              "This is you — how ViyaWay knows what fits when you travel. Tap your name anytime to view or update your travel style.",
+              "This is you — how viyaway knows what fits when you travel. Tap your name anytime to view or update your travel style.",
           },
         },
         {
@@ -51,7 +51,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Add a Travel Companion",
             description:
-              "Traveling with someone? Add them here. ViyaWay finds what fits everyone — not just a compromise.",
+              "Traveling with someone? Add them here. viyaway finds what fits everyone — not just a compromise.",
           },
         },
         {
@@ -67,7 +67,7 @@ export default function DashboardTour({ onDone }: Props) {
           popover: {
             title: "Create an Experience",
             description:
-              "Pick your destination and let ViyaWay find what fits. That's all there is to it.",
+              "Pick your destination and let viyaway find what fits. That's all there is to it.",
           },
         },
       ],

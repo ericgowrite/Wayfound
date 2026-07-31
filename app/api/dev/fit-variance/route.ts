@@ -295,7 +295,7 @@ export async function GET(request: Request) {
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>ViyaWay — Fit Score Variance Report</title>
+  <title>viyaway — Fit Score Variance Report</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; color: #2C3E50; background: #fff; }
     h1 { font-size: 22px; margin-bottom: 4px; }

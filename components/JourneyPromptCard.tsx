@@ -64,9 +64,9 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
 
     function handleFitTap(fitOutcome: FitOutcome) {
       const messages: Record<FitOutcome, string> = {
-        perfect: "Good to know — ViyaWay is getting to know you better.",
-        good: "Noted — ViyaWay is learning what works for you.",
-        off: "Thanks for the honest feedback — that helps ViyaWay find better fits.",
+        perfect: "Good to know — viyaway is getting to know you better.",
+        good: "Noted — viyaway is learning what works for you.",
+        off: "Thanks for the honest feedback — that helps viyaway find better fits.",
       };
       setAckMessage(messages[fitOutcome]);
       // Fade in after a paint frame so the element is in the DOM at opacity 0 first
@@ -85,7 +85,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
               Did {option.name} deliver?
             </p>
             <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mt-0.5">
-              One tap. Helps ViyaWay learn your fit.
+              One tap. Helps viyaway learn your fit.
             </p>
           </div>
           <button
