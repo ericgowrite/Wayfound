@@ -12,7 +12,6 @@ import {
 } from "@/types";
 import { sortByAlignment, sortByGroupFit, attachTravelerScores } from "@/lib/scoring";
 import { CATEGORY_META } from "@/lib/categories";
-import CategorySelect from "@/components/CategorySelect";
 import {
   trackSave,
   trackReject,
@@ -741,30 +740,69 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <textarea
-              className={`w-full ${inputCls} rounded-lg border px-3 py-2 text-sm focus:outline-none resize-none transition-colors`}
-              rows={2}
-              placeholder={`Paste a name, URL, or description — e.g. "Borgo Santo Pietro, Tuscany" or https://…`}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Category pill dropdown — same as search mode */}
+            <div ref={categoryPopRef} style={{ position: 'relative', flexShrink: 0 }}>
+              <button
+                onClick={() => setShowCategoryPop((v) => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  border: '1px solid #E8E8E8', borderRadius: 999,
+                  padding: '10px 14px', fontSize: 13, fontWeight: 600,
+                  color: '#2C3E50', background: '#FAF8F5', cursor: 'pointer',
+                  fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {CATEGORY_META[category]?.label ?? "Category"}
+                <span style={{ fontSize: 9, color: '#888888', marginLeft: 2 }}>▾</span>
+              </button>
+              {showCategoryPop && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
+                  background: '#fff', border: '1px solid #E8E8E8', borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)', padding: '4px', minWidth: 140,
+                }}>
+                  {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map((cat) => {
+                    const meta = CATEGORY_META[cat];
+                    const isActive = category === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => { setCategory(cat); setShowCategoryPop(false); }}
+                        style={{
+                          display: 'block', width: '100%', textAlign: 'left',
+                          padding: '8px 12px', fontSize: 13, borderRadius: 7,
+                          border: 'none', cursor: 'pointer',
+                          background: isActive ? '#FAF8F5' : 'transparent',
+                          color: isActive ? '#2C3E50' : '#555',
+                          fontWeight: isActive ? 600 : 400,
+                          fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
+                        }}
+                      >
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Score input */}
+            <input
+              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
+              placeholder={`Paste a name, URL, or description — e.g. "Borgo Santo Pietro" or https://…`}
               value={scoreInput}
               onChange={(e) => setScoreInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleScore()}
             />
-            <div className="flex gap-2">
-              <CategorySelect value={category} onChange={setCategory} />
-              <button
-                className="flex-1 sm:flex-initial px-4 py-1.5 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
-                onClick={handleScore}
-                disabled={searching || !scoreInput.trim()}
-              >
-                {searching ? (
-                  <span className="flex items-center justify-center gap-1.5">
-                    <span className="inline-block animate-spin">⟳</span> Scoring…
-                  </span>
-                ) : (
-                  "Score it"
-                )}
-              </button>
-            </div>
+            <button
+              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !scoreInput.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !scoreInput.trim() ? 0.5 : 1 }}
+              onClick={handleScore}
+              disabled={searching || !scoreInput.trim()}
+            >
+              {searching ? '…' : 'Score it'}
+            </button>
           </div>
         )}
 
