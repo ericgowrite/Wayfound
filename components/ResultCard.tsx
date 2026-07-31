@@ -1002,7 +1002,7 @@ export default function ResultCard({
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-8 py-6">
+            <div className={`flex-1 overflow-y-auto px-8 py-6 ${flipClass}`}>
               {!deepDiveMode ? renderExpandedCardMode(true) : renderDeepDiveMode()}
             </div>
           </div>

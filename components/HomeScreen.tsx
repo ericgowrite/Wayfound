@@ -72,9 +72,10 @@ interface Props {
   workspaces: TripWorkspace[];
   onWorkspaceCreated: (workspace: TripWorkspace, autoSearch: AutoSearch) => void;
   onSelectWorkspace: (id: string) => void;
+  onSelectSearch?: (workspaceId: string, searchId: string) => void;
 }
 
-export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, onSelectWorkspace }: Props) {
+export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, onSelectWorkspace, onSelectSearch }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>("accommodation");
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
   const [destination, setDestination] = useState("");
@@ -85,8 +86,13 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
   const personaInfo = defaultProfile ? TYPE_INFO[defaultProfile.enneagramType] : null;
   const activeTrip = workspaces[0] ?? null;
 
-  // Collect all saved options across workspaces for the saved panel
-  const allSaved = workspaces.flatMap((w) => w.savedOptions).slice(0, 3);
+  // Collect all saved options across workspaces for the saved panel, with workspace/search context
+  const allSaved = workspaces.flatMap((w) =>
+    w.savedOptions.map((opt) => {
+      const search = w.searches.find((s) => s.scoredResults.some((r) => r.id === opt.id));
+      return { ...opt, workspaceId: w.id, searchId: search?.id };
+    })
+  ).slice(0, 3);
 
   async function handleSearch() {
     if (!destination.trim() || submitting) return;
@@ -273,13 +279,20 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
             </p>
             <div className="flex gap-2 flex-wrap">
               {allSaved.map((item) => (
-                <div
+                <button
                   key={item.id}
-                  className="border border-[#E8E8E8] rounded-lg bg-white flex items-center justify-center px-3"
-                  style={{ height: 52, minWidth: 90 }}
+                  className="border border-[#E8E8E8] rounded-lg bg-white flex items-center justify-center px-3 transition-colors hover:border-[#C4956A]"
+                  style={{ height: 52, minWidth: 90, cursor: "pointer" }}
+                  onClick={() => {
+                    if (item.searchId && onSelectSearch) {
+                      onSelectSearch(item.workspaceId, item.searchId);
+                    } else {
+                      onSelectWorkspace(item.workspaceId);
+                    }
+                  }}
                 >
                   <span className="text-xs text-[#888888] truncate">{item.name}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -291,9 +304,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
             className="font-medium text-[#2C3E50] mb-4 text-center"
             style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 20 }}
           >
-            {activeTrip?.destination
-              ? `Still thinking about ${activeTrip.destination}?`
-              : "No trip yet — where to next?"}
+            Start a new search
           </p>
 
           <div className="flex gap-2" style={{ maxWidth: 400, margin: "0 auto 16px" }}>

@@ -110,6 +110,14 @@ export default function Home() {
     ? [defaultProfile]
     : [];
 
+  // Fall back to defaultProfile if the workspace's traveler IDs don't resolve
+  // (e.g. created before profile existed, or profile was deleted)
+  const effectiveTravelers = travelerProfiles.length > 0
+    ? travelerProfiles
+    : defaultProfile
+    ? [defaultProfile]
+    : [];
+
   async function createWorkspace() {
     if (!newName.trim() || !newDest.trim()) return;
     setCreatingWorkspace(true);
@@ -567,14 +575,14 @@ export default function Home() {
           )}
         </div>
         <div className="flex-1 overflow-hidden">
-        {activeWorkspace && travelerProfiles.length > 0 ? (
+        {activeWorkspace && effectiveTravelers.length > 0 ? (
           <WorkspaceView
             key={activeWorkspace.id}
             workspace={activeWorkspace}
-            travelers={travelerProfiles}
+            travelers={effectiveTravelers}
             onChange={handleWorkspaceChange}
             onProfileUpdate={handleProfileUpdate}
-            onOpenProfile={travelerProfiles[0] ? () => setEditingProfile(travelerProfiles[0]) : undefined}
+            onOpenProfile={effectiveTravelers[0] ? () => setEditingProfile(effectiveTravelers[0]) : undefined}
             activeSearchId={activeSearchId}
             onSearchChange={(id) => { setActiveSearchId(id); setPendingAutoSearch(null); }}
             autoSearch={pendingAutoSearch?.workspaceId === activeWorkspace.id ? pendingAutoSearch : undefined}
@@ -589,6 +597,10 @@ export default function Home() {
               setPendingAutoSearch(autoSearch);
             }}
             onSelectWorkspace={(id) => setActiveWorkspaceId(id)}
+            onSelectSearch={(workspaceId, searchId) => {
+              setActiveWorkspaceId(workspaceId);
+              setActiveSearchId(searchId);
+            }}
           />
         )}
         </div>

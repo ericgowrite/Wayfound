@@ -103,6 +103,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   // true while localStorage not yet read (avoids SSR mismatch); flips to false post-hydration if not dismissed
   const [onboardingPromptDismissed, setOnboardingPromptDismissed] = useState(true);
+  const [showCategoryPop, setShowCategoryPop] = useState(false);
+  const categoryPopRef = useRef<HTMLDivElement>(null);
 
   // Auto-start workspace tour on first visit — 600ms delay so the DOM is painted
   useEffect(() => {
@@ -110,6 +112,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     const t = setTimeout(() => setShowTour(true), 600);
     return () => clearTimeout(t);
   }, [tourDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close category popover on outside click
+  useEffect(() => {
+    if (!showCategoryPop) return;
+    function handleOutside(e: MouseEvent) {
+      if (categoryPopRef.current && !categoryPopRef.current.contains(e.target as Node)) {
+        setShowCategoryPop(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showCategoryPop]);
 
   // Fire the first search when the workspace was just created from the intent screen.
   // The ref guard ensures it fires at most once per WorkspaceView mount.
@@ -658,77 +672,73 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         </div>
       </div>
 
-      {/* Search / Score bar */}
-      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-4 space-y-3">
-        {/* Mode toggle */}
-        <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 w-fit">
-          <button
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
-              mode === "search"
-                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
-                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-            }`}
-            onClick={() => setMode("search")}
-          >
-            🔍 Search
-          </button>
-          <button
-            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
-              mode === "score"
-                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
-                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-            }`}
-            onClick={() => setMode("score")}
-          >
-            ✦ Score
-            <span
-              className="relative inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default group/info"
-              onClick={(e) => e.stopPropagation()}
-              onMouseEnter={(e) => e.stopPropagation()}
-            >
-              i
-              <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
-                Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
-              </span>
-            </span>
-          </button>
-        </div>
-
+      {/* Search bar — category pill on left, input in center, Search button on right */}
+      <div className="bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] px-4 sm:px-6 py-3 space-y-2">
         {mode === "search" ? (
-          <div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input
-                id="tour-search-input"
-                style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '12px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
-                placeholder={`Search ${workspace.destination || "any destination"}…`}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Category pill dropdown */}
+            <div id="tour-category" ref={categoryPopRef} style={{ position: 'relative', flexShrink: 0 }}>
               <button
-                style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '12px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !query.trim() ? 0.5 : 1 }}
-                onClick={() => handleSearch()}
-                disabled={searching || !query.trim()}
+                onClick={() => setShowCategoryPop((v) => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  border: '1px solid #E8E8E8', borderRadius: 999,
+                  padding: '10px 14px', fontSize: 13, fontWeight: 600,
+                  color: '#2C3E50', background: '#FAF8F5', cursor: 'pointer',
+                  fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
+                  whiteSpace: 'nowrap',
+                }}
               >
-                {searching ? '…' : 'Search'}
+                {CATEGORY_META[category]?.label ?? "Category"}
+                <span style={{ fontSize: 9, color: '#888888', marginLeft: 2 }}>▾</span>
               </button>
+              {showCategoryPop && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
+                  background: '#fff', border: '1px solid #E8E8E8', borderRadius: 10,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)', padding: '4px', minWidth: 140,
+                }}>
+                  {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map((cat) => {
+                    const meta = CATEGORY_META[cat];
+                    const isActive = category === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => { setCategory(cat); setShowCategoryPop(false); }}
+                        style={{
+                          display: 'block', width: '100%', textAlign: 'left',
+                          padding: '8px 12px', fontSize: 13, borderRadius: 7,
+                          border: 'none', cursor: 'pointer',
+                          background: isActive ? '#FAF8F5' : 'transparent',
+                          color: isActive ? '#2C3E50' : '#555',
+                          fontWeight: isActive ? 600 : 400,
+                          fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
+                        }}
+                      >
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            {/* Category chips */}
-            <div id="tour-category" style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-              {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map(cat => {
-                const meta = CATEGORY_META[cat];
-                const isActive = category === cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setCategory(cat)}
-                    style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#888888', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400 }}
-                  >
-                    {meta.label}
-                  </button>
-                );
-              })}
-            </div>
+
+            {/* Search input */}
+            <input
+              id="tour-search-input"
+              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
+              placeholder={`Search ${workspace.destination || "any destination"}…`}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+            <button
+              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !query.trim() ? 0.5 : 1 }}
+              onClick={() => handleSearch()}
+              disabled={searching || !query.trim()}
+            >
+              {searching ? '…' : 'Search'}
+            </button>
           </div>
         ) : (
           <div className="space-y-2">
@@ -774,38 +784,75 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         )}
       </div>
 
-      {/* Tabs */}
-      <div id="tour-tabs" className="flex border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-4 sm:px-6">
-        <button
-          className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "search"
-              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
-          }`}
-          onClick={() => setActiveTab("search")}
-        >
-          Results
-        </button>
-        <button
-          className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "saved"
-              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
-          }`}
-          onClick={() => setActiveTab("saved")}
-        >
-          Saved{workspace.savedOptions.length > 0 ? ` (${workspace.savedOptions.length})` : ""}
-        </button>
-        <button
-          className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "history"
-              ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
-              : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
-          }`}
-          onClick={() => setActiveTab("history")}
-        >
-          History
-        </button>
+      {/* Tabs + mode toggle — same row */}
+      <div id="tour-tabs" className="flex items-center justify-between border-b border-[#E0E8ED] dark:border-[#2a3f52] bg-white dark:bg-[#1e2d3d] px-4 sm:px-6">
+        {/* Left: result tabs */}
+        <div className="flex">
+          <button
+            className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "search"
+                ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+                : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
+            }`}
+            onClick={() => setActiveTab("search")}
+          >
+            Results
+          </button>
+          <button
+            className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "saved"
+                ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+                : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
+            }`}
+            onClick={() => setActiveTab("saved")}
+          >
+            Saved{workspace.savedOptions.length > 0 ? ` (${workspace.savedOptions.length})` : ""}
+          </button>
+          <button
+            className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "history"
+                ? "border-[#5B8BA0] text-[#2C3E50] dark:text-white"
+                : "border-transparent text-[#3D5A6E] dark:text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-[#B8D4E3]"
+            }`}
+            onClick={() => setActiveTab("history")}
+          >
+            History
+          </button>
+        </div>
+
+        {/* Right: Search / Score mode toggle */}
+        <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 my-1.5 flex-shrink-0">
+          <button
+            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+              mode === "search"
+                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+            }`}
+            onClick={() => setMode("search")}
+          >
+            🔍 Search
+          </button>
+          <button
+            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
+              mode === "score"
+                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+            }`}
+            onClick={() => setMode("score")}
+          >
+            ✦ Score
+            <span
+              className="relative inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default group/info"
+              onClick={(e) => e.stopPropagation()}
+              onMouseEnter={(e) => e.stopPropagation()}
+            >
+              i
+              <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
+                Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
