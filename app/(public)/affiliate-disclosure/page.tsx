@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 
-export const metadata = { title: "How We Make Money — ViyaWay" };
+export const metadata = { title: "How We Make Money — viyaway" };
 
 export default function AffiliatePage() {
   return (
@@ -11,7 +11,7 @@ export default function AffiliatePage() {
         {
           heading: "The Short Version",
           body: (
-            <p>ViyaWay is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
+            <p>viyaway is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
           ),
         },
         {

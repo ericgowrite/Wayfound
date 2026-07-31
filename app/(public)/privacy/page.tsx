@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 
-export const metadata = { title: "Privacy Policy — ViyaWay" };
+export const metadata = { title: "Privacy Policy — viyaway" };
 
 export default function PrivacyPage() {
   return (
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           heading: "Overview",
           body: (
             <p>
-              ViyaWay is a travel discovery application that helps users find travel experiences matched to their personality and preferences.
+              viyaway is a travel discovery application that helps users find travel experiences matched to their personality and preferences.
               This Privacy Policy explains how we collect, use, and protect your information.
             </p>
           ),
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
         {
           heading: "Children's Privacy",
           body: (
-            <p>ViyaWay is not intended for users under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
+            <p>viyaway is not intended for users under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
           ),
         },
         {
