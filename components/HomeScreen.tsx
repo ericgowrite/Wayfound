@@ -77,11 +77,9 @@ interface Props {
 export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, onSelectWorkspace }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>("accommodation");
   const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [destination, setDestination] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [chipsExpanded, setChipsExpanded] = useState(false);
 
   const defaultProfile = profiles.find((p) => p.isDefault) ?? profiles[0] ?? null;
   const personaInfo = defaultProfile ? TYPE_INFO[defaultProfile.enneagramType] : null;
@@ -126,108 +124,42 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
 
   function openSearch(intent?: string) {
     if (intent) setSelectedIntent(intent);
-    setSearchOpen(true);
   }
 
   // ── New user state ──────────────────────────────────────────────────────
   if (workspaces.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
+      <div className="flex flex-col items-center justify-center h-full px-5 py-10 text-center" style={{ background: "var(--color-canvas)" }}>
         <div style={{ width: "100%", maxWidth: 480 }}>
 
           {/* Persona eyebrow */}
           {personaInfo && (
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#C4956A] mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#C4956A] mb-3" style={{ letterSpacing: "0.08em" }}>
               {personaInfo.name}
             </p>
           )}
 
-          {/* Serif quote */}
+          {/* Serif identity statement */}
           <p
             className="font-medium text-[#2C3E50] leading-snug mb-2"
-            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 30 }}
+            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 28, lineHeight: 1.35 }}
           >
             {personaInfo?.descriptor ?? "Travel that fits who you are."}
           </p>
 
           {/* Subtitle */}
-          <p className="text-sm text-[#888888] mb-7">Going somewhere?</p>
+          <p className="text-sm text-[#888888] mb-6">Going somewhere?</p>
 
-          {/* Category picker */}
-          <div className="flex items-center justify-center gap-6 mb-7">
-            {CATEGORIES.map(({ value, label, Icon }) => (
-              <button
-                key={value}
-                className="flex flex-col items-center gap-2"
-                onClick={() => setSelectedCategory(value)}
-              >
-                <div
-                  className="flex items-center justify-center rounded-full text-[#2C3E50] transition-all"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    background: selectedCategory === value ? "#2C3E50" : "#F5F4F0",
-                    border: "1px solid #E8E8E8",
-                    color: selectedCategory === value ? "#fff" : "#2C3E50",
-                  }}
-                >
-                  <Icon />
-                </div>
-                <span className="text-xs text-[#888888]">{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Search input — shown after CTA click */}
-          {searchOpen ? (
-            <div className="mb-6">
-              <div className="flex gap-2">
-                <input
-                  autoFocus
-                  className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50]"
-                  placeholder="Where to?"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  disabled={submitting}
-                />
-                <button
-                  className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full px-5 disabled:opacity-50 transition-opacity hover:opacity-90"
-                  onClick={handleSearch}
-                  disabled={submitting || !destination.trim()}
-                >
-                  {submitting ? "…" : "Go"}
-                </button>
-              </div>
-              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-            </div>
-          ) : (
-            <button
-              className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full w-full transition-opacity hover:opacity-90"
-              style={{ maxWidth: 320, paddingTop: 15, paddingBottom: 15 }}
-              onClick={() => openSearch()}
-            >
-              Let&apos;s search →
-            </button>
-          )}
-
-          {/* "not sure?" divider */}
-          <div className="flex items-center gap-3 mt-8" style={{ maxWidth: 420, margin: "32px auto 0" }}>
-            <div className="flex-1 h-px bg-[#E8E8E8]" />
-            <span className="text-xs uppercase tracking-wider text-[#aaaaaa]" style={{ letterSpacing: "0.06em" }}>not sure?</span>
-            <div className="flex-1 h-px bg-[#E8E8E8]" />
-          </div>
-
-          {/* Vibe chips */}
-          <div className="flex flex-wrap justify-center gap-2.5 mt-4" style={{ maxWidth: 420, margin: "16px auto 0" }}>
-            {VIBE_CHIPS_PRIMARY.map((chip) => (
+          {/* Intent chips — all visible */}
+          <div className="flex flex-wrap justify-center gap-2" style={{ maxWidth: 440, margin: "0 auto 24px" }}>
+            {[...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].map((chip) => (
               <button
                 key={chip.label}
-                className="border rounded-full text-sm text-[#2C3E50] transition-all hover:bg-[#F5F4F0]"
+                className="border rounded-full text-sm transition-all"
                 style={{
-                  borderColor: selectedIntent === chip.intent && VIBE_CHIPS_PRIMARY.some(c => c.intent === chip.intent) ? "#2C3E50" : "#2C3E50",
-                  padding: "9px 16px",
-                  background: selectedIntent === chip.intent ? "#2C3E50" : "transparent",
+                  padding: "8px 15px",
+                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#2C3E50"}`,
+                  background: selectedIntent === chip.intent ? "#C4956A" : "transparent",
                   color: selectedIntent === chip.intent ? "#fff" : "#2C3E50",
                 }}
                 onClick={() => openSearch(chip.intent)}
@@ -235,57 +167,96 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                 {chip.label}
               </button>
             ))}
+          </div>
 
-            {chipsExpanded && VIBE_CHIPS_SECONDARY.map((chip) => (
+          {/* Category picker */}
+          <div className="flex items-center justify-center gap-6 mb-6">
+            {CATEGORIES.map(({ value, label, Icon }) => (
               <button
-                key={chip.label}
-                className="border border-[#2C3E50] rounded-full text-sm text-[#2C3E50] transition-all hover:bg-[#F5F4F0]"
-                style={{ padding: "9px 16px" }}
-                onClick={() => openSearch(chip.intent)}
+                key={value}
+                className="flex flex-col items-center gap-2"
+                onClick={() => setSelectedCategory(value)}
               >
-                {chip.label}
+                <div
+                  className="flex items-center justify-center rounded-full transition-all"
+                  style={{
+                    width: 44,
+                    height: 44,
+                    background: selectedCategory === value ? "#2C3E50" : "#FAF8F5",
+                    border: `1px solid ${selectedCategory === value ? "#2C3E50" : "#E8E8E8"}`,
+                    color: selectedCategory === value ? "#fff" : "#2C3E50",
+                  }}
+                >
+                  <Icon />
+                </div>
+                <span className="text-xs" style={{ color: selectedCategory === value ? "#2C3E50" : "#888888" }}>{label}</span>
               </button>
             ))}
           </div>
 
-          {/* Show more/less toggle */}
-          <button
-            className="text-xs text-[#888888] underline mt-3 block mx-auto"
-            onClick={() => setChipsExpanded((v) => !v)}
-          >
-            {chipsExpanded ? "Show fewer" : "Show more"}
-          </button>
+          {/* Search — always visible */}
+          <div style={{ maxWidth: 400, margin: "0 auto" }}>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] bg-white"
+                placeholder="Where to?"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                disabled={submitting}
+                style={{ background: "#fff" }}
+              />
+              <button
+                className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full px-5 disabled:opacity-40 transition-opacity hover:opacity-90"
+                onClick={handleSearch}
+                disabled={submitting || !destination.trim()}
+              >
+                {submitting ? "…" : "Go"}
+              </button>
+            </div>
+            {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+          </div>
         </div>
       </div>
     );
   }
 
   // ── Returning user state ────────────────────────────────────────────────
+  const hasSaves = activeTrip && activeTrip.savedOptions.length > 0;
+
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 py-12">
-      <div style={{ width: "100%", maxWidth: 560 }}>
+    <div className="flex flex-col items-center justify-center h-full px-5 py-10" style={{ background: "var(--color-canvas)" }}>
+      <div style={{ width: "100%", maxWidth: 480 }}>
 
         {/* Active trip card */}
         {activeTrip && (
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3">
+          <div className="mb-6">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3" style={{ letterSpacing: "0.08em" }}>
               Active trip
             </p>
-            <div className="border border-[#E8E8E8] rounded-lg p-4">
+            <div
+              className="rounded-xl p-4 bg-white"
+              style={{
+                border: hasSaves ? "1px solid #C4956A" : "1px solid #E8E8E8",
+                borderLeft: hasSaves ? "3px solid #C4956A" : "1px solid #E8E8E8",
+              }}
+            >
               <p
                 className="font-medium text-[#2C3E50]"
                 style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 16 }}
               >
                 {activeTrip.destination || activeTrip.name}
-                {activeTrip.destination && activeTrip.name !== activeTrip.destination
-                  ? " · Planning"
-                  : ""}
               </p>
-              <p className="text-sm text-[#888888] mt-1">
-                {activeTrip.savedOptions.length} saved
-              </p>
+              {hasSaves && (
+                <p className="text-xs text-[#C4956A] mt-1">
+                  {activeTrip.savedOptions.length} saved · ready to review
+                </p>
+              )}
+              {!hasSaves && (
+                <p className="text-sm text-[#888888] mt-1">Just started</p>
+              )}
               <button
-                className="text-sm text-[#2C3E50] underline mt-2"
+                className="text-sm font-medium text-[#2C3E50] underline mt-2 transition-opacity hover:opacity-70"
                 onClick={() => onSelectWorkspace(activeTrip.id)}
               >
                 Continue →
@@ -294,18 +265,18 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           </div>
         )}
 
-        {/* Saved thumbnails */}
+        {/* Saved items preview */}
         {allSaved.length > 0 && (
           <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3" style={{ letterSpacing: "0.08em" }}>
               Saved
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {allSaved.map((item) => (
                 <div
                   key={item.id}
-                  className="border border-[#E8E8E8] rounded flex items-center justify-center px-3"
-                  style={{ width: 100, height: 60 }}
+                  className="border border-[#E8E8E8] rounded-lg bg-white flex items-center justify-center px-3"
+                  style={{ height: 52, minWidth: 90 }}
                 >
                   <span className="text-xs text-[#888888] truncate">{item.name}</span>
                 </div>
@@ -314,10 +285,10 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           </div>
         )}
 
-        {/* Divider + new search prompt */}
-        <div className="border-t border-[#E8E8E8] pt-6 text-center">
+        {/* New search prompt */}
+        <div className="pt-5 border-t border-[#E8E8E8]">
           <p
-            className="font-medium text-[#2C3E50] mb-4"
+            className="font-medium text-[#2C3E50] mb-4 text-center"
             style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 20 }}
           >
             {activeTrip?.destination
@@ -325,37 +296,43 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
               : "No trip yet — where to next?"}
           </p>
 
-          {searchOpen ? (
-            <div>
-              <div className="flex gap-2" style={{ maxWidth: 400, margin: "0 auto" }}>
-                <input
-                  autoFocus
-                  className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50]"
-                  placeholder="Where to?"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  disabled={submitting}
-                />
-                <button
-                  className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full px-5 disabled:opacity-50 transition-opacity hover:opacity-90"
-                  onClick={handleSearch}
-                  disabled={submitting || !destination.trim()}
-                >
-                  {submitting ? "…" : "Go"}
-                </button>
-              </div>
-              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-            </div>
-          ) : (
+          <div className="flex gap-2" style={{ maxWidth: 400, margin: "0 auto 16px" }}>
+            <input
+              className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] bg-white"
+              placeholder="Where to?"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              disabled={submitting}
+            />
             <button
-              className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full mx-auto block transition-opacity hover:opacity-90"
-              style={{ maxWidth: 320, width: "100%", paddingTop: 14, paddingBottom: 14 }}
-              onClick={() => setSearchOpen(true)}
+              className="bg-[#2C3E50] text-white text-sm font-semibold rounded-full px-5 disabled:opacity-40 transition-opacity hover:opacity-90"
+              onClick={handleSearch}
+              disabled={submitting || !destination.trim()}
             >
-              Let&apos;s search →
+              {submitting ? "…" : "Go"}
             </button>
-          )}
+          </div>
+          {error && <p className="text-red-500 text-xs mt-1 text-center">{error}</p>}
+
+          {/* Intent chips */}
+          <div className="flex flex-wrap justify-center gap-2 mt-2">
+            {[...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].map((chip) => (
+              <button
+                key={chip.label}
+                className="border rounded-full text-sm transition-all"
+                style={{
+                  padding: "7px 14px",
+                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#E8E8E8"}`,
+                  background: selectedIntent === chip.intent ? "#C4956A" : "#fff",
+                  color: selectedIntent === chip.intent ? "#fff" : "#888888",
+                }}
+                onClick={() => openSearch(chip.intent)}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

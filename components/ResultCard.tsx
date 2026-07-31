@@ -33,7 +33,6 @@ interface Props {
   onExpandedChange?: (expanded: boolean) => void;
 }
 
-// SVG category icon for the 26px badge and the 12px location row
 function CategoryIcon({ category, size = 14 }: { category?: SearchCategory; size?: number }) {
   const p = {
     width: size,
@@ -92,8 +91,23 @@ function CategoryIcon({ category, size = 14 }: { category?: SearchCategory; size
   }
 }
 
-// Avatar background colors — navy and amber alternating per design
+function ExpandIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+    </svg>
+  );
+}
+
 const AVATAR_BG = ["#2C3E50", "#C4956A", "#2C3E50", "#C4956A", "#2C3E50"];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  accommodation: "Accommodation",
+  tour: "Tour",
+  restaurant: "Restaurant",
+  activity: "Activity",
+  attraction: "Attraction",
+};
 
 export default function ResultCard({
   option,
@@ -128,18 +142,15 @@ export default function ResultCard({
   const [deepDiveMode, setDeepDiveMode] = useState(false);
   const [loadingDive, setLoadingDive] = useState(false);
   const [deepDiveError, setDeepDiveError] = useState(false);
-  // "About this property" — collapsed by default in new design
+  const [flipClass, setFlipClass] = useState("");
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  // "Watch out for" in expanded card — collapsed by default
   const [tradeoffsExpanded, setTradeoffsExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Deep dive progressive disclosure states (used in renderDeepDiveMode)
   const [showMoreWhyItFits, setShowMoreWhyItFits] = useState(false);
   const [watchOutForExpanded, setWatchOutForExpanded] = useState(false);
   const [standoutExpanded, setStandoutExpanded] = useState(false);
 
-  // Chat state
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(option.chatHistory ?? []);
   const [chatInput, setChatInput] = useState("");
@@ -199,7 +210,6 @@ export default function ResultCard({
     }
   }, [chatInput, chatLoading, chatMessages, option, workspace.id, searchQuery, onChatUpdate]);
 
-  // URL validation + automatic link recovery
   type UrlStatus = "idle" | "checking" | "valid" | "recovering" | "recovered" | "not_found";
   const [urlStatus, setUrlStatus] = useState<UrlStatus>("idle");
   const [resolvedUrl, setResolvedUrl] = useState<string>(
@@ -264,9 +274,7 @@ export default function ResultCard({
     onFeedbackSubmit({ metExpectations, axisFlags: Array.from(flaggedAxes), note: feedbackNote.trim(), submittedAt: new Date().toISOString() });
   }
 
-  async function handleDeepDive() {
-    setLoadingDive(true);
-    setDeepDiveError(false);
+  async function fetchDeepDiveData(): Promise<DeepDiveResult | null> {
     try {
       const res = await fetchWithAuth("/api/deepdive", {
         method: "POST",
@@ -277,18 +285,42 @@ export default function ResultCard({
       if (data.deepDive) {
         setDeepDive(data.deepDive);
         onDeepDive();
-        setTimeout(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-      } else {
-        setDeepDiveError(true);
+        return data.deepDive;
       }
+      setDeepDiveError(true);
+      return null;
     } catch {
       setDeepDiveError(true);
-    } finally {
-      setLoadingDive(false);
+      return null;
     }
   }
 
-  // Judgment line: use field if present, else derive from first sentence of fitExplanation
+  function animateFlip(onMidpoint: () => void) {
+    setFlipClass("card-flip-out");
+    setTimeout(() => {
+      onMidpoint();
+      setFlipClass("card-flip-in");
+      setTimeout(() => setFlipClass(""), 210);
+    }, 200);
+  }
+
+  async function handleEnterDeepDive() {
+    if (loadingDive) return;
+    let data = deepDive;
+    if (!data) {
+      setLoadingDive(true);
+      data = await fetchDeepDiveData();
+      setLoadingDive(false);
+      if (!data) return;
+      setTimeout(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    }
+    animateFlip(() => setDeepDiveMode(true));
+  }
+
+  function handleExitDeepDive() {
+    animateFlip(() => setDeepDiveMode(false));
+  }
+
   const judgmentLine = option.judgmentLine ?? (() => {
     const first = option.fitExplanation.split(/\.\s+/)[0];
     return first.length > 120 ? first.slice(0, 117) + "…" : first;
@@ -308,6 +340,9 @@ export default function ResultCard({
       default:              return "About this place";
     }
   })();
+
+  const categoryDisplay = CATEGORY_LABELS[category ?? ""] ?? "";
+  const locationRow = [workspace.destination, categoryDisplay].filter(Boolean).join(" · ");
 
   // ── Source link block ─────────────────────────────────────────────────────────
   function renderSourceBlock() {
@@ -354,40 +389,17 @@ export default function ResultCard({
 
     return (
       <div className="space-y-5">
-        {/* Amber border paragraph */}
+        {/* THE VERDICT */}
         {option.fitExplanation && (
-          <div className="text-sm leading-[1.6] text-[#1A1A1A]" style={{ borderLeft: "3px solid #C4956A", paddingLeft: "14px" }}>
-            {option.fitExplanation}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}>
+              The Verdict
+            </p>
+            <div className="text-sm leading-[1.65] text-[#1A1A1A]" style={{ borderLeft: "3px solid #C4956A", paddingLeft: "14px" }}>
+              {option.fitExplanation}
+            </div>
           </div>
         )}
-
-        {/* Why this fits you */}
-        <div>
-          <p className="text-sm font-semibold text-[#2C3E50] mb-2">Why this fits you</p>
-          {deepDive && deepDive.whyItFits.length > 0 ? (
-            <div className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.7 }}>
-              {deepDive.whyItFits.map((item, i) => (
-                <div key={i}>· {item}</div>
-              ))}
-            </div>
-          ) : (
-            <div>
-              {deepDiveError && (
-                <p className="text-xs text-[#B5654A] mb-2">Research failed — try again</p>
-              )}
-              <button
-                className="w-full bg-[#2C3E50] text-white text-sm font-medium rounded-full transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ paddingTop: "13px", paddingBottom: "13px" }}
-                onClick={handleDeepDive}
-                disabled={loadingDive}
-              >
-                {loadingDive
-                  ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
-                  : seeWhyCopy}
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Traveler fit bars */}
         {travelers.length > 0 && (
@@ -435,6 +447,23 @@ export default function ResultCard({
             </div>
           </div>
         )}
+
+        {/* See why CTA — triggers Deep Dive with card flip */}
+        <div>
+          {deepDiveError && (
+            <p className="text-xs text-[#B5654A] mb-2">Research failed — try again</p>
+          )}
+          <button
+            className="w-full bg-[#2C3E50] text-white text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ paddingTop: "13px", paddingBottom: "13px", borderRadius: 9999, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}
+            onClick={handleEnterDeepDive}
+            disabled={loadingDive}
+          >
+            {loadingDive
+              ? <><span className="animate-spin inline-block">⟳</span><span>Researching…</span></>
+              : seeWhyCopy}
+          </button>
+        </div>
 
         {/* Ask ViyaWay text link */}
         <div className="text-center">
@@ -520,15 +549,32 @@ export default function ResultCard({
 
         <hr className="border-t border-[#E8E8E8]" />
 
-        {/* Watch out for — always expanded */}
+        {/* Watch out for — first item visible, rest collapsible */}
         {watchOutItems.length > 0 && (
           <div>
             <p className="text-sm font-semibold mb-1.5" style={{ color: "#8a4530" }}>Watch out for</p>
             <div className="space-y-1.5">
-              {watchOutItems.map((t, i) => (
-                <div key={i} className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>▲ {t}</div>
+              <div className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>▲ {watchOutItems[0]}</div>
+              {tradeoffsExpanded && watchOutItems.slice(1).map((t, i) => (
+                <div key={i + 1} className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>▲ {t}</div>
               ))}
             </div>
+            {watchOutItems.length > 1 && !tradeoffsExpanded && (
+              <button
+                className="mt-1.5 text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+                onClick={() => setTradeoffsExpanded(true)}
+              >
+                {watchOutItems.length - 1} more thing{watchOutItems.length - 1 === 1 ? "" : "s"} to know ↓
+              </button>
+            )}
+            {tradeoffsExpanded && watchOutItems.length > 1 && (
+              <button
+                className="mt-1.5 text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+                onClick={() => setTradeoffsExpanded(false)}
+              >
+                Show less ↑
+              </button>
+            )}
           </div>
         )}
 
@@ -542,11 +588,21 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* About this property — always expanded */}
+        {/* About this property — collapsible */}
         {option.description && (
           <div>
-            <p className="text-sm font-semibold text-[#2C3E50] mb-1.5">{aboutLabel}</p>
-            <p className="text-sm text-[#1A1A1A]" style={{ lineHeight: 1.6 }}>{option.description}</p>
+            <button
+              className="w-full text-left flex items-center justify-between gap-2"
+              onClick={() => setAboutExpanded((v) => !v)}
+            >
+              <p className="text-sm font-semibold text-[#2C3E50]">{aboutLabel}</p>
+              <span className="text-xs text-[#888888] flex-shrink-0">
+                {aboutExpanded ? "▲" : "Property details ↓"}
+              </span>
+            </button>
+            {aboutExpanded && (
+              <p className="text-sm text-[#1A1A1A] mt-2" style={{ lineHeight: 1.6 }}>{option.description}</p>
+            )}
           </div>
         )}
 
@@ -624,7 +680,7 @@ export default function ResultCard({
           </div>
         ) : null}
 
-        {/* Status bar — 4 equal columns */}
+        {/* Action row */}
         <div className="flex border-t border-[#E8E8E8] pt-4">
           <button
             className={`flex-1 text-center text-sm transition-colors ${
@@ -653,11 +709,11 @@ export default function ResultCard({
     );
   }
 
-  // ── Deep dive mode (visual redesign deferred to Step 5) ───────────────────────
+  // ── Deep Dive mode ────────────────────────────────────────────────────────────
   function renderDeepDiveMode() {
     return (
       <div className="space-y-4">
-        <button className="text-xs text-[#2C3E50] hover:underline" onClick={() => setDeepDiveMode(false)}>
+        <button className="text-xs text-[#2C3E50] hover:underline transition-opacity hover:opacity-70" onClick={handleExitDeepDive}>
           ← Back to results
         </button>
 
@@ -689,7 +745,7 @@ export default function ResultCard({
               {deepDive!.whyItFits.length > 2 && (
                 <button className="mt-2 text-xs text-[#888888] hover:text-[#2C3E50] underline"
                   onClick={() => setShowMoreWhyItFits((v) => !v)}>
-                  {showMoreWhyItFits ? "Show less" : `Show ${deepDive!.whyItFits.length - 2} more →`}
+                  {showMoreWhyItFits ? "Show less" : `Show ${deepDive!.whyItFits.length - 2} more reasons →`}
                 </button>
               )}
             </div>
@@ -743,6 +799,20 @@ export default function ResultCard({
               )}
             </div>
           )}
+
+          {option.description && (
+            <div className="px-4 py-4 border-t border-[#E8E8E8]">
+              <button className="w-full text-left" onClick={() => setAboutExpanded((v) => !v)}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-[#2C3E50]">{aboutLabel}</p>
+                  <span className="text-[#888888] text-xs">{aboutExpanded ? "▲" : "▼"}</span>
+                </div>
+              </button>
+              {aboutExpanded && (
+                <p className="text-sm text-[#1A1A1A] mt-2" style={{ lineHeight: 1.6 }}>{option.description}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
@@ -754,18 +824,18 @@ export default function ResultCard({
           />
         </div>
 
-        <button className="text-xs text-[#888888] underline hover:text-[#2C3E50] transition-colors" onClick={() => setDeepDiveMode(false)}>
+        <button className="text-xs text-[#888888] underline hover:text-[#2C3E50] transition-colors" onClick={handleExitDeepDive}>
           ← Back to results
         </button>
       </div>
     );
   }
 
-  // ── Collapsed card header — always visible in default/detail variants ─────────
+  // ── Collapsed card header ─────────────────────────────────────────────────────
   function renderCollapsedHeader(clickable: boolean) {
     return (
       <div
-        className={`px-5 sm:px-8 py-5 sm:py-7 select-none ${clickable ? "cursor-pointer" : ""}`}
+        style={{ display: "flex", gap: 14, padding: "16px 20px", borderBottom: isDetail || expanded ? "1px solid #E8E8E8" : "none", cursor: clickable ? "pointer" : "default", userSelect: "none" }}
         onClick={() => {
           if (!clickable) return;
           const next = !expanded;
@@ -774,100 +844,109 @@ export default function ResultCard({
           if (next) logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
         }}
       >
-        {/* Row 1: Property name + category badge */}
-        <div className="flex items-start justify-between gap-3">
-          <a
-            href={resolvedUrl || undefined}
-            target={resolvedUrl ? "_blank" : undefined}
-            rel="noopener noreferrer"
-            className="text-base font-semibold text-[#2C3E50] leading-snug hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!resolvedUrl) e.preventDefault();
-            }}
-          >
-            {option.name}
-          </a>
-          <div className="w-6 h-6 rounded-full bg-[#F5F4F0] border border-[#E8E8E8] flex items-center justify-center flex-shrink-0 mt-0.5">
-            <CategoryIcon category={category} size={14} />
-          </div>
+        {/* Category icon */}
+        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#F5F4F0", border: "1px solid #E8E8E8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#2C3E50", marginTop: 2 }}>
+          <CategoryIcon category={category} size={13} />
         </div>
 
-        {/* Row 2: Location */}
-        {workspace.destination && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <CategoryIcon category={category} size={12} />
-            <span className="text-xs text-[#888888]">{workspace.destination}</span>
-          </div>
-        )}
-
-        {/* Judgment line — primary visual element */}
-        <p className="text-xl font-medium leading-[1.5] text-[#2C3E50] mt-4" style={{ maxWidth: "92%", fontFamily: "var(--font-lora, \"Lora\", \"Georgia\", serif)" }}>
-          {judgmentLine}
-        </p>
-
-        {/* Watch-out flag — collapsed only, not shown when expanded or detail */}
-        {!expanded && !isDetail && option.tradeoffs.length > 0 && (
-          <p className="mt-3 text-sm text-[#8a4530]" onClick={(e) => e.stopPropagation()}>
-            <span className="text-[#B5654A]">▲</span> {option.tradeoffs[0]}
-          </p>
-        )}
-
-        {/* Footer links — collapsed only */}
-        {!expanded && !isDetail && (
-          <div
-            className="flex items-center gap-4" style={{ marginTop: "18px" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="text-sm text-[#888888] underline hover:text-[#2C3E50] transition-colors"
-              onClick={() => {
-                setExpanded(true);
-                onExpandedChange?.(true);
-                logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
-                handleDeepDive();
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Row 1: Property name + Focus Mode expand icon (detail only) */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+            <a
+              href={resolvedUrl || undefined}
+              target={resolvedUrl ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              style={{ fontSize: 16, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, textDecoration: "none", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "underline"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "none"; }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!resolvedUrl) e.preventDefault();
               }}
             >
-              See why →
-            </button>
-            <button
-              className="text-sm text-[#888888] underline hover:text-[#2C3E50] transition-colors"
-              onClick={() => {
-                setExpanded(true);
-                onExpandedChange?.(true);
-                setChatOpen(true);
-                setTimeout(() => chatInputRef.current?.focus(), 100);
-              }}
-            >
-              Have a question? Ask ViyaWay →
-            </button>
+              {option.name}
+            </a>
+            {isDetail && (
+              <button
+                style={{ color: "#888888", background: "none", border: "none", padding: "2px 4px", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
+                onClick={(e) => { e.stopPropagation(); setOverlayOpen(true); }}
+                aria-label="Open focus view"
+                title="Focus view"
+              >
+                <ExpandIcon />
+              </button>
+            )}
           </div>
-        )}
+
+          {/* Row 2: Location · Category */}
+          {locationRow && (
+            <div style={{ fontSize: 12, color: "#888888", marginTop: 3, lineHeight: 1.3 }}>
+              {locationRow}
+            </div>
+          )}
+
+          {/* Row 3: Judgment line — dominant element */}
+          {judgmentLine && (
+            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 18, fontWeight: 400, color: "#2C3E50", marginTop: 8, lineHeight: 1.4 }}>
+              {judgmentLine}
+            </div>
+          )}
+
+          {/* Row 4: First tradeoff signal — collapsed only */}
+          {!expanded && !isDetail && option.tradeoffs.length > 0 && (
+            <p style={{ marginTop: 8, fontSize: 13, color: "#8a4530" }} onClick={(e) => e.stopPropagation()}>
+              <span style={{ color: "#B5654A" }}>▲</span> {option.tradeoffs[0]}
+            </p>
+          )}
+
+          {/* Row 5: Footer links — collapsed only */}
+          {!expanded && !isDetail && (
+            <div style={{ display: "flex", gap: 16, marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
+              <button
+                style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                onClick={() => {
+                  setExpanded(true);
+                  onExpandedChange?.(true);
+                  logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
+                  handleEnterDeepDive();
+                }}
+              >
+                See why →
+              </button>
+              <button
+                style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                onClick={() => {
+                  setExpanded(true);
+                  onExpandedChange?.(true);
+                  setChatOpen(true);
+                  setTimeout(() => chatInputRef.current?.focus(), 100);
+                }}
+              >
+                Ask ViyaWay →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
 
-  // ── List variant (desktop left panel) ────────────────────────────────────────
+  // ── List variant ──────────────────────────────────────────────────────────────
   if (isList) {
     return (
       <div
-        className={`border border-[#E8E8E8] rounded-[4px] bg-white cursor-pointer transition-all ${
-          selected ? "ring-2 ring-[#2C3E50]/20 border-[#2C3E50]/30" : "hover:border-[#2C3E50]/20"
-        }`}
+        style={{ display: "flex", gap: 14, padding: "16px 0", borderBottom: "1px solid #E8E8E8", cursor: "pointer", background: selected ? "#F9F8F6" : "transparent" }}
         onClick={() => onSelect?.()}
       >
-        <div className="px-4 py-4">
-          <div className="flex items-start justify-between gap-2">
-            <span className="text-sm font-semibold text-[#2C3E50] leading-snug">{option.name}</span>
-            <div className="w-5 h-5 rounded-full bg-[#F5F4F0] border border-[#E8E8E8] flex items-center justify-center flex-shrink-0">
-              <CategoryIcon category={category} size={12} />
+        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#F5F4F0", border: "1px solid #E8E8E8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#2C3E50", marginTop: 1 }}>
+          <CategoryIcon category={category} size={13} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</div>
+          {judgmentLine && (
+            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 14, color: "#1A1A1A", marginTop: 3, lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+              {judgmentLine}
             </div>
-          </div>
-          <p className="text-sm text-[#888888] mt-1.5 leading-snug line-clamp-2" style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)' }}>
-            {judgmentLine}
-          </p>
-          {option.status !== "new" && (
-            <span className="inline-block mt-2 text-xs font-medium text-[#888888] capitalize">{option.status}</span>
           )}
         </div>
       </div>
@@ -876,14 +955,12 @@ export default function ResultCard({
 
   // ── Default + detail variants ─────────────────────────────────────────────────
   return (
-    <div ref={cardRef} className="border border-[#E8E8E8] rounded-[4px] bg-white transition-all">
+    <div ref={cardRef} style={{ border: isDetail ? "1px solid #E8E8E8" : "none", borderBottom: isDetail ? "none" : "1px solid #E8E8E8", borderRadius: isDetail ? 4 : 0, background: "#fff" }}>
 
-      {/* Collapsed header */}
       {renderCollapsedHeader(!isDetail)}
 
-      {/* Expanded details — always-on in detail; toggled in default */}
       {(isDetail || expanded) && (
-        <div className="px-5 sm:px-8 pb-5 sm:pb-7 border-t border-[#E8E8E8] pt-5 sm:pt-7">
+        <div className={`px-5 sm:px-8 pb-5 sm:pb-7 border-t border-[#E8E8E8] pt-5 sm:pt-7 ${flipClass}`}>
           {!deepDiveMode ? renderExpandedCardMode(false) : renderDeepDiveMode()}
         </div>
       )}
@@ -903,18 +980,15 @@ export default function ResultCard({
             <div className="flex items-start gap-3 px-8 py-6 border-b border-[#E8E8E8] flex-shrink-0">
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-base font-semibold text-[#2C3E50]">{option.name}</span>
+                  <span style={{ fontSize: 16, fontWeight: 600, color: "#2C3E50", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</span>
                   <div className="w-6 h-6 rounded-full bg-[#F5F4F0] border border-[#E8E8E8] flex items-center justify-center flex-shrink-0">
                     <CategoryIcon category={category} size={14} />
                   </div>
                 </div>
-                {workspace.destination && (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <CategoryIcon category={category} size={12} />
-                    <span className="text-xs text-[#888888]">{workspace.destination}</span>
-                  </div>
+                {locationRow && (
+                  <div className="text-xs text-[#888888] mt-1">{locationRow}</div>
                 )}
-                <p className="text-xl font-medium leading-[1.5] text-[#2C3E50] mt-4" style={{ maxWidth: "92%", fontFamily: "var(--font-lora, \"Lora\", \"Georgia\", serif)" }}>
+                <p style={{ fontSize: 20, fontWeight: 400, lineHeight: 1.5, color: "#2C3E50", marginTop: 16, maxWidth: "92%", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>
                   {judgmentLine}
                 </p>
               </div>

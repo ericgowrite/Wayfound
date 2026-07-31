@@ -695,30 +695,39 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         </div>
 
         {mode === "search" ? (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              id="tour-search-input"
-              className={`flex-1 min-w-0 ${inputCls} rounded-lg border px-3 py-2 text-sm focus:outline-none transition-colors`}
-              placeholder={`Search ${workspace.destination || "any destination"}…`}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-            <div id="tour-category" className="flex gap-2">
-              <CategorySelect value={category} onChange={setCategory} />
+          <div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <input
+                id="tour-search-input"
+                style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '12px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
+                placeholder={`Search ${workspace.destination || "any destination"}…`}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
               <button
-                className="flex-1 sm:flex-initial px-4 py-2 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap"
+                style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '12px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !query.trim() ? 0.5 : 1 }}
                 onClick={() => handleSearch()}
                 disabled={searching || !query.trim()}
               >
-                {searching ? (
-                  <span className="flex items-center justify-center gap-1.5">
-                    <span className="inline-block animate-spin">⟳</span> Searching…
-                  </span>
-                ) : (
-                  "Search"
-                )}
+                {searching ? '…' : 'Search'}
               </button>
+            </div>
+            {/* Category chips */}
+            <div id="tour-category" style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map(cat => {
+                const meta = CATEGORY_META[cat];
+                const isActive = category === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setCategory(cat)}
+                    style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#888888', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400 }}
+                  >
+                    {meta.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -807,26 +816,20 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             <div className="px-4 pt-4 flex-shrink-0 space-y-3">
             {/* Category tabs — shown when same query searched across multiple categories */}
             {showCategoryTabs && (
-              <div className="mb-3 flex gap-1 overflow-x-auto scrollbar-none pb-0.5">
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                 {siblingSearches.map((s) => {
                   const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                   const isActive = (categoryFilter ?? activeSearch?.category) === s.category;
                   return (
                     <button
                       key={s.id}
-                      className={`flex-shrink-0 text-xs px-3 py-1 rounded-lg border transition-colors flex items-center gap-1.5 ${
-                        isActive
-                          ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 text-[#5B8BA0] dark:text-[#7DBAD4] font-medium"
-                          : "border-[#E0E8ED] dark:border-[#3D5A6E] text-[#6B8299] dark:text-[#9BB0C1] hover:border-[#9BB0C1] dark:hover:border-[#9BB0C1] bg-white dark:bg-[#1e2d3d]"
-                      }`}
+                      style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#888888', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}
                       onClick={() => {
                         onSearchChange(s.id);
                         setCategoryFilter(s.category);
                       }}
                     >
-                      <span>{meta.icon}</span>
-                      <span>{meta.label}</span>
-                      <span className="text-[#9BB0C1] dark:text-[#6B8299]">({s.scoredResults.length})</span>
+                      {meta.label} ({s.scoredResults.length})
                     </button>
                   );
                 })}
@@ -948,7 +951,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               <div id="tour-fit-score" className="flex-1 min-h-0 flex flex-col">
 
                 {/* Mobile: stacked expandable cards */}
-                <div className="lg:hidden overflow-y-auto flex-1 space-y-3 pb-4">
+                <div className="lg:hidden overflow-y-auto flex-1 pb-4">
                   {sortedResults.map((option) => (
                     <ResultCard
                       key={option.id}
@@ -989,7 +992,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 {/* Desktop: master-detail — each panel scrolls independently */}
                 <div className="hidden lg:flex gap-4 flex-1 min-h-0">
                   {/* Left: scrollable compact list */}
-                  <div className="w-72 xl:w-80 flex-shrink-0 overflow-y-auto space-y-2 pb-4">
+                  <div className="w-72 xl:w-80 flex-shrink-0 overflow-y-auto pb-4">
                     {sortedResults.map((option) => (
                       <ResultCard
                         key={option.id}
@@ -1060,17 +1063,27 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
             {/* Empty state */}
             {!searching && sortedResults.length === 0 && (
               <div className="flex-1 flex flex-col items-center justify-center py-16">
-                <div className="text-6xl mb-4">✈️</div>
-                <p className="text-lg font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
-                  {workspace.searches.length > 0
-                    ? "No results found"
-                    : workspace.destination
-                      ? `What are you looking for in ${workspace.destination}?`
-                      : "What are you looking for?"}
-                </p>
-                <p className="text-sm text-[#6B8299] mt-1">
-                  Try &quot;boutique eco resort&quot; or &quot;rooftop restaurant with a view&quot;
-                </p>
+                {workspace.searches.length > 0 ? (
+                  <>
+                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 19, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
+                      Nothing quite fits that yet.
+                    </p>
+                    <p style={{ fontSize: 13, color: '#888888', marginTop: 8, textAlign: 'center' }}>
+                      Try a different search or adjust your filters.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 19, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
+                      {workspace.destination
+                        ? `What are you looking for in ${workspace.destination}?`
+                        : "What are you looking for?"}
+                    </p>
+                    <p style={{ fontSize: 13, color: '#888888', marginTop: 8, textAlign: 'center' }}>
+                      Try &quot;boutique eco resort&quot; or &quot;rooftop restaurant with a view&quot;
+                    </p>
+                  </>
+                )}
               </div>
             )}
 

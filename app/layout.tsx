@@ -1,18 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter, Lora } from "next/font/google";
+import { Geist_Mono, Encode_Sans, Encode_Sans_Semi_Expanded, Noto_Serif, Nothing_You_Could_Do } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Tier 1 — Hero / brand moments (marketing landing only)
+const nothingYouCouldDo = Nothing_You_Could_Do({
+  variable: "--font-permanent-marker",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
-const lora = Lora({
-  variable: "--font-lora",
+// Tier 2 — Wordmark, navigation, UI labels, buttons
+const encodeSansSemiExpanded = Encode_Sans_Semi_Expanded({
+  variable: "--font-encode-semi",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+// Tier 3 — Body copy, card descriptions, form fields
+const encodeSans = Encode_Sans({
+  variable: "--font-encode",
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  display: "swap",
+});
+
+// Tier 4 — Editorial headings, judgment lines, card titles
+const notoSerif = Noto_Serif({
+  variable: "--font-noto-serif",
+  subsets: ["latin"],
+  weight: ["400", "600"],
   display: "swap",
 });
 
@@ -42,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${lora.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nothingYouCouldDo.variable} ${encodeSansSemiExpanded.variable} ${encodeSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -51,7 +70,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="h-full flex flex-col bg-[#F8FAFB] dark:bg-[#0f1923]">
+      <body className="h-full flex flex-col">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

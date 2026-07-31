@@ -16,7 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#6B8299] dark:text-[#9BB0C1]">
+      <div className="flex items-center justify-center h-screen bg-[#FAF8F5] text-[#888888]">
         Loading…
       </div>
     );

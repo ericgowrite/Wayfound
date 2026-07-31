@@ -17,9 +17,9 @@ type Phase = "intro" | "questions" | "past_trips" | "result" | "alternatives";
 const ACK_MESSAGES = ["Good to know.", "Makes sense.", "Got it.", "Noted."];
 
 const CONFIDENCE_LABEL = {
-  high:   { text: "Strong match",        color: "text-green-600 dark:text-green-400" },
-  medium: { text: "Good match",          color: "text-yellow-600 dark:text-yellow-400" },
-  low:    { text: "Close call — see alternatives", color: "text-orange-600 dark:text-orange-400" },
+  high:   { text: "Strong match",        color: "text-green-600" },
+  medium: { text: "Good match",          color: "text-yellow-600" },
+  low:    { text: "Close call — see alternatives", color: "text-orange-600" },
 };
 
 export default function TravelAssessment({ prefilledName, isSelf = true, onComplete, onSkip }: Props) {
@@ -149,15 +149,15 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       <div className="flex flex-col h-full">
         <div className="px-6 pt-5 pb-3">
           <button
-            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors mb-3"
+            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors mb-3"
             onClick={() => setPhase("result")}
           >
             ← Back
           </button>
-          <h3 className="text-base font-semibold text-[#2C3E50] dark:text-white">
+          <h3 className="text-base font-semibold text-[#2C3E50]">
             {isSelf ? "Your top results" : `${prefilledName || "Their"} top results`}
           </h3>
-          <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">
+          <p className="text-sm text-[#888888] mt-0.5">
             {isSelf ? "Pick the one that feels most like you." : `Pick the one that feels most like ${prefilledName || "them"}.`}
           </p>
         </div>
@@ -171,29 +171,28 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               <button
                 key={type}
                 onClick={() => setActiveType(type)}
-                className={`w-full text-left px-4 py-4 rounded-xl border transition-all ${
-                  isSelected
-                    ? "border-[#5B8BA0] bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15"
-                    : "border-[#E0E8ED] dark:border-[#3D5A6E] bg-white dark:bg-[#2a3f52] hover:border-[#5B8BA0]/40 dark:hover:border-[#5B8BA0]"
-                }`}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "16px",
+                  borderRadius: 12,
+                  border: `1px solid ${isSelected ? "#2C3E50" : "#E8E8E8"}`,
+                  background: isSelected ? "#FAF8F5" : "#fff",
+                  transition: "all 0.15s",
+                  display: "block",
+                }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold ${isSelected ? "text-[#2C3E50] dark:text-[#B8D4E3]" : "text-[#2C3E50] dark:text-white"}`}>
-                      {arch.name}
-                    </p>
-                    <p className={`text-xs mt-0.5 ${isSelected ? "text-[#5B8BA0] dark:text-[#7DBAD4]" : "text-[#6B8299] dark:text-[#9BB0C1]"}`}>
-                      {arch.tagline}
-                    </p>
-                    <p className={`text-xs mt-2 leading-relaxed line-clamp-2 ${isSelected ? "text-[#3D5A6E] dark:text-[#B8D4E3]" : "text-[#6B8299] dark:text-[#9BB0C1]"}`}>
-                      {arch.description}
-                    </p>
+                    <p className="text-sm font-semibold text-[#2C3E50]">{arch.name}</p>
+                    <p className="text-xs mt-0.5 text-[#888888]">{arch.tagline}</p>
+                    <p className="text-xs mt-2 leading-relaxed line-clamp-2 text-[#888888]">{arch.description}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-[#5B8BA0] dark:text-[#7DBAD4]" : "text-[#9BB0C1] dark:text-[#6B8299]"}`}>
+                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-[#C4956A]" : "text-[#888888]"}`}>
                       {score}
                     </div>
-                    <div className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">pts</div>
+                    <div className="text-xs text-[#888888]">pts</div>
                   </div>
                 </div>
               </button>
@@ -203,14 +202,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
 
         <div className="px-6 pb-6 space-y-2">
           <button
-            className="w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
+            className="w-full py-3 bg-[#2C3E50] text-white text-sm font-semibold rounded-full transition-opacity hover:opacity-90"
             onClick={() => setPhase("result")}
           >
             Use selected style →
           </button>
           <div className="text-center">
             <button
-              className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+              className="text-xs text-[#888888] hover:opacity-70 transition-opacity"
               onClick={handleRetake}
             >
               Retake assessment
@@ -225,30 +224,31 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
   if (phase === "past_trips") {
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10">
-        <h3 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">
           Tell us about an experience you loved.
         </h3>
-        <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] leading-relaxed mb-5">
+        <p className="text-sm text-[#888888] leading-relaxed mb-5">
           Where was it, and what made it feel right for you? The more ViyaWay knows, the better your first results.
         </p>
         <textarea
-          className="w-full bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border border-[#E0E8ED] dark:border-[#3D5A6E] text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-[#5B8BA0] transition-colors resize-none"
+          className="w-full text-[#2C3E50] text-sm rounded-xl px-3 py-2.5 focus:outline-none transition-colors resize-none"
+          style={{ background: "#FAF8F5", border: "1px solid #E8E8E8" }}
           rows={4}
           maxLength={280}
           placeholder="e.g. A week in rural Japan — the quiet, the food, the feeling of being somewhere completely different from home."
           value={pastTripContext}
           onChange={(e) => setPastTripContext(e.target.value)}
         />
-        <p className="text-xs text-[#B8D4E3] dark:text-[#3D5A6E] text-right mt-1">{pastTripContext.length}/280</p>
+        <p className="text-xs text-[#888888] text-right mt-1">{pastTripContext.length}/280</p>
         <button
-          className="mt-4 w-full py-2.5 bg-[#5B8BA0] hover:bg-[#4A7A8F] text-white text-sm font-medium rounded-xl transition-colors"
+          className="mt-4 w-full py-3 bg-[#2C3E50] text-white text-sm font-semibold rounded-full transition-opacity hover:opacity-90"
           onClick={() => setPhase("result")}
         >
           Continue →
         </button>
         <div className="mt-2 text-center">
           <button
-            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#B8D4E3] transition-colors"
+            className="text-xs text-[#888888] hover:opacity-70 transition-opacity"
             onClick={() => { setPastTripContext(""); setPhase("result"); }}
           >
             Skip for now →
@@ -364,13 +364,25 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           {isSelf ? "Start discovering →" : `Create ${prefilledName ? prefilledName + "'s" : "their"} profile →`}
         </button>
 
-        {/* Calibrate link */}
+        {/* Entry Point 1 — Not quite right (Path B, fresh calibration) */}
         <button
-          className="text-xs text-[#888888] underline mt-4 transition-opacity hover:opacity-70"
+          className="text-xs mt-4 transition-opacity hover:opacity-70"
+          style={{ color: "#C4956A", textDecoration: "underline" }}
           onClick={() => setCalibratingPath("fresh")}
         >
-          Not a fit? Let&apos;s calibrate.
+          Not quite right? Answer a few more questions →
         </button>
+
+        {/* Entry Point 3 — Low confidence (Path A, wing calibration) */}
+        {result.confidence === "low" && result.runnerUpTypes.length > 0 && (
+          <button
+            className="text-xs mt-2 transition-opacity hover:opacity-70"
+            style={{ color: "#C4956A", textDecoration: "underline" }}
+            onClick={() => setCalibratingPath("wing")}
+          >
+            Want a more accurate result? Answer a few more questions →
+          </button>
+        )}
 
         {/* Secondary: see alternatives */}
         {result.runnerUpTypes.length > 0 && (
@@ -415,7 +427,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               className="font-medium text-[#2C3E50] mb-8"
               style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22, lineHeight: 1.4 }}
             >
-              {isSelf ? "Which sounds more like you?" : `Which sounds more like ${prefilledName || "them"}?`}
+              {q.setup}
             </p>
 
             <div className="flex flex-col gap-2.5">
@@ -429,10 +441,10 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
                     disabled={animating}
                     className="w-full text-left text-sm text-[#1A1A1A] transition-all"
                     style={{
-                      border: `1px solid ${chosen ? "#C4956A" : "#2C3E50"}`,
-                      borderRadius: 4,
+                      border: `1px solid ${chosen ? "#C4956A" : "#E8E8E8"}`,
+                      borderRadius: 12,
                       padding: "18px 20px",
-                      background: chosen ? "#FBF4EC" : "transparent",
+                      background: chosen ? "#FBF4EC" : "#fff",
                       lineHeight: 1.55,
                     }}
                   >

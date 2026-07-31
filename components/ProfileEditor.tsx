@@ -92,7 +92,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
   if (view === "add-trait") {
     return (
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 16 }}>
-        <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 520, fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 520, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
 
           <button
             onClick={() => { setView("main"); setSelectedPresets([]); }}
@@ -101,7 +101,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
             ← Back
           </button>
 
-          <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 20, color: "#2C3E50", marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 20, color: "#2C3E50", marginTop: 16 }}>
             Anything else that&apos;s true for you?
           </div>
 
@@ -120,7 +120,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
                     color: selected ? "#C4956A" : "#2C3E50",
                     background: selected ? "#FDF8F4" : "#FFFFFF",
                     cursor: "pointer",
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
                   }}
                 >
                   {trait}
@@ -146,7 +146,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 16 }}>
-      <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 600, fontFamily: "'Inter', sans-serif", maxHeight: "90vh", overflowY: "auto" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 600, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", maxHeight: "90vh", overflowY: "auto" }}>
 
         {/* Header row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -156,7 +156,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
                 {typeInfo.name}
               </div>
             )}
-            <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 4 }}>
+            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 4 }}>
               {draft.name}&apos;s traits
             </div>
           </div>

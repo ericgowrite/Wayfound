@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 const VALID_CATEGORIES: SearchCategory[] = ["accommodation", "tour", "restaurant", "activity", "attraction"];
 
 /** Anonymous users get 2 free searches across all their workspaces. */
-const ANON_SEARCH_LIMIT = 2;
+const ANON_SEARCH_LIMIT = 1;
 
 export async function POST(request: Request) {
   try {

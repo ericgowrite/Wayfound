@@ -1,93 +1,103 @@
 import { AssessmentQuestion, AssessmentResult, CORE_ARCHETYPES, getTopAxes } from "./assessment";
 
-// ── Path B — Fresh calibration questions (9 questions) ───────────────────────
-// Distinct type pairings from the original 10-question bank to maximize
-// discriminating signal without repeating scenarios.
+// ── Path B — Fresh calibration questions (10 questions, locked set) ───────────
 
 export const FRESH_CALIBRATION_QUESTIONS: AssessmentQuestion[] = [
   {
     id: 0,
-    a: "Getting things done well — executing flawlessly so you can move on knowing it was handled right",
-    b: "Getting things done your way — figuring it out as you go, improvising when the plan falls apart",
+    setup: "You had an issue on a trip that needed your attention.",
+    a: "You sorted it out — things got back to how they should be",
+    b: "You took over — made the call, handled it, moved on",
     typeA: 1, typeB: 8,
   },
   {
     id: 1,
-    a: "Arriving somewhere where people are warm and present with you — a host who remembers your name, strangers who become friends",
-    b: "Arriving somewhere completely private — the room is yours, the space is yours, no one knows you're there",
+    setup: "Think about the best place you've ever stayed.",
+    a: "The host remembered your name. Strangers became friends.",
+    b: "It was completely private. The space was yours. No one knew you were there.",
     typeA: 2, typeB: 5,
   },
   {
     id: 2,
-    a: "A destination that looks as good in person as it does in the photos — the right place at the right time, and you made it happen",
-    b: "A destination that surprises you every day — nothing went to plan, and somehow it was better that way",
+    setup: "You're describing a destination that delivered.",
+    a: "It looked as good in person as it did in photos — you made the right call",
+    b: "Nothing went to plan and somehow it was better that way",
     typeA: 3, typeB: 7,
   },
   {
     id: 3,
-    a: "Somewhere that moves something in you — a landscape, a room, a meal you'll remember precisely because of how it made you feel",
-    b: "Somewhere that stays with you for what you learned — the culture, the craft, the history you couldn't have understood without being there",
+    setup: "A trip is memorable because...",
+    a: "Of how it made you feel — a landscape, a meal, a moment you won't forget",
+    b: "Of what you learned — the culture, the craft, the history you couldn't have understood without being there",
     typeA: 4, typeB: 5,
   },
   {
     id: 4,
-    a: "Somewhere you've read about and trusted — highly rated, consistently excellent, no unpleasant surprises",
-    b: "Somewhere that took you completely out of your comfort zone — uncomfortable at first, worth it in the end",
+    setup: "You're choosing where to stay.",
+    a: "Somewhere with a track record — highly rated, no surprises",
+    b: "Somewhere off the map — harder to get to, but worth it",
     typeA: 6, typeB: 8,
   },
   {
     id: 5,
-    a: "Moving between many small moments — a market here, a viewpoint there, a meal that turned into something unexpected",
-    b: "Spending a whole afternoon in one neighborhood, one restaurant, one conversation that didn't need to end",
+    setup: "A perfect afternoon looks like...",
+    a: "Jumping between places — a market, a viewpoint, wherever the day takes you",
+    b: "One neighborhood, one restaurant, one conversation that didn't need to end",
     typeA: 7, typeB: 9,
   },
   {
     id: 6,
-    a: "Having space for yourself — to decompress, recharge, and actually feel what's around you without agenda",
-    b: "Finding the version of the place the tourists don't see — the off-menu dish, the local bar, the unmarked shortcut",
+    setup: "You're looking for something worth your time.",
+    a: "You decompress — feel what's around you, no rush, no plan",
+    b: "You find what's actually worth it — not what's convenient, what's right",
     typeA: 9, typeB: 1,
   },
   {
     id: 7,
-    a: "Everyone on the same page — the group agrees, the vibe is easy, no one's pulling in different directions",
-    b: "Everyone with a story to tell afterward — it doesn't matter if the day got messy, the stories are better that way",
+    setup: "Group trip. What makes it a success?",
+    a: "Everyone was on the same page — easy vibe, no one pulling in different directions",
+    b: "Everyone came back with something worth talking about",
     typeA: 2, typeB: 3,
   },
   {
     id: 8,
-    a: "Being in a place that's genuinely difficult to get to — it feels earned in a way the easy version never would",
-    b: "Being in a place so right for you that you forget to take a photo because you're just there",
+    setup: "The trips that become part of you...",
+    a: "Took real effort to pull off — and felt earned because of it",
+    b: "Put you somewhere so right that you forgot to take a photo because you were just there",
     typeA: 8, typeB: 4,
+  },
+  {
+    id: 9,
+    setup: "You're heading somewhere you've never been.",
+    a: "You've done your homework — you know what to expect and that's what lets you enjoy it",
+    b: "You're open to whatever — the less you plan, the more you find",
+    typeA: 6, typeB: 9,
   },
 ];
 
-// ── Path A — Wing calibration question bank ───────────────────────────────────
-// 5 questions per adjacent type pairing. Keys: "min-max" (e.g. "1-2", "1-9").
-// Bank will be filled in a separate brief. Infrastructure only.
-
-export const WING_CALIBRATION_BANK: Record<string, AssessmentQuestion[]> = {
-  "1-2": [],
-  "2-3": [],
-  "3-4": [],
-  "4-5": [],
-  "5-6": [],
-  "6-7": [],
-  "7-8": [],
-  "8-9": [],
-  "1-9": [], // 9w1 ↔ 1w9 pairing
-};
+// ── Path A — Wing calibration question selection ──────────────────────────────
+// Selects up to 5 questions from the fresh calibration bank most relevant to
+// the adjacent pairing. Priority: exact both-type matches first, then
+// single-type matches to fill remaining slots.
 
 export function getWingCalibrationQuestions(typeA: number, typeB: number): AssessmentQuestion[] {
-  const key = `${Math.min(typeA, typeB)}-${Math.max(typeA, typeB)}`;
-  return (WING_CALIBRATION_BANK[key] ?? []).slice(0, 5);
+  const both: AssessmentQuestion[] = [];
+  const either: AssessmentQuestion[] = [];
+  for (const q of FRESH_CALIBRATION_QUESTIONS) {
+    const hasA = q.typeA === typeA || q.typeB === typeA;
+    const hasB = q.typeA === typeB || q.typeB === typeB;
+    if (hasA && hasB) both.push(q);
+    else if (hasA || hasB) either.push(q);
+  }
+  return [...both, ...either].slice(0, 5);
 }
 
 // ── Self-awareness question ───────────────────────────────────────────────────
 
 export const SELF_AWARENESS_QUESTION = {
-  prompt: "Before we start — those first questions, were you answering based on…",
-  a: "How I actually am when I travel",
-  b: "How I'd like to be — or how I travel when things go well",
+  prompt: "When you answered those first questions — were you thinking about how you actually experience things, or how you'd like to?",
+  a: "I was honest — it felt accurate",
+  b: "I may have answered based on how I'd like to be",
 };
 
 // ── Scoring: Path A (wing) ────────────────────────────────────────────────────

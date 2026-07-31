@@ -4,6 +4,7 @@ import { AxisWeights } from "@/types";
 
 export interface AssessmentQuestion {
   id: number;
+  setup: string;
   a: string;
   b: string;
   typeA: number;
@@ -53,62 +54,72 @@ export function getTopAxes(weights: AxisWeights): AssessmentResult["topAxes"] {
 export const QUESTIONS: AssessmentQuestion[] = [
   {
     id: 0,
-    a: "Find out what's happening tonight — a market, a bar someone mentioned, something unplanned. You want to feel the city before you sleep in it.",
-    b: "Get settled first — walk the neighborhood, find somewhere local for dinner, clear your head. Tomorrow you'll be fully there. Tonight is just arriving.",
+    setup: "You just landed. No plans until tomorrow.",
+    a: "Find out what's happening tonight",
+    b: "Get settled — walk around, eat somewhere local, early night",
     typeA: 7, typeB: 9,
   },
   {
     id: 1,
-    a: "A place that moves something in you — obscure, hard to explain, emotionally resonant in a way you couldn't fully describe to anyone else",
-    b: "A place that's having its moment — the right city at the right time, and being there will mean something",
+    setup: "You're picking your next trip.",
+    a: "You're drawn to places off the beaten path",
+    b: "You've already decided — that place everyone is talking about",
     typeA: 4, typeB: 3,
   },
   {
     id: 2,
-    a: "Hours inside one neighborhood — a museum, a long lunch, a bookshop, nowhere to be",
-    b: "Moving between people — a local who shows you around, a conversation that changes your view of the place",
+    setup: "Picture a perfect day somewhere new.",
+    a: "One or two neighborhoods — spend time exploring, finding hidden gems, no agenda",
+    b: "Meet people, have real conversations, be part of the experience",
     typeA: 5, typeB: 2,
   },
   {
     id: 3,
-    a: "Find somewhere more authentic — you'd rather eat somewhere real than settle",
-    b: "You'd rather make the call yourself — find something better on the spot or improvise — than stress about what didn't work out",
+    setup: "The restaurant you planned turns out to be a letdown.",
+    a: "You whip out your phone and find somewhere better — no settling",
+    b: "You make a quick call — somewhere else, something different. You don't dwell on it.",
     typeA: 1, typeB: 8,
   },
   {
     id: 4,
-    a: "Settled — you've done your research, you know what to expect, and that lets you actually relax into it",
-    b: "Energized — the not-knowing is half of what you're there for, and you want to arrive open to anything",
+    setup: "The night before a trip somewhere you've never been.",
+    a: "You feel ready — you know what to expect",
+    b: "You feel energized by the adventure of it",
     typeA: 6, typeB: 7,
   },
   {
     id: 5,
-    a: "Find a café, sit with a coffee, let the afternoon come to you",
-    b: "Go somewhere specific that means something to you — a gallery, a street, a moment you've been saving",
+    setup: "You have a free afternoon in a city you love.",
+    a: "Find a café and let the afternoon happen",
+    b: "Go somewhere specific that's been on your mind — a gallery, a street, something you've been saving",
     typeA: 9, typeB: 4,
   },
   {
     id: 6,
-    a: "Somewhere that asks something of you — remote, raw, not set up for tourists",
-    b: "Somewhere with depth you can spend days unpacking — history, craft, a culture worth understanding slowly",
+    setup: "What kind of place gets you excited?",
+    a: "The opposite of a tourist trap — a place that takes effort to get to and pays off",
+    b: "A place where you could stay a week and still not see everything",
     typeA: 8, typeB: 5,
   },
   {
     id: 7,
-    a: "Getting it right — finding the places actually worth visiting, not the obvious choices",
-    b: "Feeling prepared — knowing enough in advance that you can relax when you get there",
+    setup: "When researching a trip.",
+    a: "You look for destinations that are special and worth your time — not the obvious choices",
+    b: "You want it all fleshed out — no unknowns, so you can relax when you get there",
     typeA: 1, typeB: 6,
   },
   {
     id: 8,
-    a: "It's the whole point — the shared experience is what you're actually there for",
-    b: "You're easy about it — if the group splits, that's fine. You know what you want to do and you'll find each other later.",
+    setup: "You're traveling with others.",
+    a: "The shared experience is the whole point — it makes everything better",
+    b: "No problem — you can hang together or do your own thing. Go with the flow.",
     typeA: 2, typeB: 9,
   },
   {
     id: 9,
-    a: "That it sounds worth having done — the places, the experiences, the story",
-    b: "That it was done with integrity — you found the real version of the place, not the tourist version",
+    setup: "You're telling someone about a trip you took.",
+    a: "You're selling it — the highlights, why it was worth it, why they should go",
+    b: "You're being honest — what was great, what was authentic, what actually delivered",
     typeA: 3, typeB: 1,
   },
 ];

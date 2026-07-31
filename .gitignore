@@ -43,3 +43,11 @@ next-env.d.ts
 
 .env
 .firebase/
+
+# Hero video source files — large ProRes originals, keep out of repo
+public/hero-videos/*.mov
+public/hero-temp.mp4
+
+# Planning docs
+SEARCH_NAV_SPEC.md
+TOUR_SPEC.md

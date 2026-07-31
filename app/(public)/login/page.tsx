@@ -51,10 +51,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ width: "100%", maxWidth: 480, background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "56px 48px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+    <div style={{ minHeight: "100vh", background: "#FAF8F5", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px", fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: 480, background: "#FAF8F5", border: "1px solid #E8E8E8", borderRadius: 12, padding: "56px 48px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-        <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 24, color: "#2C3E50" }}>
+        <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontWeight: 400, fontSize: 24, color: "#2C3E50", lineHeight: 1.3 }}>
           Welcome back.
         </div>
 

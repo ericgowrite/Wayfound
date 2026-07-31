@@ -35,12 +35,12 @@ export default function TripsDashboardPreviewClient() {
 
   if (view === "add-trait") {
     return (
-      <div style={{ minHeight: "100vh", background: "#F5F4F0", display: "flex", alignItems: "center", justifyContent: "center", padding: 40, fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: "#F5F4F0", display: "flex", alignItems: "center", justifyContent: "center", padding: 40, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
         <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 520 }}>
           <button onClick={() => { setView("main"); setSelectedPresets([]); }} style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
             ← Back
           </button>
-          <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 20, color: "#2C3E50", marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 20, color: "#2C3E50", marginTop: 16 }}>
             Anything else that&apos;s true for you?
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20 }}>
@@ -62,14 +62,14 @@ export default function TripsDashboardPreviewClient() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F4F0", display: "flex", alignItems: "center", justifyContent: "center", padding: 40, fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#F5F4F0", display: "flex", alignItems: "center", justifyContent: "center", padding: 40, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
       <div style={{ background: "#FFFFFF", border: "1px solid #E8E8E8", borderRadius: 4, padding: "28px 32px", width: "100%", maxWidth: 600 }}>
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A" }}>The Harmonist</div>
-            <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 4 }}>Your traits</div>
+            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 4 }}>Your traits</div>
           </div>
           <button style={{ fontSize: 20, color: "#9BB0C1", background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: 0 }}>×</button>
         </div>

@@ -66,8 +66,13 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-16 px-6 text-center">
-      {/* Magnifying glass — unchanged per spec */}
-      <div className="text-5xl mb-6 animate-pulse">🔍</div>
+      {/* Navy magnifying glass SVG */}
+      <div style={{ marginBottom: 24 }}>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </div>
 
       {/* Content area */}
       <div
@@ -76,22 +81,22 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
       >
         {!contentReady || !item ? (
           /* Fallback while parallel call is pending */
-          <p className="text-[#3D5A6E] dark:text-[#B8D4E3] font-medium">
+          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50', fontWeight: 500 }}>
             Finding what fits you in {destination || "your destination"}&hellip;
           </p>
         ) : item.type === "fact" ? (
           /* Destination fact */
           <>
-            <p className="text-[11px] font-semibold tracking-widest text-[#C4956A] uppercase mb-3">
+            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C4956A', marginBottom: 12 }}>
               While you wait
             </p>
-            <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">
+            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
               {item.text}
             </p>
           </>
         ) : item.traveler === "both" ? (
           /* Group recommendation — no avatar */
-          <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">
+          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
             {item.text}
           </p>
         ) : (
@@ -99,26 +104,25 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
           <>
             {itemTraveler && (
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-full bg-[#5B8BA0] dark:bg-[#3D5A6E] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                <div className="w-7 h-7 rounded-full bg-[#2C3E50] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                   {travelerInitial(itemTraveler.name)}
                 </div>
-                <span className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">
+                <span className="text-xs font-medium text-[#2C3E50]">
                   {itemTraveler.name}
-                  <span className="text-[#9BB0C1] dark:text-[#6B8299] font-normal ml-1">
+                  <span style={{ color: '#888888', fontWeight: 400, marginLeft: 4 }}>
                     · {TYPE_INFO[itemTraveler.enneagramType]?.name ?? ""}
                   </span>
                 </span>
               </div>
             )}
-            <p className="text-[#3D5A6E] dark:text-[#B8D4E3] text-sm leading-relaxed">
+            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
               {item.text}
             </p>
           </>
         )}
       </div>
 
-      {/* Timing subline — unchanged per spec */}
-      <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-6">
+      <p style={{ fontSize: 13, color: '#888888', marginTop: 24 }}>
         This may take 15–30 seconds
       </p>
     </div>

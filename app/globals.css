@@ -2,27 +2,83 @@
 
 @custom-variant dark (&:is(.dark, .dark *));
 
-/* ── Design token definitions ─────────────────────────────────────────────── */
+/* ── Design tokens v2 (July 2026) ────────────────────────────────────────── */
 :root {
-  /* Color palette */
-  --color-primary:       #2C3E50; /* Deep Navy — headings, CTAs, primary buttons */
-  --color-accent:        #C4956A; /* Warm Amber — delight/warmth ONLY, never warnings */
-  --color-caution:       #B5654A; /* Clay — watch-out flag icon ONLY */
-  --color-caution-text:  #8a4530; /* Clay text — watch-out label text */
-  --color-bg:            #FFFFFF; /* Page / card background */
-  --color-bg-muted:      #F5F4F0; /* Icon badge fills, secondary surfaces */
-  --color-border:        #E8E8E8; /* All hairline borders and dividers */
-  --color-text-body:     #1A1A1A; /* Primary body copy */
-  --color-text-muted:    #888888; /* Secondary text, labels, placeholders */
-  --color-nudge-bg:      #FBF4EC; /* Amber-wash engagement nudge banners */
-  --color-fit:           #6E9C74; /* Traveler-fit progress bar fill */
+  /* ── Color palette ── */
+  --color-canvas:       #FAF8F5; /* Primary background — warm near-white */
+  --color-slate:        #2C3E50; /* Deep slate — headlines, nav, wordmark */
+  --color-slate-mid:    #3D5A73; /* Mid slate — secondary type, muted elements */
+  --color-amber:        #C4956A; /* Warm amber — CTAs, accents, "way" split */
+  --color-amber-light:  #E8C9A8; /* Light amber — tags, chips, subtle backgrounds */
+  --color-gray-muted:   #888888; /* Mid gray — metadata, timestamps, labels */
+  --color-gray-light:   #E8E8E8; /* Light gray — dividers only */
+  --color-white:        #FFFFFF; /* Pure white — text over dark/image backgrounds */
+  --color-dark-overlay: rgba(0,0,0,0.45); /* Hero image overlay */
 
-  /* Base page tokens (used by Tailwind bg-background / text-foreground) */
-  --background: #FFFFFF;
-  --foreground: #1A1A1A;
+  /* ── Functional aliases (keep existing components working during migration) ── */
+  --color-primary:      var(--color-slate);
+  --color-accent:       var(--color-amber);
+  --color-caution:      #B5654A;
+  --color-caution-text: #8a4530;
+  --color-bg:           var(--color-canvas);
+  --color-bg-muted:     #F5F4F0;
+  --color-border:       var(--color-gray-light);
+  --color-text-body:    #1A1A1A;
+  --color-text-muted:   var(--color-gray-muted);
+  --color-nudge-bg:     #FBF4EC;
+  --color-fit:          #6E9C74;
 
-  /* Dark mode overrides — keep infrastructure, light spec is primary target */
-  /* (dark values preserved during token migration, will be refined per component) */
+  /* ── Type Scale ── */
+  --text-xs:   11px;   /* labels, section eyebrows */
+  --text-sm:   12px;   /* metadata, location, timestamps */
+  --text-base: 14px;   /* default body, descriptions */
+  --text-md:   15px;   /* body large */
+  --text-lg:   16px;   /* property names */
+  --text-xl:   18px;   /* judgment lines */
+  --text-2xl:  22px;   /* section headings */
+  --text-3xl:  28px;   /* editorial headings */
+
+  /* ── Line heights ── */
+  --leading-tight:   1.25;
+  --leading-snug:    1.4;
+  --leading-normal:  1.6;
+  --leading-relaxed: 1.75;
+
+  /* ── Font weights ── */
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  /* ── Spacing scale ── */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  /* ── Border radius ── */
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   32px;    /* Hero CTA only */
+  --radius-full: 9999px;  /* All product CTAs, pills, avatars */
+
+  /* ── Shadow ── */
+  --shadow-card:       0 2px 12px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 4px 24px rgba(0,0,0,0.10);
+  --shadow-overlay:    0 8px 40px rgba(0,0,0,0.18);
+
+  /* ── Base page tokens (Tailwind bg-background / text-foreground) ── */
+  --background: var(--color-canvas);
+  --foreground: var(--color-slate);
+
+  /* ── Migration aliases — keep existing component references working during
+     screen-by-screen update pass. Remove once all components are updated. ── */
+  --font-lora:  var(--font-noto-serif);
+  --font-inter: var(--font-encode);
 }
 
 .dark {
@@ -30,6 +86,7 @@
   --foreground: #B8D4E3;
   --color-bg:     #0f1923;
   --color-border: #2a3f52;
+  --color-canvas: #0f1923;
 }
 
 @theme inline {
@@ -38,6 +95,11 @@
   --color-foreground: var(--foreground);
 
   /* Design system tokens — available as Tailwind utilities */
+  --color-canvas:       var(--color-canvas);
+  --color-slate:        var(--color-slate);
+  --color-slate-mid:    var(--color-slate-mid);
+  --color-amber:        var(--color-amber);
+  --color-amber-light:  var(--color-amber-light);
   --color-primary:      var(--color-primary);
   --color-accent:       var(--color-accent);
   --color-caution:      var(--color-caution);
@@ -50,21 +112,46 @@
   --color-fit:          var(--color-fit);
 
   /* Fonts */
-  --font-sans:  var(--font-inter);
-  --font-serif: var(--font-lora);
-  --font-mono:  var(--font-geist-mono);
+  --font-sans:         var(--font-encode);
+  --font-ui:           var(--font-encode-semi);
+  --font-serif:        var(--font-noto-serif);
+  --font-display:      var(--font-permanent-marker);
+  --font-mono:         var(--font-geist-mono);
+
+  /* Type scale */
+  --font-size-xs:   var(--text-xs);
+  --font-size-sm:   var(--text-sm);
+  --font-size-base: var(--text-base);
+  --font-size-md:   var(--text-md);
+  --font-size-lg:   var(--text-lg);
+  --font-size-xl:   var(--text-xl);
+  --font-size-2xl:  var(--text-2xl);
+  --font-size-3xl:  var(--text-3xl);
+
+  /* Leading */
+  --line-height-tight:   var(--leading-tight);
+  --line-height-snug:    var(--leading-snug);
+  --line-height-normal:  var(--leading-normal);
+  --line-height-relaxed: var(--leading-relaxed);
 }
 
 body {
-  background: var(--color-bg);
+  background: var(--color-canvas);
   color: var(--color-text-body);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-encode), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Tailwind v4 @theme inline can't resolve runtime CSS vars at build time —
-   wire font-serif → Lora directly so the class produces the right font-family. */
+/* Font family utility classes */
+.font-ui {
+  font-family: var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif;
+}
+
 .font-serif {
-  font-family: var(--font-lora), "Georgia", ui-serif, serif;
+  font-family: var(--font-noto-serif), "Georgia", ui-serif, serif;
+}
+
+.font-display {
+  font-family: var(--font-permanent-marker), cursive;
 }
 
 button {
@@ -186,3 +273,14 @@ button {
 .animate-fade-in {
   animation: fade-in 0.5s ease both;
 }
+
+@keyframes card-flip-out {
+  from { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+  to   { transform: perspective(1200px) rotateY(-90deg); opacity: 0; }
+}
+@keyframes card-flip-in {
+  from { transform: perspective(1200px) rotateY(90deg); opacity: 0; }
+  to   { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
+}
+.card-flip-out { animation: card-flip-out 200ms ease-in forwards; }
+.card-flip-in  { animation: card-flip-in 200ms ease-out forwards; }

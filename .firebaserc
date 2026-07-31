@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "viyaway-travel-app"
+  },
+  "targets": {
+    "viyaway-travel-app": {
+      "hosting": {
+        "production": ["viyaway-travel-app-177f7"]
+      }
+    }
   }
 }

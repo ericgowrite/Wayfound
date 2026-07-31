@@ -251,14 +251,14 @@ export default function Home() {
     );
   }
 
-  const inputCls = "bg-[#EEF4F8] dark:bg-[#2a3f52] text-[#2C3E50] dark:text-[#B8D4E3] border-[#E0E8ED] dark:border-[#3D5A6E] focus:border-[#5B8BA0]";
-  const btnSecondary = "bg-[#E0E8ED] dark:bg-[#3D5A6E] text-[#3D5A6E] dark:text-[#B8D4E3] hover:bg-[#D0DCE4] dark:hover:bg-[#4A7A8F]";
-  const modalCls = "bg-white dark:bg-[#1e2d3d] border-[#E0E8ED] dark:border-[#3D5A6E]";
+  const inputCls = "bg-[#FAF8F5] text-[#2C3E50] border-[#E8E8E8] focus:border-[#2C3E50]";
+  const btnSecondary = "bg-[#E8E8E8] text-[#2C3E50] hover:bg-[#E0DDD9]";
+  const modalCls = "bg-[#FAF8F5] border-[#E8E8E8]";
 
   // Still fetching
   if (!profilesLoaded) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#6B8299] dark:text-[#9BB0C1]">
+      <div className="flex items-center justify-center h-screen bg-[#FAF8F5] text-[#888888]">
         Loading…
       </div>
     );
@@ -267,12 +267,14 @@ export default function Home() {
   // First-run: no profiles yet — show full-screen assessment
   if (profilesLoaded && profiles.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F8FAFB] dark:bg-[#0f1923] p-4">
-        <div className="w-full max-w-md bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-2xl shadow-xl overflow-hidden">
-          <div className="px-6 pt-6 pb-0 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+      <div className="flex items-center justify-center min-h-screen bg-[#FAF8F5] p-4">
+        <div className="w-full max-w-md bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl shadow-xl overflow-hidden">
+          <div className="px-6 pt-6 pb-0 border-b border-[#E8E8E8]">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-[#2C3E50] dark:text-white">ViyaWay</span>
-              <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">Welcome</span>
+              <span style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
+                viya<span style={{ color: '#C4956A' }}>way</span>
+              </span>
+              <span className="text-xs text-[#888888]">Welcome</span>
             </div>
           </div>
           {firstRunError && (
@@ -293,7 +295,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-[#F8FAFB] dark:bg-[#0f1923] text-[#2C3E50] dark:text-[#B8D4E3] overflow-hidden">
+    <div className="flex h-screen bg-[#FAF8F5] text-[#2C3E50] overflow-hidden">
       {/* Mobile backdrop */}
       {mobileMenuOpen && (
         <div
@@ -303,22 +305,24 @@ export default function Home() {
       )}
 
       {/* Sidebar — fixed drawer on mobile, static column on desktop */}
-      <div className={`${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out fixed md:relative inset-y-0 left-0 z-50 w-72 md:w-56 flex-shrink-0 bg-white dark:bg-[#1e2d3d] border-r border-[#E0E8ED] dark:border-[#2a3f52] flex flex-col`}>
+      <div className={`${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out fixed md:relative inset-y-0 left-0 z-50 w-72 md:w-56 flex-shrink-0 bg-[#FAF8F5] border-r border-[#E8E8E8] flex flex-col`}>
         {/* App header */}
-        <div className="flex items-start justify-between px-4 py-4 border-b border-[#E0E8ED] dark:border-[#2a3f52]">
+        <div className="flex items-start justify-between px-4 py-4 border-b border-[#E8E8E8]">
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-[#3D5A6E] dark:text-white">ViyaWay</h1>
-            <p className="text-xs text-[#3D5A6E] dark:text-[#9BB0C1] mt-0.5">Travel that fits who you are.</p>
+            <h1 style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
+              viya<span style={{ color: '#C4956A' }}>way</span>
+            </h1>
+            <p className="text-xs text-[#2C3E50] mt-0.5">Travel that fits who you are.</p>
             <button
               id="tour-trigger"
-              className="text-xs text-[#5B8BA0] hover:underline mt-1"
+              className="text-xs text-[#2C3E50] hover:underline mt-1"
               onClick={() => setShowTour(true)}
             >
               Take a tour
             </button>
           </div>
           <button
-            className="md:hidden text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-white text-xl leading-none mt-0.5 transition-colors"
+            className="md:hidden text-[#888888] hover:text-[#2C3E50] text-xl leading-none mt-0.5 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
             ×
@@ -330,20 +334,20 @@ export default function Home() {
           <div className="mt-2">
             <button
               id="tour-travelers"
-              className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#6B8299] uppercase font-medium tracking-wide hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
+              className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#888888] uppercase font-medium tracking-wide hover:text-[#2C3E50] transition-colors"
               onClick={() => setProfilesOpen((o) => !o)}
             >
               <span>Travelers</span>
               <span className="flex items-center gap-1">
                 <span
                   id="tour-add-traveler"
-                  className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white transition-colors"
+                  className="text-[#888888] hover:text-[#2C3E50] transition-colors"
                   onClick={(e) => { e.stopPropagation(); setShowAddProfile(true); }}
                   title="Add traveler"
                 >
                   +
                 </span>
-                <span className="text-[#9BB0C1] dark:text-[#6B8299]">{profilesOpen ? "▴" : "▾"}</span>
+                <span className="text-[#888888]">{profilesOpen ? "▴" : "▾"}</span>
               </span>
             </button>
 
@@ -354,21 +358,21 @@ export default function Home() {
                 {profiles.filter((p) => p && typeof p.name === "string" && p.name.length > 0).map((p) => (
                   <div
                     key={p.id}
-                    className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52] transition-colors"
+                    className="group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-[#FAF8F5] transition-colors"
                     onClick={() => setEditingProfile(p)}
                   >
-                    <div className="w-6 h-6 rounded-full bg-[#5B8BA0] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[#2C3E50] flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                       {p.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[#3D5A6E] dark:text-[#B8D4E3] truncate">{p.name}</p>
+                      <p className="text-xs font-medium text-[#2C3E50] truncate">{p.name}</p>
                       {TYPE_INFO[p.enneagramType] && (
-                        <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] truncate leading-tight">{TYPE_INFO[p.enneagramType].name}</p>
+                        <p className="text-[10px] text-[#888888] truncate leading-tight">{TYPE_INFO[p.enneagramType].name}</p>
                       )}
                     </div>
                     {!p.isDefault && (
                       <button
-                        className="opacity-0 group-hover:opacity-100 text-[#9BB0C1] dark:text-[#6B8299] hover:text-red-500 dark:hover:text-red-400 text-xs transition-all"
+                        className="opacity-0 group-hover:opacity-100 text-[#888888] hover:text-red-500 text-xs transition-all"
                         onClick={(e) => { e.stopPropagation(); setDeleteProfileId(p.id); }}
                       >
                         ×
@@ -378,17 +382,17 @@ export default function Home() {
                 ))}
               </div>
             )}
-            <p className="px-4 pb-3 pt-0.5 text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed">
+            <p className="px-4 pb-3 pt-0.5 text-[10px] text-[#888888] leading-relaxed">
               Select a traveler to view or update their style.
             </p>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mx-4" />
+          <div className="border-t border-[#E8E8E8] mx-4" />
 
           {/* Trips section */}
           <div id="tour-trips" className="flex items-center justify-between px-4 pt-4 pb-3">
-            <span style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 15, color: '#2C3E50' }}>
+            <span style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 15, color: '#2C3E50' }}>
               Experiences
             </span>
             <button
@@ -403,7 +407,7 @@ export default function Home() {
           <div className="px-4">
             {workspaces.length === 0 ? (
               <div style={{ paddingTop: 20, paddingBottom: 20, textAlign: 'center' }}>
-                <p style={{ fontFamily: '"Lora", serif', fontWeight: 500, fontSize: 15, color: '#2C3E50' }}>
+                <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 15, color: '#2C3E50' }}>
                   No experiences yet.
                 </p>
                 <p style={{ fontSize: 12, color: '#888888', marginTop: 8, lineHeight: 1.5 }}>
@@ -448,12 +452,12 @@ export default function Home() {
                       onClick={() => setActiveWorkspaceId(w.id)}
                     >
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                        <p className="truncate" style={{ fontFamily: '"Lora", serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#888888' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
+                        <p className="truncate" style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#888888' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
                           {w.name || w.destination || 'Untitled'}
                         </p>
                         <button
                           className="opacity-0 group-hover:opacity-100 flex-shrink-0 ml-1"
-                          style={{ color: '#9BB0C1', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+                          style={{ color: '#888888', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
                           onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
                         >
                           ×
@@ -472,7 +476,7 @@ export default function Home() {
 
                     {/* Search sub-list — only under the active workspace */}
                     {w.id === activeWorkspaceId && w.searches.length > 0 && (
-                      <div className="mb-1 border-l border-[#E0E8ED] dark:border-[#2a3f52] pl-2 space-y-0.5 mt-1">
+                      <div className="mb-1 border-l border-[#E8E8E8] pl-2 space-y-0.5 mt-1">
                         {w.searches.map((s) => {
                           const meta = CATEGORY_META[s.category] ?? { icon: "🔍", label: s.category, hint: "" };
                           const isActiveSearch = s.id === activeSearchId;
@@ -482,7 +486,7 @@ export default function Home() {
                               className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors text-xs ${
                                 isActiveSearch
                                   ? "text-[#2C3E50] font-medium"
-                                  : "text-[#888888] dark:text-[#9BB0C1] hover:bg-[#EEF4F8] dark:hover:bg-[#2a3f52]"
+                                  : "text-[#888888] hover:bg-[#FAF8F5]"
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -492,7 +496,7 @@ export default function Home() {
                             >
                               <span className="flex-shrink-0">{meta.icon}</span>
                               <span className="truncate flex-1">{s.query}</span>
-                              <span className="flex-shrink-0 text-[#9BB0C1] dark:text-[#6B8299]">
+                              <span className="flex-shrink-0 text-[#888888]">
                                 {s.scoredResults.length}
                               </span>
                             </button>
@@ -507,26 +511,20 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 pt-3 pb-4 border-t border-[#E0E8ED] dark:border-[#2a3f52] space-y-3">
+        <div className="px-4 pt-3 pb-4 border-t border-[#E8E8E8] space-y-3">
           {/* Utility */}
           <button
-            className="text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors w-full text-left"
+            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors w-full text-left"
             onClick={() => setShowFitLegend(true)}
           >
             What do fit scores mean?
           </button>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299]">v2.0</p>
+            <p className="text-xs text-[#888888]">v2.0</p>
             <div className="flex items-center gap-3">
+              {/* dark mode hidden until design is confirmed */}
               <button
-                className="text-xs text-[#6B8299] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3] transition-colors"
-                onClick={toggle}
-                title={dark ? "Switch to light mode" : "Switch to night mode"}
-              >
-                {dark ? "☀ Light" : "☾ Night"}
-              </button>
-              <button
-                className="text-xs text-[#9BB0C1] hover:text-red-500 transition-colors"
+                className="text-xs text-[#888888] hover:text-red-500 transition-colors"
                 onClick={logout}
                 title="Log out"
               >
@@ -536,14 +534,14 @@ export default function Home() {
           </div>
 
           {/* Legal */}
-          <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-3 space-y-1.5">
-            <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] uppercase tracking-wider font-medium">Legal</p>
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Privacy Policy ↗</a>
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">Terms of Service ↗</a>
-            {/* <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#5B8BA0] dark:hover:text-[#7DBAD4] transition-colors">How We Make Money ↗</a> */}
+          <div className="border-t border-[#E8E8E8] pt-3 space-y-1.5">
+            <p className="text-[10px] text-[#888888] uppercase tracking-wider font-medium">Legal</p>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">Privacy Policy ↗</a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">Terms of Service ↗</a>
+            {/* <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">How We Make Money ↗</a> */}
           </div>
 
-          {/* <p className="text-[10px] text-[#9BB0C1] dark:text-[#6B8299] leading-relaxed border-t border-[#E0E8ED] dark:border-[#2a3f52] pt-2.5">
+          {/* <p className="text-[10px] text-[#888888] leading-relaxed border-t border-[#E8E8E8] pt-2.5">
             ViyaWay may earn a commission from bookings. This doesn&apos;t affect our recommendations.
           </p> */}
         </div>
@@ -552,17 +550,19 @@ export default function Home() {
       {/* Main content */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {/* Mobile top bar — hamburger + current trip name */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#1e2d3d] border-b border-[#E0E8ED] dark:border-[#2a3f52] flex-shrink-0">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#FAF8F5] border-b border-[#E8E8E8] flex-shrink-0">
           <button
-            className="text-[#3D5A6E] dark:text-[#B8D4E3] text-xl leading-none"
+            className="text-[#2C3E50] text-xl leading-none"
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open menu"
           >
             ☰
           </button>
-          <span className="text-sm font-bold text-[#3D5A6E] dark:text-white">ViyaWay</span>
+          <span style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
+            viya<span style={{ color: '#C4956A' }}>way</span>
+          </span>
           {activeWorkspace && (
-            <span className="text-sm text-[#6B8299] dark:text-[#9BB0C1] truncate">· {activeWorkspace.name}</span>
+            <span className="text-sm text-[#888888] truncate">· {activeWorkspace.name}</span>
           )}
         </div>
         <div className="flex-1 overflow-hidden">
@@ -596,7 +596,7 @@ export default function Home() {
       {/* New workspace modal */}
       {showNewWorkspace && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 4, padding: '28px 32px', width: '100%', maxWidth: 480, fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 4, padding: '28px 32px', width: '100%', maxWidth: 480, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
 
             <button
               onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); }}
@@ -605,7 +605,7 @@ export default function Home() {
               ← Back
             </button>
 
-            <div style={{ fontFamily: '"Lora", serif', fontWeight: 600, fontSize: 22, color: '#2C3E50', marginTop: 16 }}>
+            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: '#2C3E50', marginTop: 16 }}>
               What are we planning?
             </div>
 
@@ -713,8 +713,8 @@ export default function Home() {
       {deleteWorkspaceId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Delete Experience?</h2>
-            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mb-4">
+            <h2 className="text-lg font-semibold text-[#2C3E50] mb-2">Delete Experience?</h2>
+            <p className="text-[#888888] text-sm mb-4">
               This will permanently delete &quot;{workspaces.find((w) => w.id === deleteWorkspaceId)?.name}&quot; and all its searches.
             </p>
             <div className="flex gap-2 justify-end">
@@ -729,8 +729,8 @@ export default function Home() {
       {deleteProfileId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
-            <h2 className="text-lg font-semibold text-[#2C3E50] dark:text-white mb-2">Remove Traveler?</h2>
-            <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm mb-4">
+            <h2 className="text-lg font-semibold text-[#2C3E50] mb-2">Remove Traveler?</h2>
+            <p className="text-[#888888] text-sm mb-4">
               Remove &quot;{profiles.find((p) => p.id === deleteProfileId)?.name}&quot; from your profiles?
             </p>
             <div className="flex gap-2 justify-end">
@@ -775,10 +775,10 @@ export default function Home() {
         };
         return (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#3D5A6E] rounded-2xl w-full max-w-md shadow-xl overflow-hidden" style={{ minHeight: 480 }}>
-              <div className="px-6 pt-5 pb-0 border-b border-[#E0E8ED] dark:border-[#2a3f52] flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#2C3E50] dark:text-white">Refine your style</span>
-                <button className="text-[#9BB0C1] hover:text-[#6B8299] dark:hover:text-white text-2xl leading-none" onClick={() => setCalibratingProfile(null)}>×</button>
+            <div className="bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl w-full max-w-md shadow-xl overflow-hidden" style={{ minHeight: 480 }}>
+              <div className="px-6 pt-5 pb-0 border-b border-[#E8E8E8] flex items-center justify-between">
+                <span className="text-sm font-semibold text-[#2C3E50]">Refine your style</span>
+                <button className="text-[#888888] hover:text-[#888888] text-2xl leading-none" onClick={() => setCalibratingProfile(null)}>×</button>
               </div>
               <CalibrationAssessment
                 calibrationPath="fresh"
