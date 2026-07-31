@@ -39,6 +39,7 @@ export default function Home() {
   const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
   const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
   const [showFitLegend, setShowFitLegend] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [calibratingProfile, setCalibratingProfile] = useState<Profile | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profilesOpen, setProfilesOpen] = useState(true);
@@ -520,39 +521,13 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 pt-3 pb-4 border-t border-[#E8E8E8] space-y-3">
-          {/* Utility */}
+        <div className="px-4 pt-3 pb-4 border-t border-[#E8E8E8]">
           <button
-            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors w-full text-left"
-            onClick={() => setShowFitLegend(true)}
+            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors w-full text-left flex items-center gap-1.5"
+            onClick={() => setShowSettings(true)}
           >
-            What do fit scores mean?
+            <span style={{ fontSize: 13 }}>⚙</span> Settings
           </button>
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-[#888888]">v2.0</p>
-            <div className="flex items-center gap-3">
-              {/* dark mode hidden until design is confirmed */}
-              <button
-                className="text-xs text-[#888888] hover:text-red-500 transition-colors"
-                onClick={logout}
-                title="Log out"
-              >
-                Log out
-              </button>
-            </div>
-          </div>
-
-          {/* Legal */}
-          <div className="border-t border-[#E8E8E8] pt-3 space-y-1.5">
-            <p className="text-[10px] text-[#888888] uppercase tracking-wider font-medium">Legal</p>
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">Privacy Policy ↗</a>
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">Terms of Service ↗</a>
-            {/* <a href="/affiliate-disclosure" target="_blank" rel="noopener noreferrer" className="block text-xs text-[#888888] hover:text-[#2C3E50] transition-colors">How We Make Money ↗</a> */}
-          </div>
-
-          {/* <p className="text-[10px] text-[#888888] leading-relaxed border-t border-[#E8E8E8] pt-2.5">
-            ViyaWay may earn a commission from bookings. This doesn&apos;t affect our recommendations.
-          </p> */}
         </div>
       </div>
 
@@ -815,6 +790,83 @@ export default function Home() {
 
       {/* Fit legend modal */}
       {showFitLegend && <FitLegendModal onClose={() => setShowFitLegend(false)} />}
+
+      {/* Settings modal */}
+      {showSettings && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowSettings(false)}
+        >
+          <div
+            className="bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl w-full max-w-sm shadow-xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E8E8E8]">
+              <h2 style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 18, color: '#2C3E50' }}>
+                Settings
+              </h2>
+              <button
+                className="text-[#888888] hover:text-[#2C3E50] text-2xl leading-none transition-colors"
+                onClick={() => setShowSettings(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Account */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">Account</p>
+                {user?.email && (
+                  <p className="text-sm text-[#2C3E50] mb-3">{user.email}</p>
+                )}
+                <button
+                  className="text-sm text-[#888888] hover:text-red-500 transition-colors"
+                  onClick={() => { setShowSettings(false); logout(); }}
+                >
+                  Log out →
+                </button>
+              </div>
+
+              {/* App */}
+              <div className="border-t border-[#E8E8E8] pt-5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">App</p>
+                <button
+                  className="text-sm text-[#2C3E50] hover:text-[#C4956A] transition-colors block"
+                  onClick={() => { setShowSettings(false); setShowFitLegend(true); }}
+                >
+                  What do fit scores mean? →
+                </button>
+                <p className="text-xs text-[#888888] mt-3">Version 2.0</p>
+              </div>
+
+              {/* Legal */}
+              <div className="border-t border-[#E8E8E8] pt-5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">Legal</p>
+                <div className="space-y-2">
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-[#888888] hover:text-[#2C3E50] transition-colors"
+                  >
+                    Privacy Policy ↗
+                  </a>
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-[#888888] hover:text-[#2C3E50] transition-colors"
+                  >
+                    Terms of Service ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Product tour */}
       {showTour && <DashboardTour onDone={handleTourDone} />}
