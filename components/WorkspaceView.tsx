@@ -643,31 +643,39 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               )}
             </p>
           </div>
-          {/* Group sort toggle — only visible when 2+ travelers */}
-          {travelers.length > 1 && (
-            <div className="flex items-center gap-0.5 bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-0.5 text-xs flex-shrink-0 self-start">
-              <button
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  sortMode === "fit"
-                    ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
-                    : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-                }`}
-                onClick={() => setSortMode("fit")}
+          {/* Search / Score mode toggle — top right of workspace header */}
+          <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 text-xs flex-shrink-0 self-start">
+            <button
+              className={`px-3 py-1 rounded-md transition-colors ${
+                mode === "search"
+                  ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              }`}
+              onClick={() => setMode("search")}
+            >
+              🔍 Search
+            </button>
+            <button
+              className={`px-3 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                mode === "score"
+                  ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
+                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              }`}
+              onClick={() => setMode("score")}
+            >
+              ✦ Score
+              <span
+                className="relative inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default group/info"
+                onClick={(e) => e.stopPropagation()}
+                onMouseEnter={(e) => e.stopPropagation()}
               >
-                Best Fit
-              </button>
-              <button
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  sortMode === "group"
-                    ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
-                    : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-                }`}
-                onClick={() => setSortMode("group")}
-              >
-                Best for Group
-              </button>
-            </div>
-          )}
+                i
+                <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
+                  Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
+                </span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -858,39 +866,31 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
           </button>
         </div>
 
-        {/* Right: Search / Score mode toggle */}
-        <div className="flex items-center gap-0.5 bg-[#E0E8ED] dark:bg-[#2a3f52] rounded-lg p-0.5 my-1.5 flex-shrink-0">
-          <button
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
-              mode === "search"
-                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
-                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-            }`}
-            onClick={() => setMode("search")}
-          >
-            🔍 Search
-          </button>
-          <button
-            className={`px-3 py-1 text-xs rounded-md transition-colors flex items-center gap-1 ${
-              mode === "score"
-                ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow font-medium"
-                : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
-            }`}
-            onClick={() => setMode("score")}
-          >
-            ✦ Score
-            <span
-              className="relative inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-current opacity-50 text-[9px] leading-none cursor-default group/info"
-              onClick={(e) => e.stopPropagation()}
-              onMouseEnter={(e) => e.stopPropagation()}
+        {/* Right: Best Fit / Best for Group — only when 2+ travelers */}
+        {travelers.length > 1 && (
+          <div className="flex items-center gap-0.5 bg-[#EEF4F8] dark:bg-[#2a3f52] rounded-lg p-0.5 my-1.5 text-xs flex-shrink-0">
+            <button
+              className={`px-2.5 py-1 rounded-md transition-colors ${
+                sortMode === "fit"
+                  ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
+                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              }`}
+              onClick={() => setSortMode("fit")}
             >
-              i
-              <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
-                Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
-              </span>
-            </span>
-          </button>
-        </div>
+              Best Fit
+            </button>
+            <button
+              className={`px-2.5 py-1 rounded-md transition-colors ${
+                sortMode === "group"
+                  ? "bg-white dark:bg-[#4A7A8F] text-[#2C3E50] dark:text-white shadow-sm font-medium"
+                  : "text-[#6B8299] dark:text-[#9BB0C1] hover:text-[#3D5A6E] dark:hover:text-[#B8D4E3]"
+              }`}
+              onClick={() => setSortMode("group")}
+            >
+              Best for Group
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
