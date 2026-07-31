@@ -28,12 +28,12 @@ export default function LandingPage() {
 
       {/* ── Nav ──────────────────────────────────────────────────────────────── */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E8E8E8" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "18px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="max-w-[1200px] mx-auto px-5 md:px-10 flex justify-between items-center py-[18px]">
           <div style={{ fontFamily: encodeSemi, fontWeight: 400, fontSize: 20, color: "#2C3E50", letterSpacing: 0 }}>
             viya<span style={{ color: "#C4956A" }}>way</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-            <Link href="/login" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#888888", textDecoration: "none" }}>
+          <div className="flex items-center gap-5 md:gap-7">
+            <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#888888", textDecoration: "none" }}>
               Log in
             </Link>
             <Link
@@ -58,18 +58,12 @@ export default function LandingPage() {
           overflow: "hidden",
         }}
       >
-        {/* Background video carousel */}
         <HeroVideoCarousel />
-
-        {/* Dark overlay */}
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 2 }} />
-
-        {/* Hero content */}
-        <div style={{ position: "relative", zIndex: 3, paddingLeft: "8%", paddingRight: "8%", maxWidth: 900 }}>
-          <p style={{ fontFamily: permanentMarker, fontSize: "clamp(40px, 6vw, 80px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.15, margin: 0, textTransform: "none" }}>
+        <div className="relative px-[8%] max-w-[900px]" style={{ zIndex: 3 }}>
+          <p style={{ fontFamily: permanentMarker, fontSize: "clamp(36px, 6vw, 80px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.15, margin: 0, textTransform: "none" }}>
             The world awaits.<br />Go your way.
           </p>
-
           <Link
             href="/dashboard"
             style={{
@@ -87,8 +81,7 @@ export default function LandingPage() {
           >
             Get started — it&apos;s free
           </Link>
-
-          <div style={{ display: "flex", gap: 24, marginTop: 18, flexWrap: "wrap" }}>
+          <div className="flex flex-wrap gap-4 md:gap-6 mt-4">
             {TRUST_SIGNALS.map((label) => (
               <span key={label} style={{ fontFamily: encode, fontSize: 12, color: "rgba(255,255,255,0.70)" }}>
                 ✓ {label}
@@ -99,7 +92,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ─────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 40px" }}>
+      <section className="max-w-[1200px] mx-auto px-5 md:px-10 py-12 md:py-20">
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <p style={{ fontFamily: encodeSemi, fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#888888", margin: 0 }}>
             How it works
@@ -136,12 +129,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Why ViyaWay ──────────────────────────────────────────────────────── */}
-      <section style={{ background: "#2C3E50", padding: "80px 40px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
+      <section className="px-5 md:px-10 py-12 md:py-20" style={{ background: "#2C3E50" }}>
+        <div className="max-w-[1200px] mx-auto text-center">
           <h2 style={{ fontFamily: encodeSemi, fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.3, marginTop: 0, marginBottom: 40 }}>
             Why viya<span style={{ color: "#C4956A" }}>way</span>?
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
             {WHY.map(({ title, desc }) => (
               <div key={title} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "24px", textAlign: "left" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
@@ -162,7 +155,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ────────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 720, margin: "0 auto", padding: "96px 40px", textAlign: "center" }}>
+      <section className="max-w-[720px] mx-auto px-5 md:px-10 py-16 md:py-24 text-center">
         <h2 style={{ fontFamily: notoSerif, fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 400, color: "#2C3E50", lineHeight: 1.3, marginTop: 0, marginBottom: 32 }}>
           Ready to find what fits?
         </h2>
@@ -185,8 +178,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: "1px solid #E8E8E8", padding: "24px 40px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+      <footer className="border-t border-[#E8E8E8] px-5 md:px-10 py-6">
+        <div className="max-w-[1200px] mx-auto flex justify-between items-center flex-wrap gap-3">
           <span style={{ fontFamily: encodeSemi, fontSize: 12, color: "#888888", fontWeight: 400 }}>
             © 2026 viya<span style={{ color: "#C4956A" }}>way</span>
           </span>
