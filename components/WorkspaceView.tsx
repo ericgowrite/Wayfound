@@ -978,17 +978,6 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               </div>
             )}
 
-            {/* Group sort info */}
-            {!searching && sortMode === "group" && travelers.length > 1 && sortedResults.length > 0 && (
-              <div className="mb-3 flex items-center gap-2 text-xs">
-                <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                <span className="text-[#6B8299] dark:text-[#9BB0C1]">
-                  <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Group sort</span>
-                  {" "}— options where everyone scores ≥65% rank first, then by average
-                </span>
-              </div>
-            )}
-
             {/* First-time fit score callout */}
             {showFitCallout && !searching && sortedResults.length > 0 && (
               <div className="mb-3 flex items-start gap-3 bg-[#5B8BA0]/8 dark:bg-[#5B8BA0]/15 border border-[#5B8BA0]/30 dark:border-[#5B8BA0]/50 rounded-xl px-4 py-3">
