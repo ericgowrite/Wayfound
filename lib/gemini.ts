@@ -370,7 +370,8 @@ export async function searchAndScore(
   dates?: { start: string; end: string },
   partySize?: number,
   skipCache?: boolean,
-  intent?: string
+  intent?: string,
+  recentWorkspaceSearches?: string[]
 ): Promise<ScoredOption[]> {
   // Cache check — dates excluded from key intentionally (24h TTL prevents
   // stale seasonal results; including dates destroys hit rate for re-searches).
@@ -390,8 +391,13 @@ export async function searchAndScore(
     ? `\nTRAVELER INTENT: "${intent}" — Weight results toward options that genuinely serve this intent alongside the personality profile. Do not reference the intent key literally in output text; let it inform selection and fit scoring naturally.`
     : "";
 
+  const recentSearchesLine =
+    recentWorkspaceSearches && recentWorkspaceSearches.length > 0
+      ? `\nRECENT SEARCHES IN THIS TRIP (context only — do not duplicate results from these): ${recentWorkspaceSearches.join("; ")}`
+      : "";
+
   const prompt = `
-${profileSection}${intentLine}
+${profileSection}${intentLine}${recentSearchesLine}
 
 QUERY: "${query}" (category: ${category})
 ${tripContextLine(destination, dates, partySize)}

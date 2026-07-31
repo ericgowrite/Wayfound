@@ -1,14 +1,15 @@
 import { AxisWeights, AXIS_KEYS, AXIS_LABELS, Profile, ScoredOption, SavedOption } from "@/types";
 
 // ── Storage keys ─────────────────────────────────────────────────────────────
+// LEGACY: vg:saves and vg:rejects are kept as READ-ONLY fallback for 30 days
+// while existing localStorage data migrates. New saves/rejects are tracked
+// server-side via /api/behavior-event. These keys will be removed after the
+// migration window (see lib/behaviorNudge.ts).
 const SAVES_KEY = "vg:saves";
 const REJECTS_KEY = "vg:rejects";
 const CAL_LOG_KEY = "vg:cal_log";
-const CAL_COUNT_PREFIX = "vg:cal_count:";
 // Tracks when feedback-based calibration was last shown (ISO string per profile)
 const CAL_FEEDBACK_SHOWN_PREFIX = "vg:cal_fb_shown:";
-
-export const CALIBRATION_THRESHOLD = 10;
 const GAP_THRESHOLD = 0.05;
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -82,84 +83,17 @@ export function getCalibrationLog(): CalibrationEvent[] {
   return readJSON<CalibrationEvent[]>(CAL_LOG_KEY, []);
 }
 
-// ── Tracking ─────────────────────────────────────────────────────────────────
+// ── Tracking (RETIRED) ────────────────────────────────────────────────────────
+// trackSave and trackReject are retired — passive learning now happens server-
+// side via POST /api/behavior-event + lib/behaviorNudge.ts. These stubs exist
+// for the 30-day localStorage migration fallback window only. Do not call them.
 
-export function trackSave(option: ScoredOption, profileId: string): void {
-  const saves = getSaves();
-  if (saves.some((s) => s.optionId === option.id && s.profileId === profileId)) return;
-  saves.push({
-    optionId: option.id,
-    optionName: option.name,
-    axisScores: option.axisScores,
-    fitScore: option.alignmentScore,
-    profileId,
-    timestamp: new Date().toISOString(),
-  });
-  localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-}
+// ── Calibration trigger (RETIRED) ────────────────────────────────────────────
+// The save-count batch calibration trigger (shouldTriggerCalibration) is retired.
+// Active weight tuning now happens passively via the nudge loop.
+// Feedback-based calibration (shouldTriggerFeedbackCalibration) is still active.
 
-export function trackReject(option: ScoredOption, profileId: string): void {
-  const rejects = getRejects();
-  if (rejects.some((r) => r.optionId === option.id && r.profileId === profileId)) return;
-  rejects.push({
-    optionId: option.id,
-    optionName: option.name,
-    axisScores: option.axisScores,
-    fitScore: option.alignmentScore,
-    profileId,
-    timestamp: new Date().toISOString(),
-  });
-  localStorage.setItem(REJECTS_KEY, JSON.stringify(rejects));
-}
-
-// ── Calibration trigger ───────────────────────────────────────────────────────
-
-function getLastCalCount(profileId: string): number {
-  return readJSON<number>(`${CAL_COUNT_PREFIX}${profileId}`, 0);
-}
-
-// Returns true if the user has accumulated CALIBRATION_THRESHOLD new saves
-// since the last calibration prompt was shown.
-export function shouldTriggerCalibration(profileId: string): boolean {
-  const count = getSaves().filter((s) => s.profileId === profileId).length;
-  const last = getLastCalCount(profileId);
-  return count >= CALIBRATION_THRESHOLD && count - last >= CALIBRATION_THRESHOLD;
-}
-
-// Call this immediately when showing the prompt so it doesn't fire again until
-// another CALIBRATION_THRESHOLD saves accumulate.
-export function markCalibrationShown(profileId: string): void {
-  const count = getSaves().filter((s) => s.profileId === profileId).length;
-  localStorage.setItem(`${CAL_COUNT_PREFIX}${profileId}`, String(count));
-}
-
-// ── Analysis ─────────────────────────────────────────────────────────────────
-
-export function analyzeCalibration(profile: Profile): CalibrationSuggestion[] {
-  const saves = getSaves().filter((s) => s.profileId === profile.id);
-  if (saves.length < CALIBRATION_THRESHOLD) return [];
-
-  return AXIS_KEYS.flatMap((axis) => {
-    const avgSaved = saves.reduce((sum, s) => sum + s.axisScores[axis], 0) / saves.length;
-    const currentWeight = profile.axisWeights[axis];
-    const gap = avgSaved - currentWeight;
-
-    if (Math.abs(gap) <= GAP_THRESHOLD) return [];
-
-    // Move halfway toward observed preference, rounded to 2 dp, clamped [0,1]
-    const raw = currentWeight + gap * 0.5;
-    const suggestedWeight = Math.round(Math.min(1, Math.max(0, raw)) * 100) / 100;
-
-    return [{
-      axis,
-      axisLabel: AXIS_LABELS[axis],
-      avgSaved: Math.round(avgSaved * 100) / 100,
-      currentWeight,
-      suggestedWeight,
-      direction: (gap > 0 ? "higher" : "lower") as "higher" | "lower",
-    }];
-  });
-}
+// analyzeCalibration (save-based) is retired — passive nudge loop replaced it.
 
 // ── Feedback-based calibration ─────────────────────────────────────────────
 // Outcome signal: uses post-trip axisFlags ("noisier than expected") to detect
@@ -267,16 +201,9 @@ export function analyzeFeedbackCalibration(
   });
 }
 
-export function applyCalibration(
-  profile: Profile,
-  suggestions: CalibrationSuggestion[]
-): AxisWeights {
-  const weights = { ...profile.axisWeights };
-  for (const s of suggestions) {
-    weights[s.axis] = s.suggestedWeight;
-  }
-  return weights;
-}
+// applyCalibration is retired as an independent write path. The calibration UI
+// is now read-only — it surfaces what passive nudges have learned. Weights are
+// only mutated by the server-side nudge loop (lib/behaviorNudge.ts).
 
 // ── Event logging ─────────────────────────────────────────────────────────────
 

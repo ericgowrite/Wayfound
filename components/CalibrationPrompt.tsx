@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Profile, AxisWeights } from "@/types";
-import { CalibrationSuggestion, suggestionSentence, applyCalibration } from "@/lib/calibration";
+import { CalibrationSuggestion, suggestionSentence } from "@/lib/calibration";
 
 interface Props {
   profile: Profile;
@@ -18,7 +18,9 @@ export default function CalibrationPrompt({ profile, suggestions, savesCount, so
   const [showDetails, setShowDetails] = useState(false);
 
   function handleAccept() {
-    onAccept(applyCalibration(profile, suggestions));
+    // Calibration is now a read-only "here's what we learned" surface.
+    // Pass current weights unchanged — nudge loop handles actual adjustments.
+    onAccept(profile.axisWeights);
   }
 
   return (

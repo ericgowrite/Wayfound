@@ -13,11 +13,6 @@ import {
 import { sortByAlignment, sortByGroupFit, attachTravelerScores } from "@/lib/scoring";
 import { CATEGORY_META } from "@/lib/categories";
 import {
-  trackSave,
-  trackReject,
-  shouldTriggerCalibration,
-  markCalibrationShown,
-  analyzeCalibration,
   analyzeFeedbackCalibration,
   shouldTriggerFeedbackCalibration,
   markFeedbackCalibrationShown,
@@ -93,6 +88,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   }
   const [pendingCalibration, setPendingCalibration] = useState<CalibrationSuggestion[] | null>(null);
   const [calibrationSource, setCalibrationSource] = useState<"saves" | "feedback">("saves");
+  const [pendingReject, setPendingReject] = useState<{
+    searchId: string;
+    optionId: string;
+    option: ScoredOption;
+  } | null>(null);
   const [showFitCallout, setShowFitCallout] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<SearchCategory | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
@@ -338,6 +338,29 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     }
   }
 
+  function fireBehaviorEvent(
+    action: import("@/types").BehaviorAction,
+    option: ScoredOption,
+    reason?: import("@/types").RejectReason
+  ) {
+    if (isAnonymous || !primaryProfile) return;
+    const body = {
+      profileId: primaryProfile.id,
+      workspaceId: workspace.id,
+      action,
+      reason: action === "reject" ? (reason ?? "other") : null,
+      optionId: option.id,
+      optionName: option.name,
+      axisScores: option.axisScores,
+      fitScore: option.alignmentScore,
+    };
+    fetchWithAuth("/api/behavior-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).catch(() => {}); // best-effort — never block the UI
+  }
+
   async function updateWorkspace(updated: TripWorkspace) {
     onChange(updated); // optimistic — UI reflects change instantly
     try {
@@ -381,17 +404,11 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         fitScore: option.alignmentScore,
         enneagramType: primaryProfile.enneagramType,
       });
-      // Track save rank for ranking quality analytics
       const rank = sortedResults.findIndex((o) => o.id === option.id);
       if (rank >= 0) {
         logEvent({ event: "viyaway_result_saved_rank", itemId: option.id, rank, fitScore: option.alignmentScore });
       }
-      trackSave(option, primaryProfile.id);
-      if (shouldTriggerCalibration(primaryProfile.id)) {
-        markCalibrationShown(primaryProfile.id);
-        const suggestions = analyzeCalibration(primaryProfile);
-        if (suggestions.length > 0) { setCalibrationSource("saves"); setPendingCalibration(suggestions); }
-      }
+      fireBehaviorEvent("save", option);
     }
   }
 
@@ -404,11 +421,17 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   };
 
   function handleStatusChange(searchId: string, optionId: string, status: ScoredOption["status"]) {
-    const journeyState = STATUS_TO_JOURNEY[status] ?? "saved";
-
     const optionFromSearch = workspace.searches
       .find((s) => s.id === searchId)
       ?.scoredResults.find((o) => o.id === optionId);
+
+    // Intercept reject — show reason picker before committing.
+    if (status === "rejected" && optionFromSearch) {
+      setPendingReject({ searchId, optionId, option: optionFromSearch });
+      return;
+    }
+
+    const journeyState = STATUS_TO_JOURNEY[status] ?? "saved";
     const alreadySaved = workspace.savedOptions.some((o) => o.id === optionId);
 
     // Interested and Booked are journey-tracked states — auto-save the item
@@ -449,10 +472,33 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         estimatedTravelWindow: null,
       });
     }
-    if (status === "rejected" && primaryProfile) {
-      const option = optionFromSearch ?? workspace.savedOptions.find((o) => o.id === optionId);
-      if (option) trackReject(option, primaryProfile.id);
-    }
+  }
+
+  function handleRejectWithReason(reason: import("@/types").RejectReason) {
+    if (!pendingReject) return;
+    const { searchId, optionId, option } = pendingReject;
+    setPendingReject(null);
+
+    // Apply the actual status change now that we have a reason.
+    const alreadySaved = workspace.savedOptions.some((o) => o.id === optionId);
+    const savedOptions = workspace.savedOptions.map((o) =>
+      o.id === optionId ? { ...o, status: "rejected" as const, journeyState: "not_going" as const } : o
+    );
+
+    updateWorkspace({
+      ...workspace,
+      searches: workspace.searches.map((s) =>
+        s.id === searchId
+          ? { ...s, scoredResults: s.scoredResults.map((o) => (o.id === optionId ? { ...o, status: "rejected" as const } : o)) }
+          : s
+      ),
+      savedOptions,
+    });
+
+    // Fire behavior event — skip if reason isn't "fit" (nudge won't apply, but event is still logged).
+    fireBehaviorEvent("reject", option, reason);
+
+    void alreadySaved; // suppress unused warning
   }
 
   function handleJourneyUpdate(optionId: string, fields: Partial<SavedOption>) {
@@ -462,6 +508,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
         o.id === optionId ? { ...o, ...fields } : o
       ),
     });
+
+    // Fire behavior event when journey state reaches a decisive outcome.
+    if (fields.journeyState === "booked" || fields.journeyState === "not_going") {
+      const option = workspace.savedOptions.find((o) => o.id === optionId);
+      if (option) fireBehaviorEvent(fields.journeyState, option);
+    }
   }
 
   function handleJourneyUpdateMultiple(updates: { optionId: string; fields: Partial<SavedOption> }[]) {
@@ -508,35 +560,20 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     });
   }
 
-  async function handleCalibrationAccept(newWeights: import("@/types").AxisWeights) {
+  function handleCalibrationAccept(_newWeights: import("@/types").AxisWeights) {
+    // Calibration is now a read-only "here's what we've learned" surface.
+    // Weights are adjusted passively via the behavior nudge loop — not here.
     if (!primaryProfile || !pendingCalibration) return;
-    try {
-      const res = await fetchWithAuth(`/api/profiles/${primaryProfile.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...primaryProfile, axisWeights: newWeights }),
-      });
-      if (!res.ok) {
-        console.error("[calibration] profile save failed:", res.status, await res.text());
-        setPendingCalibration(null);
-        return;
-      }
-      const saved = await res.json();
-      logCalibrationEvent({
-        timestamp: new Date().toISOString(),
-        profileId: primaryProfile.id,
-        savesCount: 0,
-        suggestions: pendingCalibration,
-        accepted: true,
-        previousWeights: primaryProfile.axisWeights,
-        newWeights,
-      });
-      onProfileUpdate(saved);
-    } catch (e) {
-      console.error("[calibration] network error:", e);
-    } finally {
-      setPendingCalibration(null);
-    }
+    logCalibrationEvent({
+      timestamp: new Date().toISOString(),
+      profileId: primaryProfile.id,
+      savesCount: 0,
+      suggestions: pendingCalibration,
+      accepted: true,
+      previousWeights: primaryProfile.axisWeights,
+      newWeights: null, // no longer written independently
+    });
+    setPendingCalibration(null);
   }
 
   function handleCalibrationDismiss() {
@@ -1498,6 +1535,38 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       )}
 
       {showTour && <WorkspaceTour onDone={handleTourDone} />}
+
+      {/* Reject reason picker — inline chip overlay, appears before reject commits */}
+      {pendingReject && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4 pointer-events-none">
+          <div
+            className="pointer-events-auto w-full max-w-sm bg-white border border-[#E8E8E8] rounded-2xl shadow-xl p-5"
+            style={{ background: "var(--color-canvas, #FAF8F5)" }}
+          >
+            <p className="text-sm font-semibold text-[#2C3E50] mb-1">
+              Why are you passing on <span className="font-bold">{pendingReject.option.name}</span>?
+            </p>
+            <p className="text-xs text-[#888888] mb-4">Helps us improve future recommendations</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(["fit", "price", "dates", "other"] as import("@/types").RejectReason[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => handleRejectWithReason(r)}
+                  className="px-4 py-2 text-sm font-medium rounded-full border border-[#E8E8E8] text-[#2C3E50] hover:bg-[#2C3E50] hover:text-white hover:border-[#2C3E50] transition-colors"
+                >
+                  {r === "fit" ? "Not the right fit" : r === "price" ? "Price" : r === "dates" ? "Dates don't work" : "Something else"}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setPendingReject(null)}
+              className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { friendlyError } from "@/lib/errorMessages";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { Search, SearchCategory } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+import { logSearchHistory, getRecentWorkspaceSearches, getWorkspaceWeights } from "@/lib/behaviorLog";
+import { getEffectiveWeights } from "@/lib/behaviorNudge";
 
 const VALID_CATEGORIES: SearchCategory[] = ["accommodation", "tour", "restaurant", "activity", "attraction"];
 
@@ -64,8 +66,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No traveler profile found. Please complete your travel style assessment first." }, { status: 400 });
     }
 
+    const primaryProfile = profiles[0];
     const searchId = uuidv4();
-    const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize, false, typeof intent === "string" ? intent : undefined);
+
+    // Build effective profiles with workspace-scoped weights when enough signal exists.
+    const effectiveProfiles = await Promise.all(
+      profiles.map(async (p) => {
+        const wsWeights = await getWorkspaceWeights(userId, p.id, workspaceId);
+        const effective = getEffectiveWeights(p.axisWeights, wsWeights);
+        return { ...p, axisWeights: effective };
+      })
+    );
+
+    // Fetch recent workspace searches for Gemini context (best-effort — non-blocking).
+    const recentSearches = primaryProfile
+      ? await getRecentWorkspaceSearches(userId, primaryProfile.id, workspaceId, 5).catch(() => [])
+      : [];
+
+    const rawResults = await searchAndScore(
+      query,
+      category as SearchCategory,
+      searchId,
+      effectiveProfiles,
+      workspace.destination,
+      workspace.dates,
+      workspace.partySize,
+      false,
+      typeof intent === "string" ? intent : undefined,
+      recentSearches
+    );
     const validatedResults = await validateResultLinks(rawResults, workspace.destination, workspace.dates, workspace.partySize);
     const scoredResults = attachTravelerScores(validatedResults, travelerProfiles);
 
@@ -81,6 +110,16 @@ export async function POST(request: Request) {
 
     workspace.searches.unshift(search);
     await saveWorkspace(userId, workspace);
+
+    // Log to search history for personalization context (best-effort — fire-and-forget).
+    if (!isAnonymous && primaryProfile) {
+      void logSearchHistory(userId, primaryProfile.id, {
+        id: searchId,
+        query,
+        workspaceId,
+        timestamp: search.searchedAt,
+      }).catch(() => {});
+    }
 
     return NextResponse.json(search);
   } catch (e) {

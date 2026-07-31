@@ -30,6 +30,11 @@ export interface Profile {
   lastCalibratedAt?: string;
   calibrationPath?: "wing" | "fresh";
   answeredAspirrationally?: boolean;
+  // Passive personalization — type drift tracking
+  lastReconciledAt?: string;
+  reconciledMismatchCount?: number;
+  /** Set when type drift crosses the mismatch threshold. UI reads to show the soft prompt. */
+  pendingTypeReconciliation?: string;
 }
 
 // Legacy alias used in older API call sites
@@ -184,5 +189,40 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  timestamp: string;
+}
+
+// ── Personalization loop ───────────────────────────────────────────────────────
+
+export type RejectReason = "fit" | "price" | "dates" | "other";
+
+export type BehaviorAction = "save" | "reject" | "booked" | "not_going";
+
+export interface BehaviorEvent {
+  action: BehaviorAction;
+  /** Required when action === "reject"; null for all other actions. */
+  reason: RejectReason | null;
+  optionId: string;
+  optionName: string;
+  axisScores: AxisWeights;
+  fitScore: number;
+  workspaceId: string;
+  timestamp: string;
+}
+
+/** Per-workspace axis weight overlay stored alongside the global profile. */
+export interface WorkspaceWeights {
+  /** Current weights, nudged by activity in this workspace. */
+  axisWeights: AxisWeights;
+  /** Snapshot of global weights when this workspace was created — used for rollup delta. */
+  baseWeights: AxisWeights;
+  saveCount: number;
+  createdAt: string;
+}
+
+export interface SearchHistoryEntry {
+  id: string;
+  query: string;
+  workspaceId: string;
   timestamp: string;
 }
