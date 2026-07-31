@@ -21,8 +21,8 @@ const mockWorkspace: TripWorkspace = {
   travelers: ["profile-1"],
   searches: [],
   savedOptions: [
-    { id: "s1", searchId: "search-1", name: "Nayara Springs", source: "#", description: "", price: "$450/night", axisScores: { calm: 0.9, designSincerity: 0.8, valueIntegrity: 0.7, socialPermeability: 0.4, autonomy: 0.6, novelty: 0.5, locationFriction: 0.6 }, alignmentScore: 88, thresholdViolations: [], watchOutFor: [], dealbreakersTriggered: [], fitExplanation: "", tradeoffs: [], status: "new", notes: "", travelerScores: {} },
-    { id: "s2", searchId: "search-1", name: "Kura Design Villas", source: "#", description: "", price: "$380/night", axisScores: { calm: 0.85, designSincerity: 0.92, valueIntegrity: 0.75, socialPermeability: 0.3, autonomy: 0.8, novelty: 0.6, locationFriction: 0.5 }, alignmentScore: 84, thresholdViolations: [], watchOutFor: [], dealbreakersTriggered: [], fitExplanation: "", tradeoffs: [], status: "new", notes: "", travelerScores: {} },
+    { id: "s1", searchId: "search-1", name: "Nayara Springs", source: "#", description: "", price: "$450/night", axisScores: { calm: 0.9, designSincerity: 0.8, valueIntegrity: 0.7, socialPermeability: 0.4, autonomy: 0.6, novelty: 0.5, locationFriction: 0.6 }, alignmentScore: 88, thresholdViolations: [], watchOutFor: [], dealbreakersTriggered: [], fitExplanation: "", tradeoffs: [], status: "new", notes: "", travelerScores: {}, savedAt: new Date().toISOString(), tags: [], journeyState: "saved" },
+    { id: "s2", searchId: "search-1", name: "Kura Design Villas", source: "#", description: "", price: "$380/night", axisScores: { calm: 0.85, designSincerity: 0.92, valueIntegrity: 0.75, socialPermeability: 0.3, autonomy: 0.8, novelty: 0.6, locationFriction: 0.5 }, alignmentScore: 84, thresholdViolations: [], watchOutFor: [], dealbreakersTriggered: [], fitExplanation: "", tradeoffs: [], status: "new", notes: "", travelerScores: {}, savedAt: new Date().toISOString(), tags: [], journeyState: "saved" },
   ],
   notes: "",
   createdAt: new Date().toISOString(),
