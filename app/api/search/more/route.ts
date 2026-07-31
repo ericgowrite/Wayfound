@@ -5,7 +5,7 @@ import { searchMoreOptions } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
 import { friendlyError } from "@/lib/errorMessages";
 
-const ANON_SEARCH_LIMIT = 2;
+const ANON_SEARCH_LIMIT = 1;
 
 export async function POST(request: Request) {
   try {

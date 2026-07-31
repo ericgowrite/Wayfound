@@ -311,7 +311,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                 className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
                 onClick={() => handleTypeConfirmed(confirmingType)}
               >
-                Yes, this is me →
+                Yes, this is correct →
               </button>
             </>
           )}

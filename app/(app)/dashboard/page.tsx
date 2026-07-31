@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Profile, TripWorkspace } from "@/types";
 import WorkspaceView from "@/components/WorkspaceView";
 import ProfileEditor from "@/components/ProfileEditor";
@@ -110,7 +111,7 @@ export default function Home() {
     : [];
 
   async function createWorkspace() {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !newDest.trim()) return;
     setCreatingWorkspace(true);
     const defaultId = profiles[0]?.id;
     const travelers = [defaultId, ...newTravelers].filter((id): id is string => !!id && id !== undefined).filter((id, i, arr) => arr.indexOf(id) === i);
@@ -271,9 +272,9 @@ export default function Home() {
         <div className="w-full max-w-md bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl shadow-xl overflow-hidden">
           <div className="px-6 pt-6 pb-0 border-b border-[#E8E8E8]">
             <div className="flex items-center justify-between mb-3">
-              <span style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
+              <Link href="/" style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50', textDecoration: 'none' }}>
                 viya<span style={{ color: '#C4956A' }}>way</span>
-              </span>
+              </Link>
               <span className="text-xs text-[#888888]">Welcome</span>
             </div>
           </div>
@@ -309,9 +310,9 @@ export default function Home() {
         {/* App header */}
         <div className="flex items-start justify-between px-4 py-4 border-b border-[#E8E8E8]">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
+            <Link href="/" style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50', textDecoration: 'none' }}>
               viya<span style={{ color: '#C4956A' }}>way</span>
-            </h1>
+            </Link>
             <p className="text-xs text-[#2C3E50] mt-0.5">Travel that fits who you are.</p>
             <button
               id="tour-trigger"
@@ -620,7 +621,7 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where (optional)</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where</div>
                 <input
                   placeholder="e.g. Tuscany, Italy"
                   value={newDest}
@@ -700,8 +701,8 @@ export default function Home() {
 
             <button
               onClick={createWorkspace}
-              disabled={!newName.trim() || creatingWorkspace}
-              style={{ background: '#2C3E50', color: '#fff', textAlign: 'center', fontSize: 15, fontWeight: 600, padding: 15, borderRadius: 999, marginTop: 28, width: 220, border: 'none', cursor: newName.trim() && !creatingWorkspace ? 'pointer' : 'not-allowed', opacity: !newName.trim() || creatingWorkspace ? 0.6 : 1, display: 'block' }}
+              disabled={!newName.trim() || !newDest.trim() || creatingWorkspace}
+              style={{ background: '#2C3E50', color: '#fff', textAlign: 'center', fontSize: 15, fontWeight: 600, padding: 15, borderRadius: 999, marginTop: 28, width: 220, border: 'none', cursor: newName.trim() && newDest.trim() && !creatingWorkspace ? 'pointer' : 'not-allowed', opacity: !newName.trim() || !newDest.trim() || creatingWorkspace ? 0.6 : 1, display: 'block' }}
             >
               {creatingWorkspace ? 'Creating…' : "Let's go →"}
             </button>

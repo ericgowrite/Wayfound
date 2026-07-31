@@ -30,7 +30,12 @@ export async function POST(request: Request) {
 
     // ── Copy profiles ──────────────────────────────────────────────────────
     const anonProfiles = await getProfiles(anonUid);
+    const realProfiles = await getProfiles(realUid);
+    const realNames = new Set(realProfiles.map((p) => p.name.trim().toLowerCase()));
     for (const profile of anonProfiles) {
+      // Skip if the real account already has a profile with the same name
+      // (avoids duplicates when a user completes onboarding anonymously then logs in)
+      if (realNames.has(profile.name.trim().toLowerCase())) continue;
       await saveProfileToList(realUid, profile);
     }
 

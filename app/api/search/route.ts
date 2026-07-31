@@ -3,6 +3,7 @@ import { getProfile, getProfiles, getWorkspace, getWorkspaces, saveWorkspace } f
 import { getTokenClaims, AuthError } from "@/lib/serverAuth";
 import { searchAndScore } from "@/lib/gemini";
 import { attachTravelerScores } from "@/lib/scoring";
+import { validateResultLinks } from "@/lib/urlCheck";
 import { friendlyError } from "@/lib/errorMessages";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { Search, SearchCategory } from "@/types";
@@ -10,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const VALID_CATEGORIES: SearchCategory[] = ["accommodation", "tour", "restaurant", "activity", "attraction"];
 
-/** Anonymous users get 2 free searches across all their workspaces. */
+/** Anonymous users get 1 free search across all their workspaces. */
 const ANON_SEARCH_LIMIT = 1;
 
 export async function POST(request: Request) {
@@ -65,10 +66,8 @@ export async function POST(request: Request) {
 
     const searchId = uuidv4();
     const rawResults = await searchAndScore(query, category as SearchCategory, searchId, profiles, workspace.destination, workspace.dates, workspace.partySize, false, typeof intent === "string" ? intent : undefined);
-    // URL validation is deferred to card expand (client-side ResultCard handles
-    // it lazily via /api/validate-url). Removing it here eliminates 0.5–3s of
-    // blocking HTTP checks from the search critical path.
-    const scoredResults = attachTravelerScores(rawResults, travelerProfiles);
+    const validatedResults = await validateResultLinks(rawResults, workspace.destination, workspace.dates, workspace.partySize);
+    const scoredResults = attachTravelerScores(validatedResults, travelerProfiles);
 
     const search: Search = {
       id: searchId,

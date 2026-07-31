@@ -601,7 +601,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       {isAnonymous && (
         <div className="bg-[#5B8BA0]/10 dark:bg-[#5B8BA0]/15 border-b border-[#5B8BA0]/20 px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
           <p className="text-xs text-[#3D5A6E] dark:text-[#9BB0C1]">
-            You have 2 free searches. <span className="font-medium">Sign in to save your experiences and keep searching.</span>
+            You have 1 free search. <span className="font-medium">Sign in to save your experiences and keep searching.</span>
           </p>
           <button
             className="text-xs font-medium text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline flex-shrink-0"

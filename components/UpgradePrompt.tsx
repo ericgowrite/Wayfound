@@ -73,7 +73,7 @@ export default function UpgradePrompt({ onClose }: Props) {
         <div className="text-center mb-5">
           <div className="text-3xl mb-2">✈️</div>
           <h2 className="text-base font-semibold text-[#2C3E50] dark:text-white">
-            You&apos;ve used your 2 free searches
+            You&apos;ve used your 1 free search
           </h2>
           <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 leading-relaxed">
             Create a free account to keep searching — your travel profile and experiences are saved automatically.

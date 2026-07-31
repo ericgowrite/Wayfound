@@ -839,8 +839,10 @@ export default function ResultCard({
         onClick={() => {
           if (!clickable) return;
           const next = !expanded;
-          setExpanded(next);
-          onExpandedChange?.(next);
+          animateFlip(() => {
+            setExpanded(next);
+            onExpandedChange?.(next);
+          });
           if (next) logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
         }}
       >

@@ -150,25 +150,6 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           {/* Subtitle */}
           <p className="text-sm text-[#888888] mb-6">Going somewhere?</p>
 
-          {/* Intent chips — all visible */}
-          <div className="flex flex-wrap justify-center gap-2" style={{ maxWidth: 440, margin: "0 auto 24px" }}>
-            {[...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].map((chip) => (
-              <button
-                key={chip.label}
-                className="border rounded-full text-sm transition-all"
-                style={{
-                  padding: "8px 15px",
-                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#2C3E50"}`,
-                  background: selectedIntent === chip.intent ? "#C4956A" : "transparent",
-                  color: selectedIntent === chip.intent ? "#fff" : "#2C3E50",
-                }}
-                onClick={() => openSearch(chip.intent)}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-
           {/* Category picker */}
           <div className="flex items-center justify-center gap-6 mb-6">
             {CATEGORIES.map(({ value, label, Icon }) => (
@@ -215,6 +196,25 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
               </button>
             </div>
             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+          </div>
+
+          {/* Intent chips — below search bar */}
+          <div className="flex flex-wrap justify-center gap-2 mt-5" style={{ maxWidth: 440, margin: "20px auto 0" }}>
+            {[...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].map((chip) => (
+              <button
+                key={chip.label}
+                className="border rounded-full text-sm transition-all"
+                style={{
+                  padding: "8px 15px",
+                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#2C3E50"}`,
+                  background: selectedIntent === chip.intent ? "#C4956A" : "transparent",
+                  color: selectedIntent === chip.intent ? "#fff" : "#2C3E50",
+                }}
+                onClick={() => openSearch(chip.intent)}
+              >
+                {chip.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
