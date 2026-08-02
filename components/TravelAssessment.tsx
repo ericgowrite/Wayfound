@@ -136,7 +136,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           className="text-xs text-[#888888] underline mt-3 transition-opacity hover:opacity-70"
           onClick={onSkip}
         >
-          I already know my type
+          {isSelf ? "I already know my type" : "They already know their type"}
         </button>
       </div>
     );
