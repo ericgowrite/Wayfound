@@ -298,7 +298,7 @@ export default function Home() {
           </div>
         </div>
         {showAddProfile && (
-          <AddProfileModal isSelf onSave={handleProfileSaved} onClose={() => setShowAddProfile(false)} />
+          <AddProfileModal isSelf onSave={handleProfileSaved} onClose={() => setShowAddProfile(false)} workspaceId={activeWorkspaceId ?? undefined} />
         )}
       </div>
     );
@@ -785,6 +785,7 @@ export default function Home() {
         <AddProfileModal
           onSave={handleProfileSaved}
           onClose={() => setShowAddProfile(false)}
+          workspaceId={activeWorkspaceId ?? undefined}
         />
       )}
 

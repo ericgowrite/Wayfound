@@ -16,11 +16,13 @@ interface Props {
   /** True when the current user is setting up their own profile (first-run or self-edit).
    *  Switches copy from third-person ("Does Eric know their type?") to first-person ("Do you know your type?"). */
   isSelf?: boolean;
+  /** The active workspace ID — required to wire a shareable assess link to the right trip. */
+  workspaceId?: string;
 }
 
-type Step = "info" | "know-type" | "assess" | "type-select" | "review";
+type Step = "info" | "know-type" | "assess" | "type-select" | "review" | "send-link";
 
-export default function AddProfileModal({ onSave, onClose, isSelf = false }: Props) {
+export default function AddProfileModal({ onSave, onClose, isSelf = false, workspaceId }: Props) {
   const [step, setStep] = useState<Step>("info");
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -28,10 +30,45 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
   const [draft, setDraft] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
   const [newDealbreaker, setNewDealbreaker] = useState("");
+  const [assessLinkUrl, setAssessLinkUrl] = useState<string | null>(null);
+  const [linkGenerating, setLinkGenerating] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   function handleNameNext() {
     if (!name.trim()) return;
     setStep("know-type");
+  }
+
+  async function generateAssessLink() {
+    if (!workspaceId) return;
+    setLinkGenerating(true);
+    setLinkError(null);
+    try {
+      const res = await fetchWithAuth("/api/assess-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setLinkError(data.error ?? "Couldn't generate a link. Try again.");
+        return;
+      }
+      setAssessLinkUrl(data.url);
+      setStep("send-link");
+    } catch {
+      setLinkError("Couldn't connect. Check your internet and try again.");
+    } finally {
+      setLinkGenerating(false);
+    }
+  }
+
+  async function copyLink() {
+    if (!assessLinkUrl) return;
+    await navigator.clipboard.writeText(assessLinkUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   }
 
   function handleTypeConfirmed(typeToConfirm: string) {
@@ -113,6 +150,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
             {step === "type-select" && !confirmingType && (isSelf ? "Which one sounds like you?" : `Select ${name ? name + "'s" : "Their"} Type`)}
             {step === "type-select" && confirmingType && (TYPE_INFO[confirmingType]?.name ?? "")}
             {step === "review" && `Review: ${draft.name}`}
+            {step === "send-link" && "Send an assessment link"}
           </h2>
           <button className="text-[#9BB0C1] hover:text-[#2C3E50] dark:hover:text-white text-2xl leading-none" onClick={onClose}>×</button>
         </div>
@@ -169,6 +207,21 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                   <p className="text-[#2C3E50] dark:text-white text-sm font-medium">{isSelf ? "No, help me find out" : "No, help them find out"}</p>
                   <p className="text-[#6B8299] text-xs mt-0.5">Take a quick in-app travel style assessment</p>
                 </button>
+                {!isSelf && workspaceId && (
+                  <button
+                    className="w-full text-left px-4 py-3 rounded-lg border border-[#E0E8ED] dark:border-[#3D5A6E] hover:border-[#5B8BA0] hover:bg-[#5B8BA0]/8 dark:hover:bg-[#5B8BA0]/10 transition-colors disabled:opacity-50"
+                    onClick={generateAssessLink}
+                    disabled={linkGenerating}
+                  >
+                    <p className="text-[#2C3E50] dark:text-white text-sm font-medium">
+                      {linkGenerating ? "Generating link…" : "They're not nearby — send a link"}
+                    </p>
+                    <p className="text-[#6B8299] text-xs mt-0.5">Share a link they can complete on their own device</p>
+                  </button>
+                )}
+                {linkError && (
+                  <p className="text-red-500 text-xs px-1">{linkError}</p>
+                )}
               </div>
             </div>
           )}
@@ -229,6 +282,31 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                   </ul>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Send-link step */}
+          {step === "send-link" && assessLinkUrl && (
+            <div className="space-y-4">
+              <p className="text-[#6B8299] dark:text-[#9BB0C1] text-sm leading-relaxed">
+                Share this link with <span className="font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">{name || "your co-traveler"}</span>.
+                They&apos;ll answer 10 questions on their own device — no account needed.
+                Their travel style will be added to this trip automatically when they finish.
+              </p>
+              <div className="flex gap-2 items-center">
+                <input
+                  readOnly
+                  value={assessLinkUrl}
+                  className={`flex-1 ${input} text-xs rounded border px-3 py-2 focus:outline-none truncate`}
+                />
+                <button
+                  onClick={copyLink}
+                  className="flex-shrink-0 px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F] transition-colors"
+                >
+                  {linkCopied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <p className="text-xs text-[#9BB0C1]">Link expires in 7 days. Single use.</p>
             </div>
           )}
 
@@ -312,6 +390,17 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false }: Pro
                 onClick={() => handleTypeConfirmed(confirmingType)}
               >
                 Yes, this is correct →
+              </button>
+            </>
+          )}
+          {step === "send-link" && (
+            <>
+              <button className={`px-4 py-2 text-sm rounded ${btnSecondary}`} onClick={() => setStep("know-type")}>← Back</button>
+              <button
+                className="px-4 py-2 text-sm rounded bg-[#5B8BA0] text-white hover:bg-[#4A7A8F]"
+                onClick={onClose}
+              >
+                Done
               </button>
             </>
           )}
