@@ -78,12 +78,14 @@ export default function AssessClient({ token }: { token: string }) {
 
   if (phase === "assessing") {
     return (
-      <div className="min-h-screen bg-[#FAF8F5]">
-        <TravelAssessment
-          isSelf={true}
-          onComplete={handleComplete}
-          onSkip={() => setPhase("intro")}
-        />
+      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-start pt-8 px-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[#E8E8E8] overflow-hidden" style={{ minHeight: 520 }}>
+          <TravelAssessment
+            isSelf={true}
+            onComplete={handleComplete}
+            onSkip={() => setPhase("intro")}
+          />
+        </div>
       </div>
     );
   }
