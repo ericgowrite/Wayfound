@@ -68,8 +68,8 @@ export async function POST(
   // Add profile to workspace travelers if not already there
   const workspace = await getWorkspace(inviterUid, workspaceId);
   if (workspace && !workspace.travelers.includes(profile.id)) {
-    if (workspace.travelers.length >= 4) {
-      return NextResponse.json({ error: "This trip already has the maximum number of travelers (4)." }, { status: 409 });
+    if (workspace.travelers.length >= 6) {
+      return NextResponse.json({ error: "This trip already has the maximum number of travelers (6)." }, { status: 409 });
     }
     workspace.travelers = [...workspace.travelers, profile.id];
     await saveWorkspace(inviterUid, workspace);
