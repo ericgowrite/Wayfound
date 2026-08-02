@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAssessLink, markAssessLinkCompleted } from "@/lib/assessLink";
-import { getProfile, saveProfileToList, getWorkspace, saveWorkspace } from "@/lib/storage";
+import { saveProfileToList, getWorkspace, saveWorkspace } from "@/lib/storage";
 import { v4 as uuidv4 } from "uuid";
 import { Profile } from "@/types";
 import templates from "@/src/data/profileTemplates.json";
