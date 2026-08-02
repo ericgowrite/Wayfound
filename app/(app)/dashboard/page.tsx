@@ -785,7 +785,7 @@ export default function Home() {
         <AddProfileModal
           onSave={handleProfileSaved}
           onClose={() => setShowAddProfile(false)}
-          workspaceId={activeWorkspaceId ?? undefined}
+          workspaceId={activeWorkspaceId ?? workspaces[0]?.id ?? undefined}
         />
       )}
 
