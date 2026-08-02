@@ -214,7 +214,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false, works
                     disabled={linkGenerating}
                   >
                     <p className="text-[#2C3E50] dark:text-white text-sm font-medium">
-                      {linkGenerating ? "Generating link…" : "They're not nearby — send a link"}
+                      {linkGenerating ? "Generating link…" : "Send a link"}
                     </p>
                     <p className="text-[#6B8299] text-xs mt-0.5">Share a link they can complete on their own device</p>
                   </button>
