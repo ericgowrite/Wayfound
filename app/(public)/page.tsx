@@ -2,10 +2,10 @@ import Link from "next/link";
 import HeroVideoCarousel from "@/components/HeroVideoCarousel";
 
 const HOW_IT_WORKS = [
-  { num: "1", title: "Tell us how you travel", desc: "A short conversation, not a form — a few questions and we know your type." },
-  { num: "2", title: "Search anything", desc: "Places to stay, restaurants, activities, tours, attractions — one search, every category." },
-  { num: "3", title: "See why it fits", desc: "A one-line judgment, not a star rating — the reason a place is right for you." },
-  { num: "4", title: "Plan it together", desc: "Invite who's coming — results account for everyone, not just you." },
+  { num: "1", title: "Tell us who you are", desc: "A few questions, not a form. Two minutes, and we've got your type." },
+  { num: "2", title: "Search like you would with a friend", desc: "Stays, restaurants, activities, tours — one search, every category." },
+  { num: "3", title: "Get the why, not just the what", desc: "Every result comes with a one-line reason it's yours. No stars. No guessing." },
+  { num: "4", title: "Bring everyone along", desc: "Add who's coming. Results account for the whole group, not just you." },
 ];
 
 const WHY = [
