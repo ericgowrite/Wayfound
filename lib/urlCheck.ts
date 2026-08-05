@@ -104,8 +104,94 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
   return res;
 }
 
+// ── Content validation ────────────────────────────────────────────────────────
+
+const GENERIC_WORDS = new Set([
+  "hotel", "hotels", "resort", "resorts", "inn", "lodge", "motel", "suites",
+  "spa", "the", "a", "an", "and", "of", "at", "in", "by", "de", "el", "la",
+  "le", "les", "los", "las", "del", "restaurant", "restaurants", "cafe",
+  "bar", "bistro", "grill", "kitchen", "house", "club", "villa", "villas",
+  "boutique", "collection", "properties", "property", "group",
+]);
+
+/** Extract the distinctive tokens from a property name for content matching. */
+export function distinctiveTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !GENERIC_WORDS.has(w));
+}
+
+/** Pull text from title/h1/og:title/meta description out of raw HTML. */
+function extractPageSignals(html: string): string {
+  const title = html.match(/<title[^>]*>([^<]{0,300})<\/title>/i)?.[1] ?? "";
+  const h1 = html.match(/<h1[^>]*>([^<]{0,200})<\/h1>/i)?.[1] ?? "";
+  const ogTitle = html.match(/property=["']og:title["'][^>]*content=["']([^"']{0,200})["']/i)?.[1]
+    ?? html.match(/content=["']([^"']{0,200})["'][^>]*property=["']og:title["']/i)?.[1]
+    ?? "";
+  const metaDesc = html.match(/name=["']description["'][^>]*content=["']([^"']{0,300})["']/i)?.[1]
+    ?? html.match(/content=["']([^"']{0,300})["'][^>]*name=["']description["']/i)?.[1]
+    ?? "";
+  return [title, h1, ogTitle, metaDesc].join(" ").toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+}
+
+const PARKED_SIGNALS = [
+  "domain for sale", "buy this domain", "this domain is for sale",
+  "domain parking", "parked domain", "godaddy", "sedoparking",
+  "hugedomains", "dan.com", "afternic", "flippa",
+  "coming soon", "under construction",
+];
+
+/**
+ * After a URL resolves successfully, fetch its HTML and verify the property
+ * name appears in the page signals (title / h1 / og:title / meta description).
+ * Returns false if the page looks parked/wrong, true if it looks correct or
+ * if we can't tell (bot-blocked, timeout, non-HTML).
+ */
+async function contentMatchesProperty(url: string, propertyName: string): Promise<boolean> {
+  const tokens = distinctiveTokens(propertyName);
+  if (tokens.length === 0) return true; // can't evaluate — don't block
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)",
+        "Accept": "text/html",
+        "Range": "bytes=0-10000", // request only the first ~10KB
+      },
+    });
+    clearTimeout(timer);
+
+    const contentType = res.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/html")) return true; // PDF, redirect to app store, etc. — don't block
+
+    const text = await res.text();
+    const html = text.slice(0, 12000); // guard against Range header being ignored
+
+    const pageText = extractPageSignals(html);
+
+    // Hard fail: page is clearly a parked domain
+    if (PARKED_SIGNALS.some((sig) => pageText.includes(sig))) return false;
+
+    // Soft fail: none of the distinctive property tokens appear anywhere in the page signals
+    const anyTokenFound = tokens.some((t) => pageText.includes(t));
+    return anyTokenFound;
+  } catch {
+    clearTimeout(timer);
+    // Network error / timeout / bot block — can't confirm, don't block
+    return true;
+  }
+}
+
 /** Try to validate a single URL. Returns the result or null on hard failure. */
-export async function checkUrl(url: string): Promise<ValidateResult> {
+export async function checkUrl(url: string, propertyName?: string): Promise<ValidateResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3000);
 
@@ -120,22 +206,23 @@ export async function checkUrl(url: string): Promise<ValidateResult> {
       return { valid: false, finalUrl: null, status, reason: "not_found" };
     }
     if (status >= 200 && status < 400) {
-      // Accept any successful response including cross-domain redirects —
-      // international properties (.it, .id, .co.uk) commonly redirect to OTA
-      // listings or regional TLD equivalents, which are legitimate destinations.
+      // URL resolves — now verify the page is actually for this property.
+      if (propertyName) {
+        const matches = await contentMatchesProperty(finalUrl, propertyName);
+        if (!matches) {
+          return { valid: false, finalUrl: null, status, reason: "content_mismatch" };
+        }
+      }
       return { valid: true, finalUrl, status, reason: "ok" };
     }
     if (status === 403 || status === 405 || status >= 500) {
+      // Server rejected our probe — can't content-validate, assume valid.
       return { valid: true, finalUrl: url, status, reason: "blocked_or_error" };
     }
     return { valid: false, finalUrl: null, status, reason: "unexpected_status" };
   } catch (e) {
     clearTimeout(timer);
     const reason = (e instanceof Error && e.name === "AbortError") ? "timeout" : "network_error";
-    // Hotel/venue sites frequently block server-side probes (bot detection, GCP IP
-    // blocklists). A failed probe is NOT evidence that the URL is wrong — it's
-    // evidence the server rejected us. Keep the original URL and let the client-side
-    // expand-time check (which uses the real browser) surface any actual bad links.
     return { valid: true, finalUrl: url, status: 0, reason };
   }
 }
@@ -176,7 +263,7 @@ export function generateUrlVariants(url: string): string[] {
 
 /** Full check: cache first, then original URL, then name-variant fallbacks.
  *  Results (valid or invalid) are cached for 30 days by hostname. */
-export async function checkUrlWithVariants(url: string): Promise<ValidateResult> {
+export async function checkUrlWithVariants(url: string, propertyName?: string): Promise<ValidateResult> {
   if (!url || !/^https?:\/\//i.test(url)) {
     return { valid: false, finalUrl: null, status: 0, reason: "invalid_url" };
   }
@@ -184,24 +271,26 @@ export async function checkUrlWithVariants(url: string): Promise<ValidateResult>
     return { valid: false, finalUrl: null, status: 0, reason: "private_address" };
   }
 
+  // Skip cache when content validation is possible — a hostname cached as "valid"
+  // before content checking was introduced may be a parked domain.
+  // Cache is still used for speed on known-good domains.
   const cached = await getCachedValidation(url);
-  if (cached) return cached;
+  if (cached && cached.reason !== "content_mismatch") return cached;
 
-  const primary = await checkUrl(url);
+  const primary = await checkUrl(url, propertyName);
   if (primary.valid) {
     await setCachedValidation(url, primary);
     return primary;
   }
 
   for (const variant of generateUrlVariants(url)) {
-    const result = await checkUrl(variant);
+    const result = await checkUrl(variant, propertyName);
     if (result.valid) {
       await setCachedValidation(url, result);
       return result;
     }
   }
 
-  // Cache invalid results too — avoids hammering permanently dead domains.
   await setCachedValidation(url, primary);
   return primary;
 }
@@ -234,7 +323,7 @@ export async function validateOrFallback(
   partySize?: number
 ): Promise<string> {
   if (!url) return mapsFallbackUrl(propertyName, destination, dates, partySize);
-  const result = await checkUrlWithVariants(url);
+  const result = await checkUrlWithVariants(url, propertyName);
   if (result.valid && result.finalUrl && !isSpamUrl(result.finalUrl)) return result.finalUrl;
   return mapsFallbackUrl(propertyName, destination, dates, partySize);
 }

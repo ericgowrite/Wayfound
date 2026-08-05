@@ -242,7 +242,7 @@ function hydrate(
 
 // ── Shared prompt fragments ───────────────────────────────────────────────────
 
-const SOURCE_INSTRUCTION = `"source": "Official property website URL retrieved from search results. Prefer the property's own domain over OTA/aggregator pages (booking.com, tripadvisor.com, expedia.com, hotels.com, marriott.com, etc.). Skip redirect/tracking URLs and sponsored search results. If no official property URL appeared, omit this field entirely."`;
+const SOURCE_INSTRUCTION = `"source": "The property's official website URL — taken directly from a grounding search result, NOT generated or guessed from the property name. Rules: (1) Only include a URL you actually saw in a search result for this specific property. (2) Prefer the property's own domain over OTAs (booking.com, tripadvisor.com, expedia.com, hotels.com, marriott.com, airbnb.com, yelp.com, etc.). (3) Do not construct or infer a URL by guessing the domain from the property name — e.g. do not turn 'Hotel El Roblar' into 'hotelelroblar.com'. (4) If you are not certain the URL belongs to this specific property, omit this field entirely. Omitting is always better than guessing wrong."`;
 
 const TEXT_FIELD_RULES = `LANGUAGE RULES for all text fields (fitExplanation, tradeoffs, watchOutFor, description):
 - Never use internal axis dimension names: calm, designSincerity, valueIntegrity, socialPermeability, autonomy, novelty, locationFriction.
