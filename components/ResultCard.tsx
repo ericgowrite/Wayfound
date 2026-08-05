@@ -242,24 +242,6 @@ export default function ResultCard({
     recoverUrl();
   }
 
-  const AFFILIATE_PARTNERS: Record<string, string> = {
-    "booking.com": "Booking.com",
-    "viator.com": "Viator",
-    "getyourguide.com": "GetYourGuide",
-    "tripadvisor.com": "Tripadvisor",
-    "hotels.com": "Hotels.com",
-  };
-
-  function getSourceLabel(src: string): string {
-    try {
-      const hostname = new URL(src).hostname.replace(/^www\./, "");
-      for (const [domain, name] of Object.entries(AFFILIATE_PARTNERS)) {
-        if (hostname === domain || hostname.endsWith(`.${domain}`)) return `Book on ${name} →`;
-      }
-    } catch { /* invalid URL */ }
-    return "View source →";
-  }
-
   const isSaved = workspace.savedOptions.some((s) => s.id === option.id);
 
   const feedbackEligible = isFeedbackEligible(option, workspace);
@@ -354,23 +336,10 @@ export default function ResultCard({
               {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
             </span>
           )}
-          {(urlStatus === "valid" || urlStatus === "recovered") && (
-            <>
-              <a
-                href={resolvedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#2C3E50] underline hover:opacity-70 transition-opacity"
-                onClick={() => logEvent({ event: "viyaway_link_clicked", itemId: option.id, urlStatus, destination: workspace.destination ?? null })}
-              >
-                {getSourceLabel(resolvedUrl)}
-              </a>
-              {!reportSent && (
-                <button onClick={handleReport} className="text-xs text-[#888888] hover:text-[#B5654A] transition-colors">
-                  Report link
-                </button>
-              )}
-            </>
+          {(urlStatus === "valid" || urlStatus === "recovered") && !reportSent && (
+            <button onClick={handleReport} className="text-xs text-[#888888] hover:text-[#B5654A] transition-colors">
+              Report link
+            </button>
           )}
           {urlStatus === "recovered" && (
             <span className="text-xs text-[#888888]">Couldn&apos;t verify original link</span>

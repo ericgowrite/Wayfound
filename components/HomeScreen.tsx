@@ -77,7 +77,7 @@ interface Props {
 
 export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, onSelectWorkspace, onSelectSearch }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<SearchCategory>("accommodation");
-  const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
+  const [selectedChipLabel, setSelectedChipLabel] = useState<string | null>(null);
   const [destination, setDestination] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -99,7 +99,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
     setSubmitting(true);
     setError("");
     try {
-      const chip = [...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].find((c) => c.intent === selectedIntent);
+      const chip = [...VIBE_CHIPS_PRIMARY, ...VIBE_CHIPS_SECONDARY].find((c) => c.label === selectedChipLabel);
       const tripName = chip
         ? `${destination.trim()} · ${chip.label}`
         : destination.trim();
@@ -120,7 +120,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
         workspaceId: workspace.id,
         query: destination.trim(),
         category: selectedCategory,
-        ...(selectedIntent ? { intent: selectedIntent } : {}),
+        ...(chip?.intent ? { intent: chip.intent } : {}),
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -128,8 +128,8 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
     }
   }
 
-  function openSearch(intent?: string) {
-    if (intent) setSelectedIntent(intent);
+  function openSearch(label?: string) {
+    if (label) setSelectedChipLabel(label);
   }
 
   // ── New user state ──────────────────────────────────────────────────────
@@ -212,11 +212,11 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                 className="border rounded-full text-sm transition-all"
                 style={{
                   padding: "8px 15px",
-                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#2C3E50"}`,
-                  background: selectedIntent === chip.intent ? "#C4956A" : "transparent",
-                  color: selectedIntent === chip.intent ? "#fff" : "#2C3E50",
+                  border: `1px solid ${selectedChipLabel === chip.label ? "#C4956A" : "#2C3E50"}`,
+                  background: selectedChipLabel === chip.label ? "#C4956A" : "transparent",
+                  color: selectedChipLabel === chip.label ? "#fff" : "#2C3E50",
                 }}
-                onClick={() => openSearch(chip.intent)}
+                onClick={() => openSearch(chip.label)}
               >
                 {chip.label}
               </button>
@@ -334,11 +334,11 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                 className="border rounded-full text-sm transition-all"
                 style={{
                   padding: "7px 14px",
-                  border: `1px solid ${selectedIntent === chip.intent ? "#C4956A" : "#E8E8E8"}`,
-                  background: selectedIntent === chip.intent ? "#C4956A" : "#fff",
-                  color: selectedIntent === chip.intent ? "#fff" : "#888888",
+                  border: `1px solid ${selectedChipLabel === chip.label ? "#C4956A" : "#E8E8E8"}`,
+                  background: selectedChipLabel === chip.label ? "#C4956A" : "#fff",
+                  color: selectedChipLabel === chip.label ? "#fff" : "#888888",
                 }}
-                onClick={() => openSearch(chip.intent)}
+                onClick={() => openSearch(chip.label)}
               >
                 {chip.label}
               </button>
