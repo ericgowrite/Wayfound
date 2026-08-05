@@ -123,17 +123,31 @@ export function distinctiveTokens(name: string): string[] {
     .filter((w) => w.length > 2 && !GENERIC_WORDS.has(w));
 }
 
-/** Pull text from title/h1/og:title/meta description out of raw HTML. */
+/** Pull text from title/h1/og:title/twitter:title/meta description/JSON-LD out of raw HTML. */
 function extractPageSignals(html: string): string {
-  const title = html.match(/<title[^>]*>([^<]{0,300})<\/title>/i)?.[1] ?? "";
-  const h1 = html.match(/<h1[^>]*>([^<]{0,200})<\/h1>/i)?.[1] ?? "";
-  const ogTitle = html.match(/property=["']og:title["'][^>]*content=["']([^"']{0,200})["']/i)?.[1]
-    ?? html.match(/content=["']([^"']{0,200})["'][^>]*property=["']og:title["']/i)?.[1]
-    ?? "";
-  const metaDesc = html.match(/name=["']description["'][^>]*content=["']([^"']{0,300})["']/i)?.[1]
-    ?? html.match(/content=["']([^"']{0,300})["'][^>]*name=["']description["']/i)?.[1]
-    ?? "";
-  return [title, h1, ogTitle, metaDesc].join(" ").toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+  // Strip HTML tags from a captured group so nested elements don't cause empty matches
+  const stripTags = (s: string) => s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+
+  const title = stripTags(html.match(/<title[^>]*>([\s\S]{0,400}?)<\/title>/i)?.[1] ?? "");
+  const h1 = stripTags(html.match(/<h1[^>]*>([\s\S]{0,200}?)<\/h1>/i)?.[1] ?? "");
+  const ogTitle =
+    html.match(/property=["']og:title["'][^>]*content=["']([^"']{0,200})["']/i)?.[1] ??
+    html.match(/content=["']([^"']{0,200})["'][^>]*property=["']og:title["']/i)?.[1] ?? "";
+  const twitterTitle =
+    html.match(/name=["']twitter:title["'][^>]*content=["']([^"']{0,200})["']/i)?.[1] ??
+    html.match(/content=["']([^"']{0,200})["'][^>]*name=["']twitter:title["']/i)?.[1] ?? "";
+  const metaDesc =
+    html.match(/name=["']description["'][^>]*content=["']([^"']{0,300})["']/i)?.[1] ??
+    html.match(/content=["']([^"']{0,300})["'][^>]*name=["']description["']/i)?.[1] ?? "";
+  // JSON-LD "name" field — covers schema.org Hotel, Restaurant, TouristAttraction, etc.
+  const jsonLdName = (html.match(/"name"\s*:\s*"([^"]{1,200})"/gi) ?? [])
+    .map((m) => m.replace(/^"name"\s*:\s*"/i, "").replace(/"$/, ""))
+    .join(" ");
+
+  return [title, h1, ogTitle, twitterTitle, metaDesc, jsonLdName]
+    .join(" ")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ");
 }
 
 const PARKED_SIGNALS = [
@@ -183,9 +197,12 @@ async function contentMatchesProperty(url: string, propertyName: string): Promis
     // Soft fail: none of the distinctive property tokens appear anywhere in the page signals
     const anyTokenFound = tokens.some((t) => pageText.includes(t));
     return anyTokenFound;
-  } catch {
+  } catch (e) {
     clearTimeout(timer);
-    // Network error / timeout / bot block — can't confirm, don't block
+    // DNS failure = domain doesn't exist → block it
+    const causeCode: string = (e as { cause?: { code?: string } })?.cause?.code ?? "";
+    if (causeCode === "ENOTFOUND" || causeCode === "EAI_AGAIN") return false;
+    // Other failures (timeout, ECONNREFUSED) = real domain, bot-blocked → pass through
     return true;
   }
 }
@@ -222,7 +239,15 @@ export async function checkUrl(url: string, propertyName?: string): Promise<Vali
     return { valid: false, finalUrl: null, status, reason: "unexpected_status" };
   } catch (e) {
     clearTimeout(timer);
+    // DNS resolution failure = domain doesn't exist = definitively wrong URL.
+    // Distinguish from bot-blocking (ECONNREFUSED, timeout) where the domain IS real.
+    const causeCode: string = (e as { cause?: { code?: string } })?.cause?.code ?? "";
+    if (causeCode === "ENOTFOUND" || causeCode === "EAI_AGAIN") {
+      return { valid: false, finalUrl: null, status: 0, reason: "dns_failure" };
+    }
     const reason = (e instanceof Error && e.name === "AbortError") ? "timeout" : "network_error";
+    // network_error / timeout = server rejected our probe (bot detection, GCP blocklist).
+    // The domain is real; we just can't verify content. Keep the URL.
     return { valid: true, finalUrl: url, status: 0, reason };
   }
 }
