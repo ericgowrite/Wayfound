@@ -62,7 +62,7 @@ export default function LandingPage() {
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 2 }} />
         <div className="relative px-[8%] max-w-[900px]" style={{ zIndex: 3 }}>
           <p style={{ fontFamily: permanentMarker, fontSize: "clamp(36px, 6vw, 80px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.15, margin: 0, textTransform: "none" }}>
-            The world awaits.<br />Go your way.
+            Travel that fits<br />who you are.
           </p>
           <Link
             href="/dashboard"
