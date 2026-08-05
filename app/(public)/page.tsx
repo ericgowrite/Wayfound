@@ -25,6 +25,10 @@ export default function LandingPage() {
 
   return (
     <div style={{ fontFamily: encode, color: "#1A1A1A", background: "#FAF8F5", minHeight: "100vh" }}>
+      <style>{`
+        .v5-card { transition: border-color 200ms ease; }
+        .v5-card:hover { border-color: #C4956A !important; }
+      `}</style>
 
       {/* ── Nav ──────────────────────────────────────────────────────────────── */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E8E8E8" }}>
@@ -75,7 +79,7 @@ export default function LandingPage() {
               background: "#C4956A",
               color: "#fff",
               padding: "16px 32px",
-              borderRadius: 32,
+              borderRadius: 12,
               textDecoration: "none",
             }}
           >
@@ -106,12 +110,12 @@ export default function LandingPage() {
           {HOW_IT_WORKS.map(({ num, title, desc }) => (
             <div
               key={num}
+              className="v5-card"
               style={{
                 background: "#FAF8F5",
                 border: "1px solid #E8E8E8",
                 borderRadius: 12,
                 padding: "32px 24px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
               }}
             >
               <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2C3E50", color: "#fff", fontSize: 13, fontFamily: encodeSemi, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
