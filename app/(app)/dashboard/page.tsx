@@ -68,7 +68,8 @@ export default function Home() {
     fetchWithAuth("/api/profiles").then((r) => r.json()).then((ps: Profile[]) => {
       if (!Array.isArray(ps)) { setProfilesLoaded(true); return; }
       setProfiles(ps);
-      if (ps.length > 0) setNewTravelers([ps[0].id]);
+      // Primary profile is always included in createWorkspace — don't pre-add to newTravelers
+      // or it renders twice (once as "(you)" row, once in the travelers list).
       setProfilesLoaded(true);
     });
     fetchWithAuth("/api/workspaces").then((r) => r.json()).then((ws: TripWorkspace[]) => {
@@ -639,7 +640,7 @@ export default function Home() {
                 </div>
               )}
 
-              {newTravelers.map(id => {
+              {newTravelers.filter(id => id !== profiles[0]?.id).map(id => {
                 const p = profiles.find(pr => pr.id === id);
                 if (!p) return null;
                 return (
