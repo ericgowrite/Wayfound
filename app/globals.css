@@ -75,10 +75,11 @@
   --background: var(--color-canvas);
   --foreground: var(--color-slate);
 
-  /* ── Migration aliases — keep existing component references working during
-     screen-by-screen update pass. Remove once all components are updated. ── */
-  --font-lora:  var(--font-noto-serif);
-  --font-inter: var(--font-encode);
+  /* ── Migration aliases ── */
+  --font-lora:        var(--font-noto-serif);
+  --font-inter:       var(--font-nunito);
+  --font-encode:      var(--font-nunito);
+  --font-encode-semi: var(--font-nunito);
 }
 
 .dark {
@@ -112,8 +113,8 @@
   --color-fit:          var(--color-fit);
 
   /* Fonts */
-  --font-sans:         var(--font-encode);
-  --font-ui:           var(--font-encode-semi);
+  --font-sans:         var(--font-nunito);
+  --font-ui:           var(--font-nunito);
   --font-serif:        var(--font-noto-serif);
   --font-display:      var(--font-permanent-marker);
   --font-mono:         var(--font-geist-mono);
@@ -138,12 +139,12 @@
 body {
   background: var(--color-canvas);
   color: var(--color-text-body);
-  font-family: var(--font-encode), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Font family utility classes */
 .font-ui {
-  font-family: var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-serif {

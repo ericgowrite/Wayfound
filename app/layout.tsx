@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Encode_Sans, Encode_Sans_Semi_Expanded, Noto_Serif, Nothing_You_Could_Do, Lexend_Giga } from "next/font/google";
+import { Geist_Mono, Nunito_Sans, Noto_Serif, Nothing_You_Could_Do, Lexend_Giga } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
-// Tier 1 — Hero / brand moments (marketing landing only)
+// Hero / brand moments (marketing landing only)
 const nothingYouCouldDo = Nothing_You_Could_Do({
   variable: "--font-permanent-marker",
   subsets: ["latin"],
@@ -19,23 +19,15 @@ const lexendGiga = Lexend_Giga({
   display: "swap",
 });
 
-// Tier 2 — Navigation, UI labels, buttons
-const encodeSansSemiExpanded = Encode_Sans_Semi_Expanded({
-  variable: "--font-encode-semi",
+// Sitewide UI — nav, body copy, labels, buttons, forms
+const nunitoSans = Nunito_Sans({
+  variable: "--font-nunito",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
-// Tier 3 — Body copy, card descriptions, form fields
-const encodeSans = Encode_Sans({
-  variable: "--font-encode",
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  display: "swap",
-});
-
-// Tier 4 — Editorial headings, judgment lines, card titles
+// Editorial headings, judgment lines, card titles
 const notoSerif = Noto_Serif({
   variable: "--font-noto-serif",
   subsets: ["latin"],
@@ -53,9 +45,6 @@ export const metadata: Metadata = {
   description: "Travel recommendations matched to your personality. No more endless scrolling or relying on reviews that aren't right for you.",
 };
 
-// Explicit viewport config — without this, mobile browsers may fall back to
-// rendering at a virtual desktop width and scaling down, which breaks every
-// responsive Tailwind breakpoint in the app.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -69,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${nothingYouCouldDo.variable} ${lexendGiga.variable} ${encodeSansSemiExpanded.variable} ${encodeSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nothingYouCouldDo.variable} ${lexendGiga.variable} ${nunitoSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script
