@@ -33,8 +33,8 @@ export default function LandingPage() {
       {/* ── Nav ──────────────────────────────────────────────────────────────── */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E8E8E8" }}>
         <div className="max-w-[1200px] mx-auto px-5 md:px-10 flex justify-between items-center py-[18px]">
-          <div style={{ fontFamily: encodeSemi, fontWeight: 400, fontSize: 20, color: "#2C3E50", letterSpacing: 0 }}>
-            Way<span style={{ color: "#C4956A" }}>found</span>
+          <div style={{ fontFamily: "var(--font-lexend-giga), ui-sans-serif, sans-serif", fontWeight: 400, fontSize: 16, color: "#2C3E50", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            WAY<span style={{ color: "#C4956A" }}>FOUND</span>
           </div>
           <div className="flex items-center gap-5 md:gap-7">
             <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#888888", textDecoration: "none" }}>

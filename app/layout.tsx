@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Encode_Sans, Encode_Sans_Semi_Expanded, Noto_Serif, Nothing_You_Could_Do } from "next/font/google";
+import { Geist_Mono, Encode_Sans, Encode_Sans_Semi_Expanded, Noto_Serif, Nothing_You_Could_Do, Lexend_Giga } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
@@ -11,7 +11,15 @@ const nothingYouCouldDo = Nothing_You_Could_Do({
   display: "swap",
 });
 
-// Tier 2 — Wordmark, navigation, UI labels, buttons
+// Wordmark — logo only
+const lexendGiga = Lexend_Giga({
+  variable: "--font-lexend-giga",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
+
+// Tier 2 — Navigation, UI labels, buttons
 const encodeSansSemiExpanded = Encode_Sans_Semi_Expanded({
   variable: "--font-encode-semi",
   subsets: ["latin"],
@@ -61,7 +69,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${nothingYouCouldDo.variable} ${encodeSansSemiExpanded.variable} ${encodeSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nothingYouCouldDo.variable} ${lexendGiga.variable} ${encodeSansSemiExpanded.variable} ${encodeSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script

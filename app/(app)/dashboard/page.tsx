@@ -282,8 +282,8 @@ export default function Home() {
         <div className="w-full max-w-md bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl shadow-xl overflow-hidden">
           <div className="px-6 pt-6 pb-0 border-b border-[#E8E8E8]">
             <div className="flex items-center justify-between mb-3">
-              <Link href="/" style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50', textDecoration: 'none' }}>
-                Way<span style={{ color: '#C4956A' }}>found</span>
+              <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                WAY<span style={{ color: '#C4956A' }}>FOUND</span>
               </Link>
               <span className="text-xs text-[#888888]">Welcome</span>
             </div>
@@ -320,8 +320,8 @@ export default function Home() {
         {/* App header */}
         <div className="flex items-start justify-between px-4 py-4 border-b border-[#E8E8E8]">
           <div>
-            <Link href="/" style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50', textDecoration: 'none' }}>
-              Way<span style={{ color: '#C4956A' }}>found</span>
+            <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              WAY<span style={{ color: '#C4956A' }}>FOUND</span>
             </Link>
             <p className="text-xs text-[#2C3E50] mt-0.5">Travel that fits who you are.</p>
             <button
@@ -543,8 +543,8 @@ export default function Home() {
           >
             ☰
           </button>
-          <span style={{ fontFamily: 'var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif', fontWeight: 400, fontSize: 20, color: '#2C3E50' }}>
-            Way<span style={{ color: '#C4956A' }}>found</span>
+          <span style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            WAY<span style={{ color: '#C4956A' }}>FOUND</span>
           </span>
           {activeWorkspace && (
             <span className="text-sm text-[#888888] truncate">· {activeWorkspace.name}</span>
