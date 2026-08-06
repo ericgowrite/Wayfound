@@ -182,7 +182,7 @@ export default function CalibrationAssessment({
               {result.tagline}
             </p>
             <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6, marginBottom: 28 }}>
-              {originalResult.name} was close. Here&apos;s what this means for how viyaway finds things for you.
+              {originalResult.name} was close. Here&apos;s what this means for how Wayfound finds things for you.
             </p>
           </>
         ) : (
@@ -194,7 +194,7 @@ export default function CalibrationAssessment({
               {result.tagline}
             </p>
             <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6, marginBottom: 28 }}>
-              viyaway knows you a little better now.
+              Wayfound knows you a little better now.
             </p>
           </>
         )}

@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 
-export const metadata = { title: "How We Make Money — viyaway" };
+export const metadata = { title: "How We Make Money — Wayfound" };
 
 export default function AffiliatePage() {
   return (
@@ -11,7 +11,7 @@ export default function AffiliatePage() {
         {
           heading: "The Short Version",
           body: (
-            <p>viyaway is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
+            <p>Wayfound is free to use. When you click a booking link and complete a purchase on a partner site, we may receive a small commission — at no additional cost to you. The price you pay is identical whether you use our link or go directly to the site.</p>
           ),
         },
         {
@@ -51,7 +51,7 @@ export default function AffiliatePage() {
         {
           heading: "Contact",
           body: (
-            <p>Questions about our affiliate relationships? Email us at <a href="mailto:support@viyaway.com" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">support@viyaway.com</a></p>
+            <p>Questions about our affiliate relationships? Email us at <a href="mailto:support@gowayfound.com" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">support@gowayfound.com</a></p>
           ),
         },
       ]}

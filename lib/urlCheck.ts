@@ -90,7 +90,7 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
     method: "HEAD",
     redirect: "follow",
     signal,
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)" },
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Wayfound/1.0)" },
   });
   // Some servers reject HEAD — fall back to GET
   if (res.status === 405) {
@@ -98,7 +98,7 @@ async function tryHead(url: string, signal: AbortSignal): Promise<Response> {
       method: "GET",
       redirect: "follow",
       signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; Wayfound/1.0)" },
     });
   }
   return res;
@@ -176,7 +176,7 @@ async function contentMatchesProperty(url: string, propertyName: string): Promis
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ViyaWay/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; Wayfound/1.0)",
         "Accept": "text/html",
         "Range": "bytes=0-10000", // request only the first ~10KB
       },

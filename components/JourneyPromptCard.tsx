@@ -35,7 +35,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
     const promptDismissedAt = new Date().toISOString();
     onUpdate(option.id, { promptDismissedAt, promptDismissCount: dismissCount });
     logEvent({
-      event: "viyaway_prompt_dismissed",
+      event: "wayfound_prompt_dismissed",
       promptType: prompt!.type === "fit" ? "fit_confirmation" : "booking_confirmation",
       itemId: option.id,
       dismissCount,
@@ -52,7 +52,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
         fitConfirmedAt: new Date().toISOString(),
       });
       logEvent({
-        event: "viyaway_fit_confirmed",
+        event: "wayfound_fit_confirmed",
         itemId: option.id,
         fitOutcome,
         fitScore: option.alignmentScore,
@@ -64,9 +64,9 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
 
     function handleFitTap(fitOutcome: FitOutcome) {
       const messages: Record<FitOutcome, string> = {
-        perfect: "Good to know — viyaway is getting to know you better.",
-        good: "Noted — viyaway is learning what works for you.",
-        off: "Thanks for the honest feedback — that helps viyaway find better fits.",
+        perfect: "Good to know — Wayfound is getting to know you better.",
+        good: "Noted — Wayfound is learning what works for you.",
+        off: "Thanks for the honest feedback — that helps Wayfound find better fits.",
       };
       setAckMessage(messages[fitOutcome]);
       // Fade in after a paint frame so the element is in the DOM at opacity 0 first
@@ -85,7 +85,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
               Did {option.name} deliver?
             </p>
             <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mt-0.5">
-              One tap. Helps viyaway learn your fit.
+              One tap. Helps Wayfound learn your fit.
             </p>
           </div>
           <button
@@ -158,7 +158,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
       promptDismissCount: 0,
     });
     logEvent({
-      event: "viyaway_booking_confirmed",
+      event: "wayfound_booking_confirmed",
       itemId: option.id,
       fitScore: option.alignmentScore,
       enneagramType: primaryEnneagramType,
@@ -183,7 +183,7 @@ export default function JourneyPromptCard({ prompt, savedOptions, primaryEnneagr
       },
     ]);
     logEvent({
-      event: "viyaway_booking_confirmed",
+      event: "wayfound_booking_confirmed",
       itemId: other.id,
       fitScore: other.alignmentScore,
       enneagramType: primaryEnneagramType,

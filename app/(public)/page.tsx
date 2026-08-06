@@ -132,7 +132,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Why viyaway ──────────────────────────────────────────────────────── */}
+      {/* ── Why Wayfound ──────────────────────────────────────────────────────── */}
       <section className="px-5 md:px-10 py-12 md:py-20" style={{ background: "#2C3E50" }}>
         <div className="max-w-[1200px] mx-auto text-center">
           <h2 style={{ fontFamily: encodeSemi, fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.3, marginTop: 0, marginBottom: 40 }}>

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import AssessClient from "./AssessClient";
 
 export const metadata: Metadata = {
-  title: "Find your travel style — viyaway",
+  title: "Find your travel style — Wayfound",
 };
 
 export default async function AssessPage({

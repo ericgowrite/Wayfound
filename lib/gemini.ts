@@ -702,7 +702,7 @@ export async function chatAboutOption(
     .join("\n");
 
   const conversationHistory = history
-    .map((m) => `${m.role === "user" ? "User" : "ViyaWay"}: ${m.content}`)
+    .map((m) => `${m.role === "user" ? "User" : "Wayfound"}: ${m.content}`)
     .join("\n");
 
   const prompt = `OPTION: ${option.name}
@@ -799,7 +799,7 @@ export async function generateLoadingContent(params: {
     .map((t) => `- ${t.name}: ${t.type ? `Type ${t.type}` : "unknown type"}`)
     .join("\n");
 
-  const prompt = `You are the voice of ViyaWay — a travel app that matches travelers to destinations based on who they actually are. Your job right now: while the user waits for results, say something worth reading.
+  const prompt = `You are the voice of Wayfound — a travel app that matches travelers to destinations based on who they actually are. Your job right now: while the user waits for results, say something worth reading.
 
 You are a trusted local friend. The one who actually lives there. The one whose texts you screenshot and send to the group chat before the trip. You know the destination and you know this traveler — and you speak to both without being asked.
 

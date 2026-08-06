@@ -228,7 +228,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           Tell us about an experience you loved.
         </h3>
         <p className="text-sm text-[#888888] leading-relaxed mb-5">
-          Where was it, and what made it feel right for you? The more viyaway knows, the better your first results.
+          Where was it, and what made it feel right for you? The more Wayfound knows, the better your first results.
         </p>
         <textarea
           className="w-full text-[#2C3E50] text-sm rounded-xl px-3 py-2.5 focus:outline-none transition-colors resize-none"

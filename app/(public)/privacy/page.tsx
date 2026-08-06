@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 
-export const metadata = { title: "Privacy Policy — viyaway" };
+export const metadata = { title: "Privacy Policy — Wayfound" };
 
 export default function PrivacyPage() {
   return (
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           heading: "Overview",
           body: (
             <p>
-              viyaway is a travel discovery application that helps users find travel experiences matched to their personality and preferences.
+              Wayfound is a travel discovery application that helps users find travel experiences matched to their personality and preferences.
               This Privacy Policy explains how we collect, use, and protect your information.
             </p>
           ),
@@ -67,13 +67,13 @@ export default function PrivacyPage() {
         {
           heading: "Children's Privacy",
           body: (
-            <p>viyaway is not intended for users under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
+            <p>Wayfound is not intended for users under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
           ),
         },
         {
           heading: "Contact",
           body: (
-            <p>Questions about this Privacy Policy? Email us at <a href="mailto:support@viyaway.com" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">support@viyaway.com</a></p>
+            <p>Questions about this Privacy Policy? Email us at <a href="mailto:support@gowayfound.com" className="text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline">support@gowayfound.com</a></p>
           ),
         },
       ]}

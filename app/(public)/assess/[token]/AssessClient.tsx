@@ -55,7 +55,7 @@ export default function AssessClient({ token }: { token: string }) {
       <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-md text-center space-y-6">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-[#C4956A] uppercase mb-3">viyaway</p>
+            <p className="text-xs font-semibold tracking-widest text-[#C4956A] uppercase mb-3">Wayfound</p>
             <h1 className="text-2xl font-bold text-[#2C3E50] leading-tight">
               Find your travel style
             </h1>

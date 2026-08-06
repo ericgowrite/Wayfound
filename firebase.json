@@ -14,7 +14,7 @@
       {
         "source": "**",
         "run": {
-          "serviceId": "viyaway",
+          "serviceId": "wayfound",
           "region": "us-central1"
         }
       }

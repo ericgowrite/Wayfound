@@ -434,13 +434,13 @@ export default function ResultCard({
           </button>
         </div>
 
-        {/* Ask viyaway text link */}
+        {/* Ask Wayfound text link */}
         <div className="text-center">
           <button
             className="text-sm text-[#888888] underline hover:text-[#2C3E50] transition-colors"
             onClick={() => { setChatOpen((v) => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100); }}
           >
-            {chatOpen ? "Hide chat" : "Ask viyaway about this place"}
+            {chatOpen ? "Hide chat" : "Ask Wayfound about this place"}
             {chatMessages.length > 0 && !chatOpen && <span className="ml-1 opacity-60">({chatMessages.length})</span>}
           </button>
         </div>
@@ -812,7 +812,7 @@ export default function ResultCard({
             setExpanded(next);
             onExpandedChange?.(next);
           });
-          if (next) logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
+          if (next) logEvent({ event: "wayfound_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
         }}
       >
         {/* Category icon */}
@@ -878,7 +878,7 @@ export default function ResultCard({
                 onClick={() => {
                   setExpanded(true);
                   onExpandedChange?.(true);
-                  logEvent({ event: "viyaway_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
+                  logEvent({ event: "wayfound_result_expanded", itemId: option.id, fitScore: option.alignmentScore, enneagramType: travelers[0]?.enneagramType ?? "" });
                   handleEnterDeepDive();
                 }}
               >
@@ -893,7 +893,7 @@ export default function ResultCard({
                   setTimeout(() => chatInputRef.current?.focus(), 100);
                 }}
               >
-                Ask viyaway →
+                Ask Wayfound →
               </button>
             </div>
           )}

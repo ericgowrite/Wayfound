@@ -322,7 +322,7 @@ export default function AddProfileModal({ onSave, onClose, isSelf = false, works
                   ) : null;
                 })()}
                 <p className="text-xs text-[#9BB0C1] dark:text-[#6B8299] mt-1">
-                  viyaway uses your travel style to score every result.
+                  Wayfound uses your travel style to score every result.
                 </p>
               </div>
 

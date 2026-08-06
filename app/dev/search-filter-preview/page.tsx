@@ -125,7 +125,7 @@ export default function SearchFilterPreview() {
                     </div>
                     <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
                       <button style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}>See why →</button>
-                      <button style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}>Ask viyaway →</button>
+                      <button style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}>Ask Wayfound →</button>
                     </div>
                   </div>
                 </div>

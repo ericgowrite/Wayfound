@@ -41,7 +41,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "viyaway — Your true path to travel",
+  title: "Wayfound — Travel that fits who you are",
   description: "Travel recommendations matched to your personality. No more endless scrolling or relying on reviews that aren't right for you.",
 };
 

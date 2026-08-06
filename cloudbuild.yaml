@@ -10,22 +10,23 @@ steps:
       - '--build-arg=NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'
       - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=$_NEXT_PUBLIC_FIREBASE_APP_ID'
       - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'
+      - '--build-arg=NEXT_PUBLIC_BASE_URL=https://gowayfound.com'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/wayfound/app'
       - '.'
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app']
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/wayfound/app']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - 'viyaway'
-      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/viyaway/app'
+      - 'wayfound'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/wayfound/app'
       - '--region=us-central1'
-      - '--project=viyaway'
+      - '--project=$PROJECT_ID'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--port=8080'

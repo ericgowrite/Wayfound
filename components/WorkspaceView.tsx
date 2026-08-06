@@ -261,7 +261,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       }, 1500);
 
       logEvent({
-        event: "viyaway_search_run",
+        event: "wayfound_search_run",
         query,
         category,
         destination: workspace.destination ?? null,
@@ -309,7 +309,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     // Unsatisfied signal — user asked for more results after seeing these
     if (activeSearch) {
       logEvent({
-        event: "viyaway_load_more",
+        event: "wayfound_load_more",
         query: activeSearch.query,
         category: activeSearch.category,
         existingCount: activeSearch.scoredResults.length,
@@ -398,7 +398,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
     if (!alreadySaved && primaryProfile) {
       logEvent({
-        event: "viyaway_item_saved",
+        event: "wayfound_item_saved",
         itemId: option.id,
         propertyType: "accommodation",
         fitScore: option.alignmentScore,
@@ -406,7 +406,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       });
       const rank = sortedResults.findIndex((o) => o.id === option.id);
       if (rank >= 0) {
-        logEvent({ event: "viyaway_result_saved_rank", itemId: option.id, rank, fitScore: option.alignmentScore });
+        logEvent({ event: "wayfound_result_saved_rank", itemId: option.id, rank, fitScore: option.alignmentScore });
       }
       fireBehaviorEvent("save", option);
     }
@@ -446,7 +446,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       ];
       if (primaryProfile) {
         logEvent({
-          event: "viyaway_item_saved",
+          event: "wayfound_item_saved",
           itemId: optionId,
           propertyType: "accommodation",
           fitScore: optionFromSearch.alignmentScore,
@@ -467,7 +467,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
     if (status === "interested" && primaryProfile) {
       logEvent({
-        event: "viyaway_item_interested",
+        event: "wayfound_item_interested",
         itemId: optionId,
         estimatedTravelWindow: null,
       });
@@ -979,7 +979,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                 </span>
                 <button
                   className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
-                  onClick={() => { setComparisonOptions(selectedOptions); setShowComparison(true); logEvent({ event: "viyaway_comparison_opened", itemCount: selectedOptions.length }); }}
+                  onClick={() => { setComparisonOptions(selectedOptions); setShowComparison(true); logEvent({ event: "wayfound_comparison_opened", itemCount: selectedOptions.length }); }}
                 >
                   Compare →
                 </button>
@@ -1243,7 +1243,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   </span>
                   <button
                     className="px-3 py-1 bg-[#5B8BA0] text-white text-sm rounded-lg hover:bg-[#4A7A8F] transition-colors"
-                    onClick={() => { setComparisonOptions(selectedSavedOptions); setShowComparison(true); logEvent({ event: "viyaway_comparison_opened", itemCount: selectedSavedOptions.length }); }}
+                    onClick={() => { setComparisonOptions(selectedSavedOptions); setShowComparison(true); logEvent({ event: "wayfound_comparison_opened", itemCount: selectedSavedOptions.length }); }}
                   >
                     Compare →
                   </button>
@@ -1269,7 +1269,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   <div className="mt-8 max-w-xs text-center">
                     <p className="text-sm font-medium text-[#3D5A6E] dark:text-[#B8D4E3]">Not quite finding what fits?</p>
                     <p className="text-sm text-[#6B8299] dark:text-[#9BB0C1] mt-1.5 leading-relaxed">
-                      viyaway&apos;s results are only as good as what it knows about you.
+                      Wayfound's results are only as good as what it knows about you.
                       If something feels off, updating your travel style takes 2 minutes.
                     </p>
                     <button
@@ -1433,7 +1433,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                   {confirmed.length > 0 && (
                     <div className="mb-4 bg-gradient-to-r from-[#5B8BA0]/10 to-[#5B8BA0]/5 dark:from-[#5B8BA0]/20 dark:to-[#5B8BA0]/10 border border-[#5B8BA0]/30 dark:border-[#5B8BA0]/40 rounded-xl px-4 py-3">
                       <p className="text-sm font-semibold text-[#2C3E50] dark:text-white">
-                        viyaway got it right {goodOrPerfect.length} out of {confirmed.length} time{confirmed.length !== 1 ? "s" : ""}.
+                        Wayfound got it right {goodOrPerfect.length} out of {confirmed.length} time{confirmed.length !== 1 ? "s" : ""}.
                       </p>
                       {confirmed.length >= 2 && (
                         <p className="text-xs text-[#6B8299] dark:text-[#9BB0C1] mt-0.5">

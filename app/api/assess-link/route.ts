@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const record = await createAssessLink(userId, workspaceId);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://viyaway.com";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://gowayfound.com";
     const url = `${baseUrl}/assess/${record.token}`;
 
     return NextResponse.json({ token: record.token, url });
