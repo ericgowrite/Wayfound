@@ -3,13 +3,13 @@ steps:
     args:
       - 'build'
       - '--no-cache'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_API_KEY=$_NEXT_PUBLIC_FIREBASE_API_KEY'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_PROJECT_ID=$_NEXT_PUBLIC_FIREBASE_PROJECT_ID'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$_NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=$_NEXT_PUBLIC_FIREBASE_APP_ID'
-      - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyBmikSXMj__EKaU-O0UsbnZ5J6pop31mT0'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=wayfound-prod-841dd.firebaseapp.com'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_PROJECT_ID=wayfound-prod-841dd'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=wayfound-prod-841dd.firebasestorage.app'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=969171216962'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=1:969171216962:web:2d848ff27790b31dc9dbdb'
+      - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-GJ9S1VCD8P'
       - '--build-arg=NEXT_PUBLIC_BASE_URL=https://gowayfound.com'
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/wayfound/app'
@@ -33,7 +33,6 @@ steps:
       - '--memory=1Gi'
       - '--min-instances=1'
       - '--max-instances=10'
-      - '--set-env-vars=GOOGLE_API_KEY=$_GOOGLE_API_KEY'
 
 options:
   logging: CLOUD_LOGGING_ONLY
