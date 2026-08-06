@@ -154,7 +154,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
 
   useEffect(() => {
     // Read after hydration to avoid SSR mismatch — same pattern as showFitCallout above.
-    if (localStorage.getItem("viya:onboarding-prompt-dismissed") !== "1") {
+    if (localStorage.getItem("wayfound:onboarding-prompt-dismissed") !== "1") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setOnboardingPromptDismissed(false);
     }
@@ -1276,7 +1276,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                       className="mt-3 text-sm text-[#5B8BA0] dark:text-[#7DBAD4] hover:underline font-medium"
                       onClick={() => {
                         setOnboardingPromptDismissed(true);
-                        localStorage.setItem("viya:onboarding-prompt-dismissed", "1");
+                        localStorage.setItem("wayfound:onboarding-prompt-dismissed", "1");
                         onOpenProfile?.();
                       }}
                     >
@@ -1286,7 +1286,7 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
                       className="mt-2 block mx-auto text-xs text-[#9BB0C1] dark:text-[#6B8299] hover:text-[#6B8299] dark:hover:text-[#9BB0C1] transition-colors"
                       onClick={() => {
                         setOnboardingPromptDismissed(true);
-                        localStorage.setItem("viya:onboarding-prompt-dismissed", "1");
+                        localStorage.setItem("wayfound:onboarding-prompt-dismissed", "1");
                       }}
                     >
                       Dismiss

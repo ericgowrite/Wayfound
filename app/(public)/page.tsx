@@ -34,7 +34,7 @@ export default function LandingPage() {
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E8E8E8" }}>
         <div className="max-w-[1200px] mx-auto px-5 md:px-10 flex justify-between items-center py-[18px]">
           <div style={{ fontFamily: encodeSemi, fontWeight: 400, fontSize: 20, color: "#2C3E50", letterSpacing: 0 }}>
-            viya<span style={{ color: "#C4956A" }}>way</span>
+            Way<span style={{ color: "#C4956A" }}>found</span>
           </div>
           <div className="flex items-center gap-5 md:gap-7">
             <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#888888", textDecoration: "none" }}>
@@ -136,7 +136,7 @@ export default function LandingPage() {
       <section className="px-5 md:px-10 py-12 md:py-20" style={{ background: "#2C3E50" }}>
         <div className="max-w-[1200px] mx-auto text-center">
           <h2 style={{ fontFamily: encodeSemi, fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.3, marginTop: 0, marginBottom: 40 }}>
-            Why viya<span style={{ color: "#C4956A" }}>way</span>?
+            Why Way<span style={{ color: "#C4956A" }}>found</span>?
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16 }}>
             {WHY.map(({ title, desc }) => (
@@ -185,7 +185,7 @@ export default function LandingPage() {
       <footer className="border-t border-[#E8E8E8] px-5 md:px-10 py-6">
         <div className="max-w-[1200px] mx-auto flex justify-between items-center flex-wrap gap-3">
           <span style={{ fontFamily: encodeSemi, fontSize: 12, color: "#888888", fontWeight: 400 }}>
-            © 2026 viya<span style={{ color: "#C4956A" }}>way</span>
+            © 2026 Way<span style={{ color: "#C4956A" }}>found</span>
           </span>
           <div style={{ display: "flex", gap: 16 }}>
             <Link href="/privacy" style={{ fontFamily: encode, fontSize: 12, color: "#888888", textDecoration: "none" }}>Privacy</Link>
