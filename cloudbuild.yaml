@@ -33,6 +33,7 @@ steps:
       - '--memory=1Gi'
       - '--min-instances=1'
       - '--max-instances=10'
+      - '--set-env-vars=GOOGLE_API_KEY=$_GOOGLE_API_KEY'
 
 options:
   logging: CLOUD_LOGGING_ONLY
