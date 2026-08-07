@@ -101,17 +101,24 @@ function getClient(): GoogleGenerativeAI {
 
 // Errors that trigger a fallback model retry
 const RETRYABLE = /503|high.?demand|overload|429|quota|rate.?limit|resource.?exhaust|404|no longer available|not found/i;
-const PRIMARY_MODEL = "gemini-3.5-flash";
-const FALLBACK_MODEL = "gemini-2.5-flash";
+// Front-facing: user sees these results — best quality
+const SEARCH_MODEL   = "gemini-3.6-flash";
+const SEARCH_FALLBACK = "gemini-2.5-flash";
+// Utility/background: loading content, chat, scoring — fast + cheap
+const LITE_MODEL     = "gemini-3.5-flash-lite";
+const LITE_FALLBACK  = "gemini-2.5-flash";
+// Legacy aliases used by withRetry default path (kept for fallback chain)
+const PRIMARY_MODEL  = SEARCH_MODEL;
+const FALLBACK_MODEL = SEARCH_FALLBACK;
 const MAX_ATTEMPTS = 3;   // 1 initial + 2 retries
 const BASE_DELAY_MS = 800;
 
-async function withRetry<T>(fn: (model: string) => Promise<T>): Promise<T> {
+async function withRetry<T>(fn: (model: string) => Promise<T>, primary = PRIMARY_MODEL, fallback = FALLBACK_MODEL): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     // Switch to fallback model on the final retry so we get a fresh capacity pool
-    const model = attempt < MAX_ATTEMPTS - 1 ? PRIMARY_MODEL : FALLBACK_MODEL;
+    const model = attempt < MAX_ATTEMPTS - 1 ? primary : fallback;
     try {
       return await fn(model);
     } catch (e) {
@@ -141,28 +148,41 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-// Disable thinking tokens for structured JSON tasks — reasoning adds latency
-// without improving output quality.
+// Thinking budget by call type. Search gets a moderate cap — reasoning helps
+// with nuanced personality-fit scoring. Short/utility calls get 0 (no thinking).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function noThinking(_model: string): object {
-  return { generationConfig: { thinkingConfig: { thinkingBudget: 0 } } as any };
+function thinkingConfig(budget: number): object {
+  return { generationConfig: { thinkingConfig: { thinkingBudget: budget } } as any };
 }
+const THINKING_SEARCH = thinkingConfig(1024);  // search + deepdive: cap, don't eliminate
+const THINKING_OFF    = thinkingConfig(0);     // loading content, chat, scoring: off
 
-async function callWithSearch(systemPrompt: string, userPrompt: string): Promise<{ text: string }> {
+async function callWithSearch(
+  systemPrompt: string,
+  userPrompt: string,
+  primary = PRIMARY_MODEL,
+  fallback = FALLBACK_MODEL,
+  thinking = THINKING_SEARCH
+): Promise<{ text: string; model: string }> {
   return withRetry(async (model) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt, ...noThinking(model) });
+    const m = getClient().getGenerativeModel({ model, tools: [{ googleSearch: {} } as any], systemInstruction: systemPrompt, ...thinking });
     const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
-    return { text: result.response.text() };
-  });
+    return { text: result.response.text(), model };
+  }, primary, fallback);
 }
 
-async function callPlain(systemPrompt: string, userPrompt: string): Promise<string> {
+async function callPlain(
+  systemPrompt: string,
+  userPrompt: string,
+  primary = PRIMARY_MODEL,
+  fallback = FALLBACK_MODEL
+): Promise<string> {
   return withRetry(async (model) => {
-    const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt, ...noThinking(model) });
+    const m = getClient().getGenerativeModel({ model, systemInstruction: systemPrompt, ...THINKING_OFF });
     const result = await withTimeout(m.generateContent(userPrompt), GEMINI_TIMEOUT_MS);
     return result.response.text();
-  });
+  }, primary, fallback);
 }
 
 // ── Parsers ───────────────────────────────────────────────────────────────────
@@ -429,14 +449,14 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw, model: usedModel } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "search");
   const items = parseArray(raw);
   // Write to cache before hydrating so the stored items have no UUID fields.
   await setCachedSearch(cacheKey, query, category, items);
   const hydrated = items.map((item) => hydrate(item, searchId));
   // Fire quality audit in background — non-fatal, never blocks the response.
-  void logSearchQuality(searchId, query, category, hydrated);
+  void logSearchQuality(searchId, query, category, hydrated, usedModel);
   return hydrated;
 }
 
@@ -492,11 +512,11 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw, model: usedModel } = await callWithSearch(systemPrompt, prompt);
   auditResponse(raw, "moreOptions");
   const items = parseArray(raw);
   const hydrated = items.map((item) => hydrate(item, searchId));
-  void logSearchQuality(searchId, query, category, hydrated);
+  void logSearchQuality(searchId, query, category, hydrated, usedModel);
   return hydrated;
 }
 
@@ -662,7 +682,7 @@ ${AXIS_GUIDE}
 
 ${thresholdLine(scoringProfile)}`.trim();
 
-  const { text: raw } = await callWithSearch(systemPrompt, prompt);
+  const { text: raw } = await callWithSearch(systemPrompt, prompt, LITE_MODEL, LITE_FALLBACK, THINKING_OFF);
   auditResponse(raw, "scoreSpecific", { userProvidedUrl });
 
   const parsed = parseObject(raw);
@@ -721,7 +741,7 @@ User: ${userMessage}
 
 Respond helpfully and concisely (2-4 sentences unless more detail is requested). Reference the traveler's profile when relevant.`;
 
-  const raw = await callPlain(systemPrompt, prompt);
+  const raw = await callPlain(systemPrompt, prompt, LITE_MODEL, LITE_FALLBACK);
   auditResponse(raw, "chat");
   return raw.trim();
 }
@@ -858,7 +878,7 @@ Return exactly this shape:
 [{"type": "fact"|"recommendation", "traveler": string|null, "text": "..."}]`;
 
   try {
-    const raw = await callPlain("", prompt);
+    const raw = await callPlain("", prompt, LITE_MODEL, LITE_FALLBACK);
     const cleaned = raw.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     const match = cleaned.match(/\[[\s\S]*\]/);
     if (!match) return [];

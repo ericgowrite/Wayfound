@@ -76,30 +76,39 @@ export function auditResults(results: ScoredOption[]): {
 
 /**
  * Write quality audit to Firestore — non-fatal, fire-and-forget.
- * Only writes when issues are present; perfect results don't add noise.
+ * Logs every search (not just flagged ones) so future qualitative re-scoring
+ * jobs can evaluate voice quality across the full history, not just exceptions.
  */
 export async function logSearchQuality(
   searchId: string,
   query: string,
   category: string,
-  results: ScoredOption[]
+  results: ScoredOption[],
+  model?: string
 ): Promise<void> {
   const { issues, score } = auditResults(results);
-  if (issues.length === 0) return; // clean — no log needed
 
   try {
     await adminDb.collection("searchQualityLog").add({
       searchId,
       query,
       category,
+      model: model ?? "unknown",
       score,
       issues,
       resultCount: results.length,
+      // Judgment lines — the content a future voice-quality re-scorer needs.
+      // Stored on every call so historical searches can be backfill-scored.
+      judgments: results.map((r) => ({
+        name: r.name,
+        fitExplanation: r.fitExplanation ?? "",
+        tradeoffs: r.tradeoffs ?? [],
+      })),
       ts: Timestamp.now(),
     });
     if (score < 70) {
       console.warn(
-        `[VIYA-QUALITY] Low quality score ${score} for "${query}" — ${issues.length} issue(s): ` +
+        `[QUALITY] Low score ${score} for "${query}" — ${issues.length} issue(s): ` +
           issues
             .slice(0, 3)
             .map((i) => `${i.type}(${i.field})`)
