@@ -24,6 +24,7 @@ export function friendlyError(error: unknown): string {
     return "The search took too long to respond. Please try again.";
   }
 
-  // Fallback — don't leak raw error details
+  // Fallback — log for diagnosis but don't leak raw details to client
+  console.error("[friendlyError] unmatched error:", msg);
   return "Something unexpected happened. Please try again.";
 }

@@ -17,9 +17,13 @@ const VALID_CATEGORIES: SearchCategory[] = ["accommodation", "tour", "restaurant
 const ANON_SEARCH_LIMIT = 1;
 
 export async function POST(request: Request) {
+  let step = "init";
   try {
+    step = "auth";
     const { uid: userId, isAnonymous } = await getTokenClaims(request);
+    step = "parse";
     const { workspaceId, query, category, intent } = await request.json();
+    console.log(`[search] parsed uid=${userId} ws=${workspaceId} q="${query}" cat=${category}`);
 
     if (!workspaceId || typeof workspaceId !== "string") {
       return NextResponse.json({ error: "workspaceId is required" }, { status: 400 });
@@ -33,6 +37,7 @@ export async function POST(request: Request) {
 
     // Enforce free-tier search limit for anonymous users before touching Gemini.
     if (isAnonymous) {
+      step = "anonCheck";
       const allWorkspaces = await getWorkspaces(userId);
       const totalSearches = allWorkspaces.reduce((n, w) => n + w.searches.length, 0);
       if (totalSearches >= ANON_SEARCH_LIMIT) {
@@ -43,6 +48,7 @@ export async function POST(request: Request) {
       }
     }
 
+    step = "rateLimit";
     const { allowed } = await checkRateLimit(userId, isAnonymous);
     if (!allowed) {
       return NextResponse.json(
@@ -51,14 +57,17 @@ export async function POST(request: Request) {
       );
     }
 
+    step = "getWorkspace";
     const workspace = await getWorkspace(userId, workspaceId);
     if (!workspace) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
 
+    step = "getProfiles";
     const allProfiles = await getProfiles(userId);
     const travelerProfiles = workspace.travelers
       .map((id) => allProfiles.find((p) => p.id === id))
       .filter((p): p is NonNullable<typeof p> => !!p);
 
+    step = "getDefaultProfile";
     const defaultProfile = await getProfile(userId);
     const profiles = travelerProfiles.length > 0 ? travelerProfiles : (defaultProfile ? [defaultProfile] : []);
 
@@ -68,7 +77,9 @@ export async function POST(request: Request) {
 
     const primaryProfile = profiles[0];
     const searchId = uuidv4();
+    console.log(`[search] profiles=${profiles.length} primaryProfile=${primaryProfile.id} searchId=${searchId}`);
 
+    step = "effectiveWeights";
     // Build effective profiles with workspace-scoped weights when enough signal exists.
     const effectiveProfiles = await Promise.all(
       profiles.map(async (p) => {
@@ -78,11 +89,14 @@ export async function POST(request: Request) {
       })
     );
 
+    step = "recentSearches";
     // Fetch recent workspace searches for Gemini context (best-effort — non-blocking).
     const recentSearches = primaryProfile
       ? await getRecentWorkspaceSearches(userId, primaryProfile.id, workspaceId, 5).catch(() => [])
       : [];
 
+    step = "searchAndScore";
+    console.log(`[search] calling searchAndScore step=${step}`);
     const rawResults = await searchAndScore(
       query,
       category as SearchCategory,
@@ -95,7 +109,11 @@ export async function POST(request: Request) {
       typeof intent === "string" ? intent : undefined,
       recentSearches
     );
+    console.log(`[search] searchAndScore done results=${rawResults.length}`);
+
+    step = "validateLinks";
     const validatedResults = await validateResultLinks(rawResults, workspace.destination, workspace.dates, workspace.partySize);
+    step = "attachScores";
     const scoredResults = attachTravelerScores(validatedResults, travelerProfiles);
 
     const search: Search = {
@@ -108,6 +126,7 @@ export async function POST(request: Request) {
       searchedAt: new Date().toISOString(),
     };
 
+    step = "saveWorkspace";
     workspace.searches.unshift(search);
     await saveWorkspace(userId, workspace);
 
@@ -124,7 +143,7 @@ export async function POST(request: Request) {
     return NextResponse.json(search);
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    console.error("Search error:", e);
+    console.error(`[search] error at step=${step}:`, e);
     return NextResponse.json({ error: friendlyError(e) }, { status: 500 });
   }
 }
