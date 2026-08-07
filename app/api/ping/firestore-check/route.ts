@@ -6,36 +6,43 @@ export async function GET() {
 
   results.project = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "missing";
   results.googleApiKey = process.env.GOOGLE_API_KEY ? "set" : "MISSING";
+  results.firestoreStatus = "skipped";
+  results.authStatus = "skipped";
 
   try {
     const { adminDb } = await import("@/lib/firebase-admin");
     await adminDb.collection("_health").limit(1).get();
-    results.firestore = "ok";
+    results.firestoreStatus = "ok";
   } catch (e) {
-    results.firestore = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
+    results.firestoreStatus = `ERROR: ${e instanceof Error ? e.message.slice(0, 200) : String(e)}`;
   }
 
+  // Test 3.6-flash with googleSearch + thinkingConfig (mirrors actual search call)
   try {
-    const { adminAuth } = await import("@/lib/firebase-admin");
-    await adminAuth.listUsers(1);
-    results.auth = "ok";
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3.6-flash",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tools: [{ googleSearch: {} } as any],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      generationConfig: { thinkingConfig: { thinkingBudget: 1024 } } as any,
+    });
+    const result = await model.generateContent("Say OK in one word.");
+    results.gemini_3_6_flash_search = `ok: ${result.response.text().slice(0, 50)}`;
   } catch (e) {
-    results.auth = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
+    results.gemini_3_6_flash_search = `ERROR: ${e instanceof Error ? e.message.slice(0, 300) : String(e)}`;
   }
 
-  // List available models for this API key
+  // Test 3.5-flash-lite plain (mirrors loading-content/chat)
   try {
-    const apiKey = process.env.GOOGLE_API_KEY!;
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-    );
-    const data = await res.json() as { models?: Array<{ name: string; supportedGenerationMethods?: string[] }> };
-    const generateModels = (data.models ?? [])
-      .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
-      .map(m => m.name);
-    results.availableModels = generateModels;
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
+    const result = await model.generateContent("Say OK in one word.");
+    results.gemini_3_5_flash_lite = `ok: ${result.response.text().slice(0, 50)}`;
   } catch (e) {
-    results.availableModels = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
+    results.gemini_3_5_flash_lite = `ERROR: ${e instanceof Error ? e.message.slice(0, 300) : String(e)}`;
   }
 
   return NextResponse.json(results);
