@@ -23,5 +23,16 @@ export async function GET() {
     results.auth = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
   }
 
+  try {
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const apiKey = process.env.GOOGLE_API_KEY!;
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent("Say OK in one word.");
+    results.gemini = `ok: ${result.response.text().slice(0, 30)}`;
+  } catch (e) {
+    results.gemini = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
+  }
+
   return NextResponse.json(results);
 }
