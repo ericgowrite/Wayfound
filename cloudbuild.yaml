@@ -11,6 +11,7 @@ steps:
       - '--build-arg=NEXT_PUBLIC_FIREBASE_APP_ID=$_NEXT_PUBLIC_FIREBASE_APP_ID'
       - '--build-arg=NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$_NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'
       - '--build-arg=NEXT_PUBLIC_BASE_URL=https://gowayfound.com'
+      - '--build-arg=BUILD_COMMIT=$COMMIT_SHA'
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/wayfound/app'
       - '.'

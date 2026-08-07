@@ -6,6 +6,7 @@ export async function GET() {
 
   results.project = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "missing";
   results.googleApiKey = process.env.GOOGLE_API_KEY ? "set" : "MISSING";
+  results.buildCommit = process.env.BUILD_COMMIT ?? "unknown";
   results.firestoreStatus = "skipped";
   results.authStatus = "skipped";
 
