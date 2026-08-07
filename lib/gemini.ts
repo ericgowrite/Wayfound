@@ -101,8 +101,8 @@ function getClient(): GoogleGenerativeAI {
 
 // Errors that trigger a fallback model retry
 const RETRYABLE = /503|high.?demand|overload|429|quota|rate.?limit|resource.?exhaust|404|no longer available|not found/i;
-const PRIMARY_MODEL = "gemini-1.5-flash";
-const FALLBACK_MODEL = "gemini-1.5-pro";
+const PRIMARY_MODEL = "gemini-3.5-flash";
+const FALLBACK_MODEL = "gemini-2.5-flash";
 const MAX_ATTEMPTS = 3;   // 1 initial + 2 retries
 const BASE_DELAY_MS = 800;
 
