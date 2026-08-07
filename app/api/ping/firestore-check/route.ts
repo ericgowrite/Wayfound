@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const results: Record<string, string> = {};
+  const results: Record<string, unknown> = {};
 
   results.project = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "missing";
   results.googleApiKey = process.env.GOOGLE_API_KEY ? "set" : "MISSING";
@@ -23,15 +23,19 @@ export async function GET() {
     results.auth = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
   }
 
+  // List available models for this API key
   try {
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const apiKey = process.env.GOOGLE_API_KEY!;
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent("Say OK in one word.");
-    results.gemini = `ok: ${result.response.text().slice(0, 30)}`;
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+    );
+    const data = await res.json() as { models?: Array<{ name: string; supportedGenerationMethods?: string[] }> };
+    const generateModels = (data.models ?? [])
+      .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+      .map(m => m.name);
+    results.availableModels = generateModels;
   } catch (e) {
-    results.gemini = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
+    results.availableModels = `ERROR: ${e instanceof Error ? e.message : String(e)}`;
   }
 
   return NextResponse.json(results);
