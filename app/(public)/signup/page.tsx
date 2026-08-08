@@ -55,20 +55,20 @@ export default function SignupPage() {
     <div style={{ minHeight: "100vh", background: "#FAF8F5", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px", fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: 480, background: "#FAF8F5", border: "1px solid #E8E8E8", borderRadius: 12, padding: "56px 48px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
 
-        <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontWeight: 400, fontSize: 26, color: "#2C3E50", lineHeight: 1.3 }}>
+        <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontWeight: 400, fontSize: 29, color: "#2C3E50", lineHeight: 1.3 }}>
           Travel that fits who you are.
         </div>
 
         <button
           onClick={handleGoogle}
-          style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 14, color: "#1A1A1A", fontWeight: 600, width: "100%", marginTop: 26, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "#FFFFFF", cursor: "pointer" }}
+          style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 15, color: "#1A1A1A", fontWeight: 600, width: "100%", marginTop: 26, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "#FFFFFF", cursor: "pointer" }}
         >
           <GoogleIcon /><span>Continue with Google</span>
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginTop: 26 }}>
           <div style={{ flex: 1, height: 1, background: "#E8E8E8" }} />
-          <span style={{ fontSize: 12, color: "#aaaaaa" }}>or</span>
+          <span style={{ fontSize: 13, color: "#aaaaaa" }}>or</span>
           <div style={{ flex: 1, height: 1, background: "#E8E8E8" }} />
         </div>
 
@@ -76,23 +76,23 @@ export default function SignupPage() {
           <input
             type="email" placeholder="Email" value={email} required
             onChange={(e) => setEmail(e.target.value)}
-            style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 14, color: "#1A1A1A", width: "100%", marginTop: 14, boxSizing: "border-box", outline: "none" }}
+            style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 15, color: "#1A1A1A", width: "100%", marginTop: 14, boxSizing: "border-box", outline: "none" }}
           />
           <input
             type="password" placeholder="Password (6+ characters)" value={password} required minLength={6}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 14, color: "#1A1A1A", width: "100%", marginTop: 10, boxSizing: "border-box", outline: "none" }}
+            style={{ border: "1px solid #E8E8E8", borderRadius: 4, padding: "13px 16px", fontSize: 15, color: "#1A1A1A", width: "100%", marginTop: 10, boxSizing: "border-box", outline: "none" }}
           />
-          {error && <p style={{ fontSize: 12, color: "#B5654A", marginTop: 8, textAlign: "left" }}>{error}</p>}
+          {error && <p style={{ fontSize: 13, color: "#B5654A", marginTop: 8, textAlign: "left" }}>{error}</p>}
           <button
             type="submit" disabled={loading}
-            style={{ background: "#2C3E50", color: "#fff", textAlign: "center", fontSize: 14, fontWeight: 600, padding: 14, borderRadius: 999, marginTop: 14, width: "100%", border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1 }}
+            style={{ background: "#2C3E50", color: "#fff", textAlign: "center", fontSize: 15, fontWeight: 600, padding: 14, borderRadius: 999, marginTop: 14, width: "100%", border: "none", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1 }}
           >
             {loading ? "Creating account…" : "Continue →"}
           </button>
         </form>
 
-        <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 20 }}>
+        <div style={{ fontSize: 13, color: "#3D5A73", marginTop: 20 }}>
           Already have an account?{" "}
           <Link href="/login" style={{ textDecoration: "underline", color: "#3D5A73" }}>Sign in</Link>
         </div>

@@ -33,16 +33,16 @@ export default function LandingPage() {
       {/* ── Nav ──────────────────────────────────────────────────────────────── */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E8E8E8" }}>
         <div className="max-w-[1200px] mx-auto px-5 md:px-10 flex justify-between items-center py-[18px]">
-          <div style={{ fontFamily: "var(--font-lexend-giga), ui-sans-serif, sans-serif", fontWeight: 400, fontSize: 16, color: "#2C3E50", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          <div style={{ fontFamily: "var(--font-lexend-giga), ui-sans-serif, sans-serif", fontWeight: 400, fontSize: 18, color: "#2C3E50", letterSpacing: "0.04em", textTransform: "uppercase" }}>
             WAY<span style={{ color: "#C4956A" }}>FOUND</span>
           </div>
           <div className="flex items-center gap-5 md:gap-7">
-            <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#3D5A73", textDecoration: "none" }}>
+            <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 15, fontWeight: 400, color: "#3D5A73", textDecoration: "none" }}>
               Log in
             </Link>
             <Link
               href="/dashboard"
-              style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 600, background: "#C4956A", color: "#fff", padding: "10px 20px", borderRadius: 9999, textDecoration: "none", display: "inline-block" }}
+              style={{ fontFamily: encodeSemi, fontSize: 15, fontWeight: 600, background: "#C4956A", color: "#fff", padding: "10px 20px", borderRadius: 9999, textDecoration: "none", display: "inline-block" }}
             >
               Get started
             </Link>
@@ -74,7 +74,7 @@ export default function LandingPage() {
               display: "inline-block",
               marginTop: 36,
               fontFamily: encodeSemi,
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: 600,
               background: "#C4956A",
               color: "#fff",
@@ -87,7 +87,7 @@ export default function LandingPage() {
           </Link>
           <div className="flex flex-wrap gap-4 md:gap-6 mt-4">
             {TRUST_SIGNALS.map((label) => (
-              <span key={label} style={{ fontFamily: encode, fontSize: 12, color: "rgba(255,255,255,0.70)" }}>
+              <span key={label} style={{ fontFamily: encode, fontSize: 13, color: "rgba(255,255,255,0.70)" }}>
                 ✓ {label}
               </span>
             ))}
@@ -98,7 +98,7 @@ export default function LandingPage() {
       {/* ── How it works ─────────────────────────────────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-5 md:px-10 py-12 md:py-20">
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontFamily: encodeSemi, fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#3D5A73", margin: 0 }}>
+          <p style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#3D5A73", margin: 0 }}>
             How it works
           </p>
           <h2 style={{ fontFamily: notoSerif, fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, marginTop: 12, marginBottom: 0 }}>
@@ -118,13 +118,13 @@ export default function LandingPage() {
                 padding: "32px 24px",
               }}
             >
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2C3E50", color: "#fff", fontSize: 13, fontFamily: encodeSemi, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2C3E50", color: "#fff", fontSize: 14, fontFamily: encodeSemi, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {num}
               </div>
-              <h3 style={{ fontFamily: notoSerif, fontSize: 16, fontWeight: 600, color: "#2C3E50", marginTop: 16, marginBottom: 0, lineHeight: 1.3 }}>
+              <h3 style={{ fontFamily: notoSerif, fontSize: 18, fontWeight: 600, color: "#2C3E50", marginTop: 16, marginBottom: 0, lineHeight: 1.3 }}>
                 {title}
               </h3>
-              <p style={{ fontFamily: encode, fontSize: 14, color: "#3D5A73", marginTop: 8, lineHeight: 1.6, marginBottom: 0 }}>
+              <p style={{ fontFamily: encode, fontSize: 15, color: "#3D5A73", marginTop: 8, lineHeight: 1.6, marginBottom: 0 }}>
                 {desc}
               </p>
             </div>
@@ -144,10 +144,10 @@ export default function LandingPage() {
                 <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                   <span style={{ color: "#C4956A", marginTop: 1 }}>✓</span>
                   <div>
-                    <p style={{ fontFamily: notoSerif, fontSize: 15, fontWeight: 600, color: "#FFFFFF", margin: 0, lineHeight: 1.3 }}>
+                    <p style={{ fontFamily: notoSerif, fontSize: 17, fontWeight: 600, color: "#FFFFFF", margin: 0, lineHeight: 1.3 }}>
                       {title}
                     </p>
-                    <p style={{ fontFamily: encode, fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 6, lineHeight: 1.6, marginBottom: 0 }}>
+                    <p style={{ fontFamily: encode, fontSize: 14, color: "rgba(255,255,255,0.65)", marginTop: 6, lineHeight: 1.6, marginBottom: 0 }}>
                       {desc}
                     </p>
                   </div>
@@ -168,7 +168,7 @@ export default function LandingPage() {
           style={{
             display: "inline-block",
             fontFamily: encodeSemi,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: 600,
             background: "#C4956A",
             color: "#fff",
@@ -184,13 +184,13 @@ export default function LandingPage() {
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer className="border-t border-[#E8E8E8] px-5 md:px-10 py-6">
         <div className="max-w-[1200px] mx-auto flex justify-between items-center flex-wrap gap-3">
-          <span style={{ fontFamily: encodeSemi, fontSize: 12, color: "#3D5A73", fontWeight: 400 }}>
+          <span style={{ fontFamily: encodeSemi, fontSize: 13, color: "#3D5A73", fontWeight: 400 }}>
             © 2026 Wayfound
           </span>
           <div style={{ display: "flex", gap: 16 }}>
-            <Link href="/privacy" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Privacy</Link>
-            <Link href="/terms" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Terms</Link>
-            <Link href="/affiliate-disclosure" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Affiliate disclosure</Link>
+            <Link href="/privacy" style={{ fontFamily: encode, fontSize: 13, color: "#3D5A73", textDecoration: "none" }}>Privacy</Link>
+            <Link href="/terms" style={{ fontFamily: encode, fontSize: 13, color: "#3D5A73", textDecoration: "none" }}>Terms</Link>
+            <Link href="/affiliate-disclosure" style={{ fontFamily: encode, fontSize: 13, color: "#3D5A73", textDecoration: "none" }}>Affiliate disclosure</Link>
           </div>
         </div>
       </footer>

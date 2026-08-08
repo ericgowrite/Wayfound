@@ -361,7 +361,7 @@ export default function ResultCard({
         {/* THE VERDICT */}
         {option.fitExplanation && (
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}>
               The Verdict
             </p>
             <div className="text-sm leading-[1.65] text-[#1A1A1A]" style={{ borderLeft: "3px solid #C4956A", paddingLeft: "14px" }}>
@@ -827,7 +827,7 @@ export default function ResultCard({
               href={resolvedUrl || undefined}
               target={resolvedUrl ? "_blank" : undefined}
               rel="noopener noreferrer"
-              style={{ fontSize: 16, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, textDecoration: "none", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}
+              style={{ fontSize: 18, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, textDecoration: "none", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "underline"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "none"; }}
               onClick={(e) => {
@@ -851,21 +851,21 @@ export default function ResultCard({
 
           {/* Row 2: Location · Category */}
           {locationRow && (
-            <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 3, lineHeight: 1.3 }}>
+            <div style={{ fontSize: 13, color: "#3D5A73", marginTop: 3, lineHeight: 1.3 }}>
               {locationRow}
             </div>
           )}
 
           {/* Row 3: Judgment line — dominant element */}
           {judgmentLine && (
-            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 18, fontWeight: 400, color: "#2C3E50", marginTop: 8, lineHeight: 1.4 }}>
+            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 20, fontWeight: 400, color: "#2C3E50", marginTop: 8, lineHeight: 1.4 }}>
               {judgmentLine}
             </div>
           )}
 
           {/* Row 4: First tradeoff signal — collapsed only */}
           {!expanded && !isDetail && option.tradeoffs.length > 0 && (
-            <p style={{ marginTop: 8, fontSize: 13, color: "#8a4530" }} onClick={(e) => e.stopPropagation()}>
+            <p style={{ marginTop: 8, fontSize: 14, color: "#8a4530" }} onClick={(e) => e.stopPropagation()}>
               <span style={{ color: "#B5654A" }}>▲</span> {option.tradeoffs[0]}
             </p>
           )}
@@ -874,7 +874,7 @@ export default function ResultCard({
           {!expanded && !isDetail && (
             <div style={{ display: "flex", gap: 16, marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
               <button
-                style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                style={{ fontSize: 14, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
                 onClick={() => {
                   setExpanded(true);
                   onExpandedChange?.(true);
@@ -885,7 +885,7 @@ export default function ResultCard({
                 See why →
               </button>
               <button
-                style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                style={{ fontSize: 14, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
                 onClick={() => {
                   setExpanded(true);
                   onExpandedChange?.(true);
@@ -913,9 +913,9 @@ export default function ResultCard({
           <CategoryIcon category={category} size={13} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</div>
           {judgmentLine && (
-            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 14, color: "#1A1A1A", marginTop: 3, lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+            <div style={{ fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif", fontSize: 15, color: "#1A1A1A", marginTop: 3, lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
               {judgmentLine}
             </div>
           )}
@@ -951,7 +951,7 @@ export default function ResultCard({
             <div className="flex items-start gap-3 px-8 py-6 border-b border-[#E8E8E8] flex-shrink-0">
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-3">
-                  <span style={{ fontSize: 16, fontWeight: 600, color: "#2C3E50", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</span>
+                  <span style={{ fontSize: 18, fontWeight: 600, color: "#2C3E50", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>{option.name}</span>
                   <div className="w-6 h-6 rounded-full bg-[#F5F4F0] border border-[#E8E8E8] flex items-center justify-center flex-shrink-0">
                     <CategoryIcon category={category} size={14} />
                   </div>
@@ -959,7 +959,7 @@ export default function ResultCard({
                 {locationRow && (
                   <div className="text-xs text-[#3D5A73] mt-1">{locationRow}</div>
                 )}
-                <p style={{ fontSize: 20, fontWeight: 400, lineHeight: 1.5, color: "#2C3E50", marginTop: 16, maxWidth: "92%", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>
+                <p style={{ fontSize: 22, fontWeight: 400, lineHeight: 1.5, color: "#2C3E50", marginTop: 16, maxWidth: "92%", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>
                   {judgmentLine}
                 </p>
               </div>

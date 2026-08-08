@@ -787,14 +787,14 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5,
                   border: '1px solid #E8E8E8', borderRadius: 999,
-                  padding: '10px 14px', fontSize: 13, fontWeight: 600,
+                  padding: '10px 14px', fontSize: 14, fontWeight: 600,
                   color: '#2C3E50', background: '#FAF8F5', cursor: 'pointer',
                   fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
                   whiteSpace: 'nowrap',
                 }}
               >
                 {CATEGORY_META[category]?.label ?? "Category"}
-                <span style={{ fontSize: 9, color: '#3D5A73', marginLeft: 2 }}>▾</span>
+                <span style={{ fontSize: 10, color: '#3D5A73', marginLeft: 2 }}>▾</span>
               </button>
               {showCategoryPop && (
                 <div style={{
@@ -811,7 +811,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                         onClick={() => { setCategory(cat); setShowCategoryPop(false); }}
                         style={{
                           display: 'block', width: '100%', textAlign: 'left',
-                          padding: '8px 12px', fontSize: 13, borderRadius: 7,
+                          padding: '8px 12px', fontSize: 14, borderRadius: 7,
                           border: 'none', cursor: 'pointer',
                           background: isActive ? '#FAF8F5' : 'transparent',
                           color: isActive ? '#2C3E50' : '#555',
@@ -830,14 +830,14 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
             {/* Search input */}
             <input
               id="tour-search-input"
-              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
+              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 15, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
               placeholder={`Search ${workspace.destination || "any destination"}…`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             <button
-              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !query.trim() ? 0.5 : 1 }}
+              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 15, fontWeight: 600, border: 'none', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !query.trim() ? 0.5 : 1 }}
               onClick={() => handleSearch()}
               disabled={searching || !query.trim()}
             >
@@ -853,14 +853,14 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5,
                   border: '1px solid #E8E8E8', borderRadius: 999,
-                  padding: '10px 14px', fontSize: 13, fontWeight: 600,
+                  padding: '10px 14px', fontSize: 14, fontWeight: 600,
                   color: '#2C3E50', background: '#FAF8F5', cursor: 'pointer',
                   fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif",
                   whiteSpace: 'nowrap',
                 }}
               >
                 {CATEGORY_META[category]?.label ?? "Category"}
-                <span style={{ fontSize: 9, color: '#3D5A73', marginLeft: 2 }}>▾</span>
+                <span style={{ fontSize: 10, color: '#3D5A73', marginLeft: 2 }}>▾</span>
               </button>
               {showCategoryPop && (
                 <div style={{
@@ -877,7 +877,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                         onClick={() => { setCategory(cat); setShowCategoryPop(false); }}
                         style={{
                           display: 'block', width: '100%', textAlign: 'left',
-                          padding: '8px 12px', fontSize: 13, borderRadius: 7,
+                          padding: '8px 12px', fontSize: 14, borderRadius: 7,
                           border: 'none', cursor: 'pointer',
                           background: isActive ? '#FAF8F5' : 'transparent',
                           color: isActive ? '#2C3E50' : '#555',
@@ -895,14 +895,14 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
 
             {/* Score input */}
             <input
-              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 14, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
+              style={{ flex: 1, minWidth: 0, border: '1px solid #2C3E50', borderRadius: 999, padding: '10px 18px', fontSize: 15, color: '#1A1A1A', outline: 'none', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", background: '#fff' }}
               placeholder={`Paste a name, URL, or description — e.g. "Borgo Santo Pietro" or https://…`}
               value={scoreInput}
               onChange={(e) => setScoreInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleScore()}
             />
             <button
-              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 14, fontWeight: 600, border: 'none', cursor: searching || !scoreInput.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !scoreInput.trim() ? 0.5 : 1 }}
+              style={{ background: '#2C3E50', color: '#fff', borderRadius: 999, padding: '10px 20px', fontSize: 15, fontWeight: 600, border: 'none', cursor: searching || !scoreInput.trim() ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: searching || !scoreInput.trim() ? 0.5 : 1 }}
               onClick={handleScore}
               disabled={searching || !scoreInput.trim()}
             >
@@ -1005,7 +1005,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                   return (
                     <button
                       key={s.id}
-                      style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#3D5A73', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}
+                      style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 14, color: isActive ? '#2C3E50' : '#3D5A73', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}
                       onClick={() => {
                         onSearchChange(s.id);
                         setCategoryFilter(s.category);
@@ -1236,21 +1236,21 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
               <div className="flex-1 flex flex-col items-center justify-center py-16">
                 {workspace.searches.length > 0 ? (
                   <>
-                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 19, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
+                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 21, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
                       Nothing quite fits that yet.
                     </p>
-                    <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
+                    <p style={{ fontSize: 14, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
                       Try a different search or adjust your filters.
                     </p>
                   </>
                 ) : (
                   <>
-                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 19, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
+                    <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 21, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
                       {workspace.destination
                         ? `What are you looking for in ${workspace.destination}?`
                         : "What are you looking for?"}
                     </p>
-                    <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
+                    <p style={{ fontSize: 14, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
                       Try &quot;boutique eco resort&quot; or &quot;rooftop restaurant with a view&quot;
                     </p>
                   </>

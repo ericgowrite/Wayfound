@@ -115,7 +115,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
         <p
           className="font-semibold text-[#2C3E50] leading-snug mb-4"
-          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 30, maxWidth: 420 }}
+          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 33, maxWidth: 420 }}
         >
           {isSelf
             ? "Great experiences are everywhere. The right ones are specific to you."
@@ -318,7 +318,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         {/* Type name */}
         <p
           className="font-semibold text-[#2C3E50] leading-tight mb-2"
-          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 32 }}
+          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 35 }}
         >
           You&apos;re {displayed.name}.
         </p>
@@ -425,7 +425,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           <div style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}>
             <p
               className="font-medium text-[#2C3E50] mb-8"
-              style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22, lineHeight: 1.4 }}
+              style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 24, lineHeight: 1.4 }}
             >
               {q.setup}
             </p>

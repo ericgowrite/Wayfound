@@ -29,14 +29,14 @@
   --color-fit:          #6E9C74;
 
   /* ── Type Scale ── */
-  --text-xs:   12px;   /* labels, section eyebrows */
-  --text-sm:   13px;   /* metadata, location, timestamps */
-  --text-base: 15px;   /* default body, descriptions */
-  --text-md:   16px;   /* body large */
-  --text-lg:   17px;   /* property names */
-  --text-xl:   19px;   /* judgment lines */
-  --text-2xl:  23px;   /* section headings */
-  --text-3xl:  29px;   /* editorial headings */
+  --text-xs:   13px;   /* labels, section eyebrows */
+  --text-sm:   14px;   /* metadata, location, timestamps */
+  --text-base: 17px;   /* default body, descriptions */
+  --text-md:   18px;   /* body large */
+  --text-lg:   19px;   /* property names */
+  --text-xl:   21px;   /* judgment lines */
+  --text-2xl:  25px;   /* section headings */
+  --text-3xl:  32px;   /* editorial headings */
 
   /* ── Line heights ── */
   --leading-tight:   1.3;
@@ -142,7 +142,7 @@ body {
   background: var(--color-canvas);
   color: var(--color-text-body);
   font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 /* Font family utility classes */

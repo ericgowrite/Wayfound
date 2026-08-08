@@ -303,7 +303,7 @@ export default function Home() {
         <div className="w-full max-w-md bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl shadow-xl overflow-hidden">
           <div className="px-6 pt-6 pb-0 border-b border-[#E8E8E8]">
             <div className="flex items-center justify-between mb-3">
-              <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 16, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 WAY<span style={{ color: '#C4956A' }}>FOUND</span>
               </Link>
               <span className="text-xs text-[#3D5A73]">Welcome</span>
@@ -341,7 +341,7 @@ export default function Home() {
         {/* App header */}
         <div className="flex items-start justify-between px-4 py-4 border-b border-[#E8E8E8]">
           <div>
-            <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 16, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               WAY<span style={{ color: '#C4956A' }}>FOUND</span>
             </Link>
             <p className="text-xs text-[#2C3E50] mt-0.5">Travel that fits who you are.</p>
@@ -424,13 +424,13 @@ export default function Home() {
 
           {/* Trips section */}
           <div id="tour-trips" className="flex items-center justify-between px-4 pt-4 pb-3">
-            <span style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 15, color: '#2C3E50' }}>
+            <span style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 17, color: '#2C3E50' }}>
               Experiences
             </span>
             <button
               id="tour-create-trip"
               onClick={() => setShowNewWorkspace(true)}
-              style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '5px 10px', fontSize: 12, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', lineHeight: 1 }}
+              style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '5px 10px', fontSize: 13, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', lineHeight: 1 }}
             >
               + New
             </button>
@@ -439,15 +439,15 @@ export default function Home() {
           <div className="px-4">
             {workspaces.length === 0 ? (
               <div style={{ paddingTop: 20, paddingBottom: 20, textAlign: 'center' }}>
-                <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 15, color: '#2C3E50' }}>
+                <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 17, color: '#2C3E50' }}>
                   No experiences yet.
                 </p>
-                <p style={{ fontSize: 12, color: '#3D5A73', marginTop: 8, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 8, lineHeight: 1.5 }}>
                   Each experience is its own space — start one whenever you&apos;re ready.
                 </p>
                 <button
                   onClick={() => setShowNewWorkspace(true)}
-                  style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '9px 14px', fontSize: 12, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', marginTop: 14 }}
+                  style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '9px 14px', fontSize: 13, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', marginTop: 14 }}
                 >
                   + New experience
                 </button>
@@ -484,23 +484,23 @@ export default function Home() {
                       onClick={() => setActiveWorkspaceId(w.id)}
                     >
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                        <p className="truncate" style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#3D5A73' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
+                        <p className="truncate" style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 15, color: isBooked ? '#3D5A73' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
                           {w.name || w.destination || 'Untitled'}
                         </p>
                         <button
                           className="opacity-0 group-hover:opacity-100 flex-shrink-0 ml-1"
-                          style={{ color: '#3D5A73', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+                          style={{ color: '#3D5A73', fontSize: 15, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
                           onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
                         >
                           ×
                         </button>
                       </div>
-                      <p style={{ fontSize: 12, color: '#3D5A73', marginTop: 3, lineHeight: 1.4 }}>
+                      <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 3, lineHeight: 1.4 }}>
                         {subtitleParts.join(' · ')}
                       </p>
                       <button
                         onClick={(e) => { e.stopPropagation(); setActiveWorkspaceId(w.id); }}
-                        style={{ fontSize: 13, color: isBooked ? '#3D5A73' : '#2C3E50', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 6 }}
+                        style={{ fontSize: 14, color: isBooked ? '#3D5A73' : '#2C3E50', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 6 }}
                       >
                         {isBooked ? 'View →' : 'Continue →'}
                       </button>
@@ -548,7 +548,7 @@ export default function Home() {
             className="text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors w-full text-left flex items-center gap-1.5"
             onClick={() => setShowSettings(true)}
           >
-            <span style={{ fontSize: 13 }}>⚙</span> Settings
+            <span style={{ fontSize: 14 }}>⚙</span> Settings
           </button>
         </div>
       </div>
@@ -564,7 +564,7 @@ export default function Home() {
           >
             ☰
           </button>
-          <span style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 16, color: '#2C3E50', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             WAY<span style={{ color: '#C4956A' }}>FOUND</span>
           </span>
           {activeWorkspace && (
@@ -612,12 +612,12 @@ export default function Home() {
 
             <button
               onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); setAddingTravelerForWorkspace(false); }}
-              style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              style={{ fontSize: 14, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
             >
               ← Back
             </button>
 
-            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: '#2C3E50', marginTop: 16 }}>
+            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 24, color: '#2C3E50', marginTop: 16 }}>
               What are we planning?
             </div>
 
@@ -627,39 +627,39 @@ export default function Home() {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createWorkspace()}
               autoFocus
-              style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '13px 16px', fontSize: 14, color: '#1A1A1A', width: '100%', marginTop: 16, boxSizing: 'border-box', outline: 'none' }}
+              style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '13px 16px', fontSize: 15, color: '#1A1A1A', width: '100%', marginTop: 16, boxSizing: 'border-box', outline: 'none' }}
             />
 
             <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where</div>
                 <input
                   placeholder="e.g. Tuscany, Italy"
                   value={newDest}
                   onChange={(e) => setNewDest(e.target.value)}
-                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 13, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
+                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 14, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>When (optional)</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>When (optional)</div>
                 <input
                   placeholder="Flexible"
-                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 13, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
+                  style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 14, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
                 />
               </div>
             </div>
 
             <div style={{ borderTop: '1px solid #E8E8E8', marginTop: 24, paddingTop: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Who&apos;s joining you
               </div>
 
               {profiles[0] && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
-                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#2C3E50', color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#2C3E50', color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {profiles[0].name[0]}
                   </div>
-                  <span style={{ fontSize: 13, color: '#1A1A1A' }}>{profiles[0].name} (you)</span>
+                  <span style={{ fontSize: 14, color: '#1A1A1A' }}>{profiles[0].name} (you)</span>
                 </div>
               )}
 
@@ -668,11 +668,11 @@ export default function Home() {
                 if (!p) return null;
                 return (
                   <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#C4956A', color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#C4956A', color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {p.name[0]}
                     </div>
-                    <span style={{ fontSize: 13, color: '#1A1A1A', flex: 1 }}>{p.name}</span>
-                    <button onClick={() => toggleTraveler(id)} style={{ fontSize: 16, color: '#3D5A73', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+                    <span style={{ fontSize: 14, color: '#1A1A1A', flex: 1 }}>{p.name}</span>
+                    <button onClick={() => toggleTraveler(id)} style={{ fontSize: 18, color: '#3D5A73', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
                   </div>
                 );
               })}
@@ -685,13 +685,13 @@ export default function Home() {
                       <button
                         key={p.id}
                         onClick={() => { toggleTraveler(p.id); setShowAddTraveler(false); }}
-                        style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '6px 12px', fontSize: 12, color: '#2C3E50', background: '#fff', cursor: 'pointer' }}
+                        style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '6px 12px', fontSize: 13, color: '#2C3E50', background: '#fff', cursor: 'pointer' }}
                       >
                         {p.name}
                       </button>
                     ))}
                     {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length === 0 && (
-                      <span style={{ fontSize: 12, color: '#3D5A73' }}>All travelers added.</span>
+                      <span style={{ fontSize: 13, color: '#3D5A73' }}>All travelers added.</span>
                     )}
                   </div>
                 )}
@@ -701,7 +701,7 @@ export default function Home() {
                   {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length > 0 && !showAddTraveler && (
                     <button
                       onClick={() => setShowAddTraveler(true)}
-                      style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                      style={{ fontSize: 14, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       + Add someone
                     </button>
@@ -709,7 +709,7 @@ export default function Home() {
                   {/* Create a brand-new traveler profile */}
                   <button
                     onClick={() => { setAddingTravelerForWorkspace(true); setShowAddProfile(true); }}
-                    style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                    style={{ fontSize: 14, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     + New traveler
                   </button>
@@ -718,13 +718,13 @@ export default function Home() {
             </div>
 
             {workspaceError && (
-              <p style={{ fontSize: 12, color: '#B5654A', marginTop: 12 }}>{workspaceError}</p>
+              <p style={{ fontSize: 13, color: '#B5654A', marginTop: 12 }}>{workspaceError}</p>
             )}
 
             <button
               onClick={createWorkspace}
               disabled={!newName.trim() || !newDest.trim() || creatingWorkspace}
-              style={{ background: '#2C3E50', color: '#fff', textAlign: 'center', fontSize: 15, fontWeight: 600, padding: 15, borderRadius: 999, marginTop: 28, width: 220, border: 'none', cursor: newName.trim() && newDest.trim() && !creatingWorkspace ? 'pointer' : 'not-allowed', opacity: !newName.trim() || !newDest.trim() || creatingWorkspace ? 0.6 : 1, display: 'block' }}
+              style={{ background: '#2C3E50', color: '#fff', textAlign: 'center', fontSize: 17, fontWeight: 600, padding: 15, borderRadius: 999, marginTop: 28, width: 220, border: 'none', cursor: newName.trim() && newDest.trim() && !creatingWorkspace ? 'pointer' : 'not-allowed', opacity: !newName.trim() || !newDest.trim() || creatingWorkspace ? 0.6 : 1, display: 'block' }}
             >
               {creatingWorkspace ? 'Creating…' : "Let's go →"}
             </button>
@@ -839,7 +839,7 @@ export default function Home() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E8E8E8]">
-              <h2 style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 18, color: '#2C3E50' }}>
+              <h2 style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 20, color: '#2C3E50' }}>
                 Settings
               </h2>
               <button

@@ -96,12 +96,12 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
 
           <button
             onClick={() => { setView("main"); setSelectedPresets([]); }}
-            style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+            style={{ fontSize: 14, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
           >
             ← Back
           </button>
 
-          <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 20, color: "#2C3E50", marginTop: 16 }}>
+          <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 16 }}>
             Anything else that&apos;s true for you?
           </div>
 
@@ -116,7 +116,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
                     border: `1px solid ${selected ? "#C4956A" : "#2C3E50"}`,
                     borderRadius: 999,
                     padding: "9px 16px",
-                    fontSize: 13,
+                    fontSize: 14,
                     color: selected ? "#C4956A" : "#2C3E50",
                     background: selected ? "#FDF8F4" : "#FFFFFF",
                     cursor: "pointer",
@@ -128,14 +128,14 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               );
             })}
             {availablePresets.length === 0 && (
-              <p style={{ fontSize: 13, color: "#3D5A73" }}>All traits already added.</p>
+              <p style={{ fontSize: 14, color: "#3D5A73" }}>All traits already added.</p>
             )}
           </div>
 
           <button
             onClick={saveTraits}
             disabled={saving}
-            style={{ background: "#2C3E50", color: "#fff", textAlign: "center", fontSize: 14, fontWeight: 500, padding: 13, borderRadius: 999, marginTop: 24, width: 200, border: "none", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1, display: "block" }}
+            style={{ background: "#2C3E50", color: "#fff", textAlign: "center", fontSize: 15, fontWeight: 500, padding: 13, borderRadius: 999, marginTop: 24, width: 200, border: "none", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1, display: "block" }}
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -152,17 +152,17 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             {typeInfo && (
-              <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A" }}>
+              <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A" }}>
                 {typeInfo.name}
               </div>
             )}
-            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 22, color: "#2C3E50", marginTop: 4 }}>
+            <div style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 600, fontSize: 24, color: "#2C3E50", marginTop: 4 }}>
               {draft.name}&apos;s traits
             </div>
           </div>
           <button
             onClick={saveAndClose}
-            style={{ fontSize: 20, color: "#9BB0C1", background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: 0, marginLeft: 16, flexShrink: 0 }}
+            style={{ fontSize: 22, color: "#9BB0C1", background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: 0, marginLeft: 16, flexShrink: 0 }}
           >
             ×
           </button>
@@ -176,10 +176,10 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
             {(typeInfo?.bullets ?? []).map((bullet, i) => (
               <div
                 key={i}
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, padding: "12px 0", borderBottom: "1px solid #E8E8E8" }}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 15, padding: "12px 0", borderBottom: "1px solid #E8E8E8" }}
               >
                 <span style={{ color: "#1A1A1A" }}>{bullet}</span>
-                <span style={{ fontSize: 13, color: "#2C3E50", flexShrink: 0, marginLeft: 12 }}>On</span>
+                <span style={{ fontSize: 14, color: "#2C3E50", flexShrink: 0, marginLeft: 12 }}>On</span>
               </div>
             ))}
 
@@ -187,15 +187,15 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               <div
                 key={i}
                 className="group"
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, padding: "12px 0", borderBottom: "1px solid #E8E8E8" }}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 15, padding: "12px 0", borderBottom: "1px solid #E8E8E8" }}
               >
                 <span style={{ color: "#1A1A1A" }}>{d}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: 12 }}>
-                  <span style={{ fontSize: 13, color: "#2C3E50" }}>On</span>
+                  <span style={{ fontSize: 14, color: "#2C3E50" }}>On</span>
                   <button
                     className="opacity-0 group-hover:opacity-100"
                     onClick={() => removeDealbreaker(i)}
-                    style={{ fontSize: 14, color: "#3D5A73", background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}
+                    style={{ fontSize: 15, color: "#3D5A73", background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}
                   >
                     ×
                   </button>
@@ -204,15 +204,15 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
             ))}
 
             {offTraitLabel && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, padding: "12px 0", borderBottom: "1px solid #E8E8E8", color: "#3D5A73" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 15, padding: "12px 0", borderBottom: "1px solid #E8E8E8", color: "#3D5A73" }}>
                 <span>{offTraitLabel}</span>
-                <span style={{ fontSize: 13 }}>Off</span>
+                <span style={{ fontSize: 14 }}>Off</span>
               </div>
             )}
 
             <button
               onClick={() => setView("add-trait")}
-              style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 14 }}
+              style={{ fontSize: 14, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 14 }}
             >
               + Add a trait
             </button>
@@ -222,7 +222,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               {onCalibrate && !suppressed && (
                 <button
                   onClick={onCalibrate}
-                  style={{ fontSize: 12, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+                  style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
                 >
                   Refine your experience style →
                 </button>
@@ -230,7 +230,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               {onRetakeAssessment && (
                 <button
                   onClick={onRetakeAssessment}
-                  style={{ fontSize: 12, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+                  style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
                 >
                   Update travel style →
                 </button>
@@ -241,15 +241,15 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
           {/* Right panel — co-travelers */}
           {workspaceProfiles && workspaceProfiles.length > 0 && (
             <div style={{ width: 200, flexShrink: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#2C3E50" }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#2C3E50" }}>
                 This trip
               </div>
-              <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 8 }}>Weighing results against:</div>
+              <div style={{ fontSize: 13, color: "#3D5A73", marginTop: 8 }}>Weighing results against:</div>
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                 {workspaceProfiles.map(p => (
                   <div
                     key={p.id}
-                    style={{ border: "1px solid #2C3E50", borderRadius: 999, padding: "6px 12px", fontSize: 12, color: "#2C3E50" }}
+                    style={{ border: "1px solid #2C3E50", borderRadius: 999, padding: "6px 12px", fontSize: 13, color: "#2C3E50" }}
                   >
                     {p.name}
                   </div>

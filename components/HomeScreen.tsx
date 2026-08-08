@@ -148,7 +148,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           {/* Serif identity statement */}
           <p
             className="font-medium text-[#2C3E50] leading-snug mb-2"
-            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 28, lineHeight: 1.35 }}
+            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 31, lineHeight: 1.35 }}
           >
             {personaInfo?.descriptor ?? "Travel that fits who you are."}
           </p>
@@ -249,7 +249,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
             >
               <p
                 className="font-medium text-[#2C3E50]"
-                style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 16 }}
+                style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 18 }}
               >
                 {activeTrip.destination || activeTrip.name}
               </p>
@@ -302,7 +302,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
         <div className="pt-5 border-t border-[#E8E8E8]">
           <p
             className="font-medium text-[#2C3E50] mb-4 text-center"
-            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 20 }}
+            style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22 }}
           >
             Start a new search
           </p>

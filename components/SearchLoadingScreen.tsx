@@ -81,22 +81,22 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
       >
         {!contentReady || !item ? (
           /* Fallback while parallel call is pending */
-          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50', fontWeight: 500 }}>
+          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 20, lineHeight: 1.6, color: '#2C3E50', fontWeight: 500 }}>
             Finding what fits you in {destination || "your destination"}&hellip;
           </p>
         ) : item.type === "fact" ? (
           /* Destination fact */
           <>
-            <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C4956A', marginBottom: 12 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C4956A', marginBottom: 12 }}>
               While you wait
             </p>
-            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
+            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 20, lineHeight: 1.6, color: '#2C3E50' }}>
               {item.text}
             </p>
           </>
         ) : item.traveler === "both" ? (
           /* Group recommendation — no avatar */
-          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
+          <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 20, lineHeight: 1.6, color: '#2C3E50' }}>
             {item.text}
           </p>
         ) : (
@@ -115,14 +115,14 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
                 </span>
               </div>
             )}
-            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
+            <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 20, lineHeight: 1.6, color: '#2C3E50' }}>
               {item.text}
             </p>
           </>
         )}
       </div>
 
-      <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 24 }}>
+      <p style={{ fontSize: 14, color: '#3D5A73', marginTop: 24 }}>
         This may take 15–30 seconds
       </p>
     </div>

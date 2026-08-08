@@ -135,7 +135,7 @@ export default function CalibrationAssessment({
       <div className="flex flex-col h-full justify-center px-6 py-10">
         <p
           className="font-medium text-[#2C3E50] text-center mb-8"
-          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 20, lineHeight: 1.4 }}
+          style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22, lineHeight: 1.4 }}
         >
           {SELF_AWARENESS_QUESTION.prompt}
         </p>
@@ -170,30 +170,30 @@ export default function CalibrationAssessment({
   if (phase === "result" && result) {
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10 text-center">
-        <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10 }}>
           {result.tagline}
         </p>
         {typeChanged ? (
           <>
-            <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 26, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
+            <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 29, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
               Actually, you&apos;re {result.name}.
             </p>
-            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
+            <p style={{ fontSize: 15, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
               {result.tagline}
             </p>
-            <p style={{ fontSize: 13, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
               {originalResult.name} was close. Here&apos;s what this means for how Wayfound finds things for you.
             </p>
           </>
         ) : (
           <>
-            <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 26, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
+            <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 29, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
               Confirmed — you&apos;re {result.name}.
             </p>
-            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
+            <p style={{ fontSize: 15, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
               {result.tagline}
             </p>
-            <p style={{ fontSize: 13, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
               Wayfound knows you a little better now.
             </p>
           </>
@@ -250,7 +250,7 @@ export default function CalibrationAssessment({
           <div style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}>
             <p
               className="font-medium text-[#2C3E50] mb-8 text-center"
-              style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 22, lineHeight: 1.4 }}
+              style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 24, lineHeight: 1.4 }}
             >
               {q.setup}
             </p>
