@@ -290,7 +290,7 @@ export default function Home() {
   // Still fetching
   if (!profilesLoaded) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#FAF8F5] text-[#888888]">
+      <div className="flex items-center justify-center h-screen bg-[#FAF8F5] text-[#3D5A73]">
         Loading…
       </div>
     );
@@ -306,7 +306,7 @@ export default function Home() {
               <Link href="/" style={{ fontFamily: 'var(--font-lexend-giga), ui-sans-serif, sans-serif', fontWeight: 400, fontSize: 14, color: '#2C3E50', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 WAY<span style={{ color: '#C4956A' }}>FOUND</span>
               </Link>
-              <span className="text-xs text-[#888888]">Welcome</span>
+              <span className="text-xs text-[#3D5A73]">Welcome</span>
             </div>
           </div>
           {firstRunError && (
@@ -354,7 +354,7 @@ export default function Home() {
             </button>
           </div>
           <button
-            className="md:hidden text-[#888888] hover:text-[#2C3E50] text-xl leading-none mt-0.5 transition-colors"
+            className="md:hidden text-[#3D5A73] hover:text-[#2C3E50] text-xl leading-none mt-0.5 transition-colors"
             onClick={() => setMobileMenuOpen(false)}
           >
             ×
@@ -366,20 +366,20 @@ export default function Home() {
           <div className="mt-2">
             <button
               id="tour-travelers"
-              className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#888888] uppercase font-medium tracking-wide hover:text-[#2C3E50] transition-colors"
+              className="w-full flex items-center justify-between px-4 py-2 text-xs text-[#3D5A73] uppercase font-medium tracking-wide hover:text-[#2C3E50] transition-colors"
               onClick={() => setProfilesOpen((o) => !o)}
             >
               <span>Travelers</span>
               <span className="flex items-center gap-1">
                 <span
                   id="tour-add-traveler"
-                  className="text-[#888888] hover:text-[#2C3E50] transition-colors"
+                  className="text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                   onClick={(e) => { e.stopPropagation(); setShowAddProfile(true); }}
                   title="Add traveler"
                 >
                   +
                 </span>
-                <span className="text-[#888888]">{profilesOpen ? "▴" : "▾"}</span>
+                <span className="text-[#3D5A73]">{profilesOpen ? "▴" : "▾"}</span>
               </span>
             </button>
 
@@ -399,12 +399,12 @@ export default function Home() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-[#2C3E50] truncate">{p.name}</p>
                       {TYPE_INFO[p.enneagramType] && (
-                        <p className="text-[10px] text-[#888888] truncate leading-tight">{TYPE_INFO[p.enneagramType].name}</p>
+                        <p className="text-[12px] text-[#3D5A73] truncate leading-tight">{TYPE_INFO[p.enneagramType].name}</p>
                       )}
                     </div>
                     {!p.isDefault && (
                       <button
-                        className="opacity-0 group-hover:opacity-100 text-[#888888] hover:text-red-500 text-xs transition-all"
+                        className="opacity-0 group-hover:opacity-100 text-[#3D5A73] hover:text-red-500 text-xs transition-all"
                         onClick={(e) => { e.stopPropagation(); setDeleteProfileId(p.id); }}
                       >
                         ×
@@ -414,7 +414,7 @@ export default function Home() {
                 ))}
               </div>
             )}
-            <p className="px-4 pb-3 pt-0.5 text-[10px] text-[#888888] leading-relaxed">
+            <p className="px-4 pb-3 pt-0.5 text-[12px] text-[#3D5A73] leading-relaxed">
               Select a traveler to view or update their style.
             </p>
           </div>
@@ -430,7 +430,7 @@ export default function Home() {
             <button
               id="tour-create-trip"
               onClick={() => setShowNewWorkspace(true)}
-              style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '5px 10px', fontSize: 11, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', lineHeight: 1 }}
+              style={{ border: '1px solid #2C3E50', borderRadius: 999, padding: '5px 10px', fontSize: 12, color: '#2C3E50', fontWeight: 600, background: 'transparent', cursor: 'pointer', lineHeight: 1 }}
             >
               + New
             </button>
@@ -442,7 +442,7 @@ export default function Home() {
                 <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 15, color: '#2C3E50' }}>
                   No experiences yet.
                 </p>
-                <p style={{ fontSize: 12, color: '#888888', marginTop: 8, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 12, color: '#3D5A73', marginTop: 8, lineHeight: 1.5 }}>
                   Each experience is its own space — start one whenever you&apos;re ready.
                 </p>
                 <button
@@ -484,23 +484,23 @@ export default function Home() {
                       onClick={() => setActiveWorkspaceId(w.id)}
                     >
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                        <p className="truncate" style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#888888' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
+                        <p className="truncate" style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontWeight: 500, fontSize: 14, color: isBooked ? '#3D5A73' : '#2C3E50', lineHeight: 1.3, flexGrow: 1, minWidth: 0 }}>
                           {w.name || w.destination || 'Untitled'}
                         </p>
                         <button
                           className="opacity-0 group-hover:opacity-100 flex-shrink-0 ml-1"
-                          style={{ color: '#888888', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+                          style={{ color: '#3D5A73', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
                           onClick={(e) => { e.stopPropagation(); setDeleteWorkspaceId(w.id); }}
                         >
                           ×
                         </button>
                       </div>
-                      <p style={{ fontSize: 12, color: '#888888', marginTop: 3, lineHeight: 1.4 }}>
+                      <p style={{ fontSize: 12, color: '#3D5A73', marginTop: 3, lineHeight: 1.4 }}>
                         {subtitleParts.join(' · ')}
                       </p>
                       <button
                         onClick={(e) => { e.stopPropagation(); setActiveWorkspaceId(w.id); }}
-                        style={{ fontSize: 13, color: isBooked ? '#888888' : '#2C3E50', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 6 }}
+                        style={{ fontSize: 13, color: isBooked ? '#3D5A73' : '#2C3E50', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 6 }}
                       >
                         {isBooked ? 'View →' : 'Continue →'}
                       </button>
@@ -518,7 +518,7 @@ export default function Home() {
                               className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors text-xs ${
                                 isActiveSearch
                                   ? "text-[#2C3E50] font-medium"
-                                  : "text-[#888888] hover:bg-[#FAF8F5]"
+                                  : "text-[#3D5A73] hover:bg-[#FAF8F5]"
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -528,7 +528,7 @@ export default function Home() {
                             >
                               <span className="flex-shrink-0">{meta.icon}</span>
                               <span className="truncate flex-1">{s.query}</span>
-                              <span className="flex-shrink-0 text-[#888888]">
+                              <span className="flex-shrink-0 text-[#3D5A73]">
                                 {s.scoredResults.length}
                               </span>
                             </button>
@@ -545,7 +545,7 @@ export default function Home() {
 
         <div className="px-4 pt-3 pb-4 border-t border-[#E8E8E8]">
           <button
-            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors w-full text-left flex items-center gap-1.5"
+            className="text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors w-full text-left flex items-center gap-1.5"
             onClick={() => setShowSettings(true)}
           >
             <span style={{ fontSize: 13 }}>⚙</span> Settings
@@ -568,7 +568,7 @@ export default function Home() {
             WAY<span style={{ color: '#C4956A' }}>FOUND</span>
           </span>
           {activeWorkspace && (
-            <span className="text-sm text-[#888888] truncate">· {activeWorkspace.name}</span>
+            <span className="text-sm text-[#3D5A73] truncate">· {activeWorkspace.name}</span>
           )}
         </div>
         <div className="flex-1 overflow-hidden">
@@ -612,7 +612,7 @@ export default function Home() {
 
             <button
               onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); setAddingTravelerForWorkspace(false); }}
-              style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
             >
               ← Back
             </button>
@@ -632,7 +632,7 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where</div>
                 <input
                   placeholder="e.g. Tuscany, Italy"
                   value={newDest}
@@ -641,7 +641,7 @@ export default function Home() {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>When (optional)</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>When (optional)</div>
                 <input
                   placeholder="Flexible"
                   style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '12px 14px', fontSize: 13, color: '#1A1A1A', width: '100%', marginTop: 8, boxSizing: 'border-box', outline: 'none' }}
@@ -650,13 +650,13 @@ export default function Home() {
             </div>
 
             <div style={{ borderTop: '1px solid #E8E8E8', marginTop: 24, paddingTop: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#3D5A73', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Who&apos;s joining you
               </div>
 
               {profiles[0] && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
-                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#2C3E50', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#2C3E50', color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {profiles[0].name[0]}
                   </div>
                   <span style={{ fontSize: 13, color: '#1A1A1A' }}>{profiles[0].name} (you)</span>
@@ -668,11 +668,11 @@ export default function Home() {
                 if (!p) return null;
                 return (
                   <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#C4956A', color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 26, height: 26, borderRadius: '50%', background: '#C4956A', color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {p.name[0]}
                     </div>
                     <span style={{ fontSize: 13, color: '#1A1A1A', flex: 1 }}>{p.name}</span>
-                    <button onClick={() => toggleTraveler(id)} style={{ fontSize: 16, color: '#888888', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+                    <button onClick={() => toggleTraveler(id)} style={{ fontSize: 16, color: '#3D5A73', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
                   </div>
                 );
               })}
@@ -691,7 +691,7 @@ export default function Home() {
                       </button>
                     ))}
                     {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length === 0 && (
-                      <span style={{ fontSize: 12, color: '#888888' }}>All travelers added.</span>
+                      <span style={{ fontSize: 12, color: '#3D5A73' }}>All travelers added.</span>
                     )}
                   </div>
                 )}
@@ -701,7 +701,7 @@ export default function Home() {
                   {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length > 0 && !showAddTraveler && (
                     <button
                       onClick={() => setShowAddTraveler(true)}
-                      style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                      style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       + Add someone
                     </button>
@@ -709,7 +709,7 @@ export default function Home() {
                   {/* Create a brand-new traveler profile */}
                   <button
                     onClick={() => { setAddingTravelerForWorkspace(true); setShowAddProfile(true); }}
-                    style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                    style={{ fontSize: 13, color: '#3D5A73', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     + New traveler
                   </button>
@@ -737,7 +737,7 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
             <h2 className="text-lg font-semibold text-[#2C3E50] mb-2">Delete Experience?</h2>
-            <p className="text-[#888888] text-sm mb-4">
+            <p className="text-[#3D5A73] text-sm mb-4">
               This will permanently delete &quot;{workspaces.find((w) => w.id === deleteWorkspaceId)?.name}&quot; and all its searches.
             </p>
             <div className="flex gap-2 justify-end">
@@ -753,7 +753,7 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className={`${modalCls} rounded-xl border w-full max-w-sm p-6`}>
             <h2 className="text-lg font-semibold text-[#2C3E50] mb-2">Remove Traveler?</h2>
-            <p className="text-[#888888] text-sm mb-4">
+            <p className="text-[#3D5A73] text-sm mb-4">
               Remove &quot;{profiles.find((p) => p.id === deleteProfileId)?.name}&quot; from your profiles?
             </p>
             <div className="flex gap-2 justify-end">
@@ -801,7 +801,7 @@ export default function Home() {
             <div className="bg-[#FAF8F5] border border-[#E8E8E8] rounded-2xl w-full max-w-md shadow-xl overflow-hidden" style={{ minHeight: 480 }}>
               <div className="px-6 pt-5 pb-0 border-b border-[#E8E8E8] flex items-center justify-between">
                 <span className="text-sm font-semibold text-[#2C3E50]">Refine your style</span>
-                <button className="text-[#888888] hover:text-[#888888] text-2xl leading-none" onClick={() => setCalibratingProfile(null)}>×</button>
+                <button className="text-[#3D5A73] hover:text-[#3D5A73] text-2xl leading-none" onClick={() => setCalibratingProfile(null)}>×</button>
               </div>
               <CalibrationAssessment
                 calibrationPath="fresh"
@@ -843,7 +843,7 @@ export default function Home() {
                 Settings
               </h2>
               <button
-                className="text-[#888888] hover:text-[#2C3E50] text-2xl leading-none transition-colors"
+                className="text-[#3D5A73] hover:text-[#2C3E50] text-2xl leading-none transition-colors"
                 onClick={() => setShowSettings(false)}
               >
                 ×
@@ -853,12 +853,12 @@ export default function Home() {
             <div className="px-6 py-5 space-y-5">
               {/* Account */}
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">Account</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3">Account</p>
                 {user?.email && (
                   <p className="text-sm text-[#2C3E50] mb-3">{user.email}</p>
                 )}
                 <button
-                  className="text-sm text-[#888888] hover:text-red-500 transition-colors"
+                  className="text-sm text-[#3D5A73] hover:text-red-500 transition-colors"
                   onClick={() => { setShowSettings(false); logout(); }}
                 >
                   Log out →
@@ -867,25 +867,25 @@ export default function Home() {
 
               {/* App */}
               <div className="border-t border-[#E8E8E8] pt-5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">App</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3">App</p>
                 <button
                   className="text-sm text-[#2C3E50] hover:text-[#C4956A] transition-colors block"
                   onClick={() => { setShowSettings(false); setShowFitLegend(true); }}
                 >
                   What do fit scores mean? →
                 </button>
-                <p className="text-xs text-[#888888] mt-3">Version 2.0</p>
+                <p className="text-xs text-[#3D5A73] mt-3">Version 2.0</p>
               </div>
 
               {/* Legal */}
               <div className="border-t border-[#E8E8E8] pt-5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#888888] mb-3">Legal</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3">Legal</p>
                 <div className="space-y-2">
                   <a
                     href="/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-sm text-[#888888] hover:text-[#2C3E50] transition-colors"
+                    className="block text-sm text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                   >
                     Privacy Policy ↗
                   </a>
@@ -893,7 +893,7 @@ export default function Home() {
                     href="/terms"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-sm text-[#888888] hover:text-[#2C3E50] transition-colors"
+                    className="block text-sm text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                   >
                     Terms of Service ↗
                   </a>

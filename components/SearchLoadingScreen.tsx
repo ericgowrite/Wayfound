@@ -87,7 +87,7 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
         ) : item.type === "fact" ? (
           /* Destination fact */
           <>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C4956A', marginBottom: 12 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C4956A', marginBottom: 12 }}>
               While you wait
             </p>
             <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 18, lineHeight: 1.6, color: '#2C3E50' }}>
@@ -109,7 +109,7 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
                 </div>
                 <span className="text-xs font-medium text-[#2C3E50]">
                   {itemTraveler.name}
-                  <span style={{ color: '#888888', fontWeight: 400, marginLeft: 4 }}>
+                  <span style={{ color: '#3D5A73', fontWeight: 400, marginLeft: 4 }}>
                     · {TYPE_INFO[itemTraveler.enneagramType]?.name ?? ""}
                   </span>
                 </span>
@@ -122,7 +122,7 @@ export default function SearchLoadingScreen({ phase, destination, travelers, ite
         )}
       </div>
 
-      <p style={{ fontSize: 13, color: '#888888', marginTop: 24 }}>
+      <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 24 }}>
         This may take 15–30 seconds
       </p>
     </div>

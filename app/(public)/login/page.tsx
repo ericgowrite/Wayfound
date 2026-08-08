@@ -91,9 +91,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ fontSize: 12, color: "#888888", marginTop: 18 }}>
+        <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 18 }}>
           New here?{" "}
-          <Link href="/signup" style={{ textDecoration: "underline", color: "#888888" }}>Create an account</Link>
+          <Link href="/signup" style={{ textDecoration: "underline", color: "#3D5A73" }}>Create an account</Link>
         </div>
       </div>
     </div>

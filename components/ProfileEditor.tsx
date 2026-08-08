@@ -96,7 +96,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
 
           <button
             onClick={() => { setView("main"); setSelectedPresets([]); }}
-            style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+            style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
           >
             ← Back
           </button>
@@ -128,7 +128,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               );
             })}
             {availablePresets.length === 0 && (
-              <p style={{ fontSize: 13, color: "#888888" }}>All traits already added.</p>
+              <p style={{ fontSize: 13, color: "#3D5A73" }}>All traits already added.</p>
             )}
           </div>
 
@@ -152,7 +152,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             {typeInfo && (
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A" }}>
                 {typeInfo.name}
               </div>
             )}
@@ -195,7 +195,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
                   <button
                     className="opacity-0 group-hover:opacity-100"
                     onClick={() => removeDealbreaker(i)}
-                    style={{ fontSize: 14, color: "#888888", background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}
+                    style={{ fontSize: 14, color: "#3D5A73", background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}
                   >
                     ×
                   </button>
@@ -204,7 +204,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
             ))}
 
             {offTraitLabel && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, padding: "12px 0", borderBottom: "1px solid #E8E8E8", color: "#888888" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 14, padding: "12px 0", borderBottom: "1px solid #E8E8E8", color: "#3D5A73" }}>
                 <span>{offTraitLabel}</span>
                 <span style={{ fontSize: 13 }}>Off</span>
               </div>
@@ -212,7 +212,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
 
             <button
               onClick={() => setView("add-trait")}
-              style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 14 }}
+              style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 14 }}
             >
               + Add a trait
             </button>
@@ -222,7 +222,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               {onCalibrate && !suppressed && (
                 <button
                   onClick={onCalibrate}
-                  style={{ fontSize: 12, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+                  style={{ fontSize: 12, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
                 >
                   Refine your experience style →
                 </button>
@@ -230,7 +230,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               {onRetakeAssessment && (
                 <button
                   onClick={onRetakeAssessment}
-                  style={{ fontSize: 12, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+                  style={{ fontSize: 12, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
                 >
                   Update travel style →
                 </button>
@@ -244,7 +244,7 @@ export default function ProfileEditor({ profile, onSave, onClose, onRetakeAssess
               <div style={{ fontSize: 13, fontWeight: 600, color: "#2C3E50" }}>
                 This trip
               </div>
-              <div style={{ fontSize: 12, color: "#888888", marginTop: 8 }}>Weighing results against:</div>
+              <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 8 }}>Weighing results against:</div>
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
                 {workspaceProfiles.map(p => (
                   <div

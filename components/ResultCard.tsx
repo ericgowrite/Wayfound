@@ -332,19 +332,19 @@ export default function ResultCard({
       <div className="flex flex-col gap-0.5 min-h-6">
         <div className="flex items-center gap-3 flex-wrap">
           {(urlStatus === "checking" || urlStatus === "recovering") && (
-            <span className="text-xs text-[#888888] animate-pulse">
+            <span className="text-xs text-[#3D5A73] animate-pulse">
               {urlStatus === "recovering" ? "Finding link…" : "Checking source…"}
             </span>
           )}
           {(urlStatus === "valid" || urlStatus === "recovered") && !reportSent && (
-            <button onClick={handleReport} className="text-xs text-[#888888] hover:text-[#B5654A] transition-colors">
+            <button onClick={handleReport} className="text-xs text-[#3D5A73] hover:text-[#B5654A] transition-colors">
               Report link
             </button>
           )}
           {urlStatus === "recovered" && (
-            <span className="text-xs text-[#888888]">Couldn&apos;t verify original link</span>
+            <span className="text-xs text-[#3D5A73]">Couldn&apos;t verify original link</span>
           )}
-          {urlStatus === "not_found" && <span className="text-xs text-[#888888]">Source not available</span>}
+          {urlStatus === "not_found" && <span className="text-xs text-[#3D5A73]">Source not available</span>}
         </div>
       </div>
     );
@@ -361,7 +361,7 @@ export default function ResultCard({
         {/* THE VERDICT */}
         {option.fitExplanation && (
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}>
+            <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10, fontFamily: "var(--font-encode-semi), ui-sans-serif, system-ui, sans-serif" }}>
               The Verdict
             </p>
             <div className="text-sm leading-[1.65] text-[#1A1A1A]" style={{ borderLeft: "3px solid #C4956A", paddingLeft: "14px" }}>
@@ -373,7 +373,7 @@ export default function ResultCard({
         {/* Traveler fit bars */}
         {travelers.length > 0 && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3">
               Traveler fit
             </p>
             <div className="space-y-2.5">
@@ -437,7 +437,7 @@ export default function ResultCard({
         {/* Ask Wayfound text link */}
         <div className="text-center">
           <button
-            className="text-sm text-[#888888] underline hover:text-[#2C3E50] transition-colors"
+            className="text-sm text-[#3D5A73] underline hover:text-[#2C3E50] transition-colors"
             onClick={() => { setChatOpen((v) => !v); if (!chatOpen) setTimeout(() => chatInputRef.current?.focus(), 100); }}
           >
             {chatOpen ? "Hide chat" : "Ask Wayfound about this place"}
@@ -452,7 +452,7 @@ export default function ResultCard({
               <div>
                 <p className="text-xs font-medium text-[#2C3E50]">Ask anything about {option.name}</p>
                 {travelers.length > 0 && (
-                  <p className="text-xs text-[#888888]">
+                  <p className="text-xs text-[#3D5A73]">
                     {travelers.length === 1
                       ? `For ${travelers[0].name}`
                       : `For ${travelers.slice(0, -1).map((t) => t.name).join(", ")} & ${travelers[travelers.length - 1].name}`}
@@ -461,16 +461,16 @@ export default function ResultCard({
               </div>
               <div className="flex items-center gap-2">
                 {chatMessages.length > 0 && (
-                  <button className="text-xs text-[#888888] hover:text-[#B5654A] transition-colors"
+                  <button className="text-xs text-[#3D5A73] hover:text-[#B5654A] transition-colors"
                     onClick={() => { setChatMessages([]); onChatUpdate([]); }}>Clear</button>
                 )}
-                <button className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+                <button className="text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                   onClick={() => setChatOpen(false)}>Collapse</button>
               </div>
             </div>
             <div className="max-h-64 overflow-y-auto p-3 space-y-2.5">
               {chatMessages.length === 0 && (
-                <p className="text-xs text-[#888888] text-center py-4">
+                <p className="text-xs text-[#3D5A73] text-center py-4">
                   Pricing, vibe, logistics, or how it fits your travel style — ask away.
                 </p>
               )}
@@ -487,9 +487,9 @@ export default function ResultCard({
                 <div className="flex justify-start">
                   <div className="bg-white border border-[#E8E8E8] px-3 py-2 rounded-2xl rounded-bl-md">
                     <span className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-[#888888] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 bg-[#888888] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 bg-[#888888] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-1.5 h-1.5 bg-[#3D5A73] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 bg-[#3D5A73] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 bg-[#3D5A73] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                     </span>
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function ResultCard({
               <input
                 ref={chatInputRef}
                 type="text"
-                className="flex-1 bg-transparent text-sm text-[#2C3E50] placeholder-[#888888] outline-none min-w-0"
+                className="flex-1 bg-transparent text-sm text-[#2C3E50] placeholder-[#3D5A73] outline-none min-w-0"
                 placeholder="Ask about pricing, vibe, logistics…"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
@@ -530,7 +530,7 @@ export default function ResultCard({
             </div>
             {watchOutItems.length > 1 && !tradeoffsExpanded && (
               <button
-                className="mt-1.5 text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+                className="mt-1.5 text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                 onClick={() => setTradeoffsExpanded(true)}
               >
                 {watchOutItems.length - 1} more thing{watchOutItems.length - 1 === 1 ? "" : "s"} to know ↓
@@ -538,7 +538,7 @@ export default function ResultCard({
             )}
             {tradeoffsExpanded && watchOutItems.length > 1 && (
               <button
-                className="mt-1.5 text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+                className="mt-1.5 text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
                 onClick={() => setTradeoffsExpanded(false)}
               >
                 Show less ↑
@@ -565,7 +565,7 @@ export default function ResultCard({
               onClick={() => setAboutExpanded((v) => !v)}
             >
               <p className="text-sm font-semibold text-[#2C3E50]">{aboutLabel}</p>
-              <span className="text-xs text-[#888888] flex-shrink-0">
+              <span className="text-xs text-[#3D5A73] flex-shrink-0">
                 {aboutExpanded ? "▲" : "Property details ↓"}
               </span>
             </button>
@@ -580,9 +580,9 @@ export default function ResultCard({
 
         {/* Notes */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-2">Notes</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-2">Notes</p>
           <textarea
-            className="w-full text-sm text-[#1A1A1A] border border-[#E8E8E8] rounded-[4px] p-3 resize-none focus:outline-none focus:border-[#2C3E50] transition-colors bg-white placeholder-[#888888]"
+            className="w-full text-sm text-[#1A1A1A] border border-[#E8E8E8] rounded-[4px] p-3 resize-none focus:outline-none focus:border-[#2C3E50] transition-colors bg-white placeholder-[#3D5A73]"
             rows={2}
             placeholder="Add a note…"
             value={notes}
@@ -594,7 +594,7 @@ export default function ResultCard({
         {/* Post-trip feedback */}
         {option.feedback ? (
           <div className="rounded-[4px] border border-[#E8E8E8] bg-[#F5F4F0] px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-1.5">Your feedback</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-1.5">Your feedback</p>
             <p className="text-sm text-[#1A1A1A]">
               {option.feedback.metExpectations === "yes" ? "Met expectations ✓" : option.feedback.metExpectations === "no" ? "Didn't meet expectations ✗" : "Mixed — partly met expectations"}
             </p>
@@ -606,14 +606,14 @@ export default function ResultCard({
               </ul>
             )}
             {option.feedback.note && (
-              <p className="text-sm text-[#888888] mt-1.5 italic">&quot;{option.feedback.note}&quot;</p>
+              <p className="text-sm text-[#3D5A73] mt-1.5 italic">&quot;{option.feedback.note}&quot;</p>
             )}
           </div>
         ) : feedbackEligible && !feedbackDismissed ? (
           <div className="rounded-[4px] border border-[#C4956A]/40 bg-[#FBF4EC] px-4 py-3 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-medium text-[#2C3E50]">How was {option.name}?</p>
-              <button className="text-xs text-[#888888] hover:text-[#2C3E50] flex-shrink-0" onClick={() => setFeedbackDismissed(true)}>Not now</button>
+              <button className="text-xs text-[#3D5A73] hover:text-[#2C3E50] flex-shrink-0" onClick={() => setFeedbackDismissed(true)}>Not now</button>
             </div>
             <div className="flex gap-1.5 flex-wrap">
               {(["yes", "mixed", "no"] as PropertyFeedback["metExpectations"][]).map((v) => (
@@ -621,7 +621,7 @@ export default function ResultCard({
                   className={`px-3 py-1 text-xs rounded-full capitalize transition-colors ${
                     metExpectations === v
                       ? "bg-[#2C3E50] text-white font-medium"
-                      : "bg-white text-[#888888] border border-[#E8E8E8] hover:border-[#2C3E50]"
+                      : "bg-white text-[#3D5A73] border border-[#E8E8E8] hover:border-[#2C3E50]"
                   }`}
                   onClick={() => setMetExpectations(v)}>
                   {v === "yes" ? "Met expectations" : v === "no" ? "Didn't meet expectations" : "Mixed"}
@@ -653,7 +653,7 @@ export default function ResultCard({
         <div className="flex border-t border-[#E8E8E8] pt-4">
           <button
             className={`flex-1 text-center text-sm transition-colors ${
-              isSaved ? "font-semibold text-[#2C3E50]" : "text-[#888888] hover:text-[#2C3E50]"
+              isSaved ? "font-semibold text-[#2C3E50]" : "text-[#3D5A73] hover:text-[#2C3E50]"
             }`}
             onClick={onSave}
           >
@@ -665,7 +665,7 @@ export default function ResultCard({
               <button
                 key={s}
                 className={`flex-1 text-center text-sm transition-colors ${
-                  isActive ? "font-semibold text-[#2C3E50]" : "text-[#888888] hover:text-[#2C3E50]"
+                  isActive ? "font-semibold text-[#2C3E50]" : "text-[#3D5A73] hover:text-[#2C3E50]"
                 }`}
                 onClick={() => onStatusChange(s)}
               >
@@ -712,7 +712,7 @@ export default function ResultCard({
                 ))}
               </ul>
               {deepDive!.whyItFits.length > 2 && (
-                <button className="mt-2 text-xs text-[#888888] hover:text-[#2C3E50] underline"
+                <button className="mt-2 text-xs text-[#3D5A73] hover:text-[#2C3E50] underline"
                   onClick={() => setShowMoreWhyItFits((v) => !v)}>
                   {showMoreWhyItFits ? "Show less" : `Show ${deepDive!.whyItFits.length - 2} more reasons →`}
                 </button>
@@ -725,7 +725,7 @@ export default function ResultCard({
               <div className="flex items-center justify-between gap-2 cursor-pointer"
                 onClick={() => setWatchOutForExpanded((v) => !v)}>
                 <p className="text-sm font-semibold text-[#8a4530]">Watch out for</p>
-                <span className="text-[#888888] text-xs">{watchOutForExpanded ? "▲" : "▼"}</span>
+                <span className="text-[#3D5A73] text-xs">{watchOutForExpanded ? "▲" : "▼"}</span>
               </div>
               <ul className="mt-2 space-y-2">
                 <li className="flex items-start gap-2 text-sm text-[#1A1A1A] leading-snug">
@@ -740,7 +740,7 @@ export default function ResultCard({
                 ))}
               </ul>
               {!watchOutForExpanded && deepDive!.watchOutFor.length > 1 && (
-                <button className="mt-1.5 text-xs text-[#888888] hover:text-[#2C3E50]"
+                <button className="mt-1.5 text-xs text-[#3D5A73] hover:text-[#2C3E50]"
                   onClick={() => setWatchOutForExpanded(true)}>
                   {deepDive!.watchOutFor.length - 1} more thing{deepDive!.watchOutFor.length - 1 === 1 ? "" : "s"} to know ↓
                 </button>
@@ -753,14 +753,14 @@ export default function ResultCard({
               <button className="w-full text-left" onClick={() => setStandoutExpanded((v) => !v)}>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-[#2C3E50]">What makes it stand out</p>
-                  <span className="text-[#888888] text-xs">{standoutExpanded ? "▲" : "▼"}</span>
+                  <span className="text-[#3D5A73] text-xs">{standoutExpanded ? "▲" : "▼"}</span>
                 </div>
               </button>
               {standoutExpanded && (
                 <ul className="mt-2.5 space-y-2">
                   {deepDive!.standoutFeatures.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-[#1A1A1A] leading-snug">
-                      <span className="text-[#888888] flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-[#3D5A73] flex-shrink-0 mt-0.5">•</span>
                       <span>{item}</span>
                     </li>
                   ))}
@@ -774,7 +774,7 @@ export default function ResultCard({
               <button className="w-full text-left" onClick={() => setAboutExpanded((v) => !v)}>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-[#2C3E50]">{aboutLabel}</p>
-                  <span className="text-[#888888] text-xs">{aboutExpanded ? "▲" : "▼"}</span>
+                  <span className="text-[#3D5A73] text-xs">{aboutExpanded ? "▲" : "▼"}</span>
                 </div>
               </button>
               {aboutExpanded && (
@@ -785,15 +785,15 @@ export default function ResultCard({
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-2">Notes</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-2">Notes</p>
           <textarea
-            className="w-full text-sm text-[#1A1A1A] border border-[#E8E8E8] rounded-[4px] p-3 resize-none focus:outline-none focus:border-[#2C3E50] transition-colors bg-white placeholder-[#888888]"
+            className="w-full text-sm text-[#1A1A1A] border border-[#E8E8E8] rounded-[4px] p-3 resize-none focus:outline-none focus:border-[#2C3E50] transition-colors bg-white placeholder-[#3D5A73]"
             rows={2} placeholder="Add notes…" value={notes}
             onChange={(e) => setNotes(e.target.value)} onBlur={() => onNotesChange(notes)}
           />
         </div>
 
-        <button className="text-xs text-[#888888] underline hover:text-[#2C3E50] transition-colors" onClick={handleExitDeepDive}>
+        <button className="text-xs text-[#3D5A73] underline hover:text-[#2C3E50] transition-colors" onClick={handleExitDeepDive}>
           ← Back to results
         </button>
       </div>
@@ -839,7 +839,7 @@ export default function ResultCard({
             </a>
             {isDetail && (
               <button
-                style={{ color: "#888888", background: "none", border: "none", padding: "2px 4px", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
+                style={{ color: "#3D5A73", background: "none", border: "none", padding: "2px 4px", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
                 onClick={(e) => { e.stopPropagation(); setOverlayOpen(true); }}
                 aria-label="Open focus view"
                 title="Focus view"
@@ -851,7 +851,7 @@ export default function ResultCard({
 
           {/* Row 2: Location · Category */}
           {locationRow && (
-            <div style={{ fontSize: 12, color: "#888888", marginTop: 3, lineHeight: 1.3 }}>
+            <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 3, lineHeight: 1.3 }}>
               {locationRow}
             </div>
           )}
@@ -874,7 +874,7 @@ export default function ResultCard({
           {!expanded && !isDetail && (
             <div style={{ display: "flex", gap: 16, marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
               <button
-                style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
                 onClick={() => {
                   setExpanded(true);
                   onExpandedChange?.(true);
@@ -885,7 +885,7 @@ export default function ResultCard({
                 See why →
               </button>
               <button
-                style={{ fontSize: 13, color: "#888888", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                style={{ fontSize: 13, color: "#3D5A73", textDecoration: "underline", background: "none", border: "none", padding: 0, cursor: "pointer" }}
                 onClick={() => {
                   setExpanded(true);
                   onExpandedChange?.(true);
@@ -957,14 +957,14 @@ export default function ResultCard({
                   </div>
                 </div>
                 {locationRow && (
-                  <div className="text-xs text-[#888888] mt-1">{locationRow}</div>
+                  <div className="text-xs text-[#3D5A73] mt-1">{locationRow}</div>
                 )}
                 <p style={{ fontSize: 20, fontWeight: 400, lineHeight: 1.5, color: "#2C3E50", marginTop: 16, maxWidth: "92%", fontFamily: "var(--font-noto-serif), Georgia, ui-serif, serif" }}>
                   {judgmentLine}
                 </p>
               </div>
               <button
-                className="text-[#888888] hover:text-[#2C3E50] text-2xl leading-none flex-shrink-0 ml-2 transition-colors"
+                className="text-[#3D5A73] hover:text-[#2C3E50] text-2xl leading-none flex-shrink-0 ml-2 transition-colors"
                 onClick={() => setOverlayOpen(false)}
                 aria-label="Close focus view"
               >×</button>

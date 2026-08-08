@@ -154,7 +154,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           </p>
 
           {/* Subtitle */}
-          <p className="text-sm text-[#888888] mb-6">Going somewhere?</p>
+          <p className="text-sm text-[#3D5A73] mb-6">Going somewhere?</p>
 
           {/* Category picker */}
           <div className="flex items-center justify-center gap-6 mb-6">
@@ -176,7 +176,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                 >
                   <Icon />
                 </div>
-                <span className="text-xs" style={{ color: selectedCategory === value ? "#2C3E50" : "#888888" }}>{label}</span>
+                <span className="text-xs" style={{ color: selectedCategory === value ? "#2C3E50" : "#3D5A73" }}>{label}</span>
               </button>
             ))}
           </div>
@@ -185,7 +185,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
           <div style={{ maxWidth: 400, margin: "0 auto" }}>
             <div className="flex gap-2">
               <input
-                className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] bg-white"
+                className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#3D5A73] focus:outline-none focus:border-[#2C3E50] bg-white"
                 placeholder="Where to?"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
@@ -237,7 +237,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
         {/* Active trip card */}
         {activeTrip && (
           <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3" style={{ letterSpacing: "0.08em" }}>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3" style={{ letterSpacing: "0.08em" }}>
               Active trip
             </p>
             <div
@@ -259,7 +259,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                 </p>
               )}
               {!hasSaves && (
-                <p className="text-sm text-[#888888] mt-1">Just started</p>
+                <p className="text-sm text-[#3D5A73] mt-1">Just started</p>
               )}
               <button
                 className="text-sm font-medium text-[#2C3E50] underline mt-2 transition-opacity hover:opacity-70"
@@ -274,7 +274,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
         {/* Saved items preview */}
         {allSaved.length > 0 && (
           <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#888888] mb-3" style={{ letterSpacing: "0.08em" }}>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#3D5A73] mb-3" style={{ letterSpacing: "0.08em" }}>
               Saved
             </p>
             <div className="flex gap-2 flex-wrap">
@@ -291,7 +291,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                     }
                   }}
                 >
-                  <span className="text-xs text-[#888888] truncate">{item.name}</span>
+                  <span className="text-xs text-[#3D5A73] truncate">{item.name}</span>
                 </button>
               ))}
             </div>
@@ -309,7 +309,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
 
           <div className="flex gap-2" style={{ maxWidth: 400, margin: "0 auto 16px" }}>
             <input
-              className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] bg-white"
+              className="flex-1 border border-[#E8E8E8] rounded-full px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#3D5A73] focus:outline-none focus:border-[#2C3E50] bg-white"
               placeholder="Where to?"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
@@ -336,7 +336,7 @@ export default function HomeScreen({ profiles, workspaces, onWorkspaceCreated, o
                   padding: "7px 14px",
                   border: `1px solid ${selectedChipLabel === chip.label ? "#C4956A" : "#E8E8E8"}`,
                   background: selectedChipLabel === chip.label ? "#C4956A" : "#fff",
-                  color: selectedChipLabel === chip.label ? "#fff" : "#888888",
+                  color: selectedChipLabel === chip.label ? "#fff" : "#3D5A73",
                 }}
                 onClick={() => openSearch(chip.label)}
               >

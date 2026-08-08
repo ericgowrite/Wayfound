@@ -92,9 +92,9 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <div style={{ fontSize: 12, color: "#888888", marginTop: 20 }}>
+        <div style={{ fontSize: 12, color: "#3D5A73", marginTop: 20 }}>
           Already have an account?{" "}
-          <Link href="/login" style={{ textDecoration: "underline", color: "#888888" }}>Sign in</Link>
+          <Link href="/login" style={{ textDecoration: "underline", color: "#3D5A73" }}>Sign in</Link>
         </div>
       </div>
     </div>

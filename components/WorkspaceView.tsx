@@ -704,7 +704,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
               <span className="relative" ref={travelerPickerRef}>
                 <button
                   onClick={() => setShowTravelerPicker((v) => !v)}
-                  className="text-[#888888] hover:text-[#2C3E50] dark:hover:text-white transition-colors text-xs leading-none"
+                  className="text-[#3D5A73] hover:text-[#2C3E50] dark:hover:text-white transition-colors text-xs leading-none"
                   title="Add traveler"
                 >
                   + traveler
@@ -718,19 +718,19 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                         onClick={() => addTravelerToWorkspace(p.id)}
                         className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#2C3E50] dark:text-white hover:bg-[#F5F8FA] dark:hover:bg-[#2a3f52] transition-colors"
                       >
-                        <span className="w-5 h-5 rounded-full bg-[#2C3E50] dark:bg-[#4A7A8F] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-[#2C3E50] dark:bg-[#4A7A8F] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
                           {p.name[0]}
                         </span>
                         {p.name}
                       </button>
                     ))}
                     {allProfiles.filter(p => !workspace.travelers?.includes(p.id)).length === 0 && (
-                      <p className="px-3 py-2 text-xs text-[#888888]">All travelers added.</p>
+                      <p className="px-3 py-2 text-xs text-[#3D5A73]">All travelers added.</p>
                     )}
                     <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mt-1 pt-1">
                       <button
                         onClick={() => { setShowTravelerPicker(false); onNewTraveler?.(); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#888888] hover:text-[#2C3E50] dark:hover:text-white hover:bg-[#F5F8FA] dark:hover:bg-[#2a3f52] transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#3D5A73] hover:text-[#2C3E50] dark:hover:text-white hover:bg-[#F5F8FA] dark:hover:bg-[#2a3f52] transition-colors"
                       >
                         + New traveler
                       </button>
@@ -767,7 +767,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                 onMouseEnter={(e) => e.stopPropagation()}
               >
                 i
-                <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[10px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
+                <span className="invisible group-hover/info:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 w-48 bg-[#2C3E50] dark:bg-[#1e2d3d] text-white text-[11px] leading-snug font-normal rounded-lg px-2.5 py-2 shadow-lg pointer-events-none opacity-0 group-hover/info:opacity-100 transition-opacity">
                   Paste a name, URL, or description of a specific option and we&apos;ll score it against your traveler profile.
                 </span>
               </span>
@@ -794,7 +794,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                 }}
               >
                 {CATEGORY_META[category]?.label ?? "Category"}
-                <span style={{ fontSize: 9, color: '#888888', marginLeft: 2 }}>▾</span>
+                <span style={{ fontSize: 9, color: '#3D5A73', marginLeft: 2 }}>▾</span>
               </button>
               {showCategoryPop && (
                 <div style={{
@@ -860,7 +860,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                 }}
               >
                 {CATEGORY_META[category]?.label ?? "Category"}
-                <span style={{ fontSize: 9, color: '#888888', marginLeft: 2 }}>▾</span>
+                <span style={{ fontSize: 9, color: '#3D5A73', marginLeft: 2 }}>▾</span>
               </button>
               {showCategoryPop && (
                 <div style={{
@@ -1005,7 +1005,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                   return (
                     <button
                       key={s.id}
-                      style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#888888', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}
+                      style={{ border: `1px solid ${isActive ? '#2C3E50' : '#E8E8E8'}`, borderRadius: 999, padding: '8px 14px', fontSize: 13, color: isActive ? '#2C3E50' : '#3D5A73', background: '#fff', cursor: 'pointer', fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}
                       onClick={() => {
                         onSearchChange(s.id);
                         setCategoryFilter(s.category);
@@ -1239,7 +1239,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                     <p style={{ fontFamily: 'var(--font-noto-serif), Georgia, ui-serif, serif', fontSize: 19, fontWeight: 500, color: '#2C3E50', textAlign: 'center' }}>
                       Nothing quite fits that yet.
                     </p>
-                    <p style={{ fontSize: 13, color: '#888888', marginTop: 8, textAlign: 'center' }}>
+                    <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
                       Try a different search or adjust your filters.
                     </p>
                   </>
@@ -1250,7 +1250,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
                         ? `What are you looking for in ${workspace.destination}?`
                         : "What are you looking for?"}
                     </p>
-                    <p style={{ fontSize: 13, color: '#888888', marginTop: 8, textAlign: 'center' }}>
+                    <p style={{ fontSize: 13, color: '#3D5A73', marginTop: 8, textAlign: 'center' }}>
                       Try &quot;boutique eco resort&quot; or &quot;rooftop restaurant with a view&quot;
                     </p>
                   </>
@@ -1606,7 +1606,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
             <p className="text-sm font-semibold text-[#2C3E50] mb-1">
               Why are you passing on <span className="font-bold">{pendingReject.option.name}</span>?
             </p>
-            <p className="text-xs text-[#888888] mb-4">Helps us improve future recommendations</p>
+            <p className="text-xs text-[#3D5A73] mb-4">Helps us improve future recommendations</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {(["fit", "price", "dates", "other"] as import("@/types").RejectReason[]).map((r) => (
                 <button
@@ -1620,7 +1620,7 @@ export default function WorkspaceView({ workspace, travelers, allProfiles, onCha
             </div>
             <button
               onClick={() => setPendingReject(null)}
-              className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors"
+              className="text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors"
             >
               Cancel
             </button>

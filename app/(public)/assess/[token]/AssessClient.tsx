@@ -59,7 +59,7 @@ export default function AssessClient({ token }: { token: string }) {
             <h1 className="text-2xl font-bold text-[#2C3E50] leading-tight">
               Find your travel style
             </h1>
-            <p className="text-[#888888] text-sm mt-3 leading-relaxed">
+            <p className="text-[#3D5A73] text-sm mt-3 leading-relaxed">
               Someone is planning a trip and wants to find experiences that work for both of you.
               Answer 10 quick questions to share your travel style — no account needed.
             </p>
@@ -93,7 +93,7 @@ export default function AssessClient({ token }: { token: string }) {
   if (phase === "submitting") {
     return (
       <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
-        <p className="text-[#888888] text-sm">Saving your travel style…</p>
+        <p className="text-[#3D5A73] text-sm">Saving your travel style…</p>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export default function AssessClient({ token }: { token: string }) {
             ✓
           </div>
           <h1 className="text-xl font-bold text-[#2C3E50]">You&apos;re in</h1>
-          <p className="text-[#888888] text-sm leading-relaxed">
+          <p className="text-[#3D5A73] text-sm leading-relaxed">
             {profileName ? `${profileName}'s` : "Your"} travel style has been added to the trip.
             Results will now be scored for both of you.
           </p>
@@ -126,7 +126,7 @@ export default function AssessClient({ token }: { token: string }) {
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-md text-center space-y-4">
         <h1 className="text-xl font-bold text-[#2C3E50]">Link unavailable</h1>
-        <p className="text-[#888888] text-sm leading-relaxed">{errorMsg}</p>
+        <p className="text-[#3D5A73] text-sm leading-relaxed">{errorMsg}</p>
       </div>
     </div>
   );

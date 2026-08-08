@@ -121,7 +121,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
             ? "Great experiences are everywhere. The right ones are specific to you."
             : `Great experiences are everywhere. The right ones are specific to ${displayName}.`}
         </p>
-        <p className="text-sm text-[#888888] leading-relaxed mb-7" style={{ maxWidth: 380 }}>
+        <p className="text-sm text-[#3D5A73] leading-relaxed mb-7" style={{ maxWidth: 380 }}>
           A few questions and we&apos;ll know which ones those are.
         </p>
         <button
@@ -131,9 +131,9 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         >
           Let&apos;s go →
         </button>
-        <p className="text-xs text-[#888888] mt-4">Takes about 2 minutes</p>
+        <p className="text-xs text-[#3D5A73] mt-4">Takes about 2 minutes</p>
         <button
-          className="text-xs text-[#888888] underline mt-3 transition-opacity hover:opacity-70"
+          className="text-xs text-[#3D5A73] underline mt-3 transition-opacity hover:opacity-70"
           onClick={onSkip}
         >
           {isSelf ? "I already know my type" : "They already know their type"}
@@ -149,7 +149,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       <div className="flex flex-col h-full">
         <div className="px-6 pt-5 pb-3">
           <button
-            className="text-xs text-[#888888] hover:text-[#2C3E50] transition-colors mb-3"
+            className="text-xs text-[#3D5A73] hover:text-[#2C3E50] transition-colors mb-3"
             onClick={() => setPhase("result")}
           >
             ← Back
@@ -157,7 +157,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           <h3 className="text-base font-semibold text-[#2C3E50]">
             {isSelf ? "Your top results" : `${prefilledName || "Their"} top results`}
           </h3>
-          <p className="text-sm text-[#888888] mt-0.5">
+          <p className="text-sm text-[#3D5A73] mt-0.5">
             {isSelf ? "Pick the one that feels most like you." : `Pick the one that feels most like ${prefilledName || "them"}.`}
           </p>
         </div>
@@ -185,14 +185,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-[#2C3E50]">{arch.name}</p>
-                    <p className="text-xs mt-0.5 text-[#888888]">{arch.tagline}</p>
-                    <p className="text-xs mt-2 leading-relaxed line-clamp-2 text-[#888888]">{arch.description}</p>
+                    <p className="text-xs mt-0.5 text-[#3D5A73]">{arch.tagline}</p>
+                    <p className="text-xs mt-2 leading-relaxed line-clamp-2 text-[#3D5A73]">{arch.description}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-[#C4956A]" : "text-[#888888]"}`}>
+                    <div className={`text-lg font-bold tabular-nums ${isSelected ? "text-[#C4956A]" : "text-[#3D5A73]"}`}>
                       {score}
                     </div>
-                    <div className="text-xs text-[#888888]">pts</div>
+                    <div className="text-xs text-[#3D5A73]">pts</div>
                   </div>
                 </div>
               </button>
@@ -209,7 +209,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           </button>
           <div className="text-center">
             <button
-              className="text-xs text-[#888888] hover:opacity-70 transition-opacity"
+              className="text-xs text-[#3D5A73] hover:opacity-70 transition-opacity"
               onClick={handleRetake}
             >
               Retake assessment
@@ -227,7 +227,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">
           Tell us about an experience you loved.
         </h3>
-        <p className="text-sm text-[#888888] leading-relaxed mb-5">
+        <p className="text-sm text-[#3D5A73] leading-relaxed mb-5">
           Where was it, and what made it feel right for you? The more Wayfound knows, the better your first results.
         </p>
         <textarea
@@ -239,7 +239,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
           value={pastTripContext}
           onChange={(e) => setPastTripContext(e.target.value)}
         />
-        <p className="text-xs text-[#888888] text-right mt-1">{pastTripContext.length}/280</p>
+        <p className="text-xs text-[#3D5A73] text-right mt-1">{pastTripContext.length}/280</p>
         <button
           className="mt-4 w-full py-3 bg-[#2C3E50] text-white text-sm font-semibold rounded-full transition-opacity hover:opacity-90"
           onClick={() => setPhase("result")}
@@ -248,7 +248,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         </button>
         <div className="mt-2 text-center">
           <button
-            className="text-xs text-[#888888] hover:opacity-70 transition-opacity"
+            className="text-xs text-[#3D5A73] hover:opacity-70 transition-opacity"
             onClick={() => { setPastTripContext(""); setPhase("result"); }}
           >
             Skip for now →
@@ -287,7 +287,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         {/* Inline alternatives — low confidence only */}
         {showAlternativesInline && result.runnerUpTypes.length > 0 && (
           <div className="mb-6 w-full border border-[#E8E8E8] rounded p-4 text-left space-y-3">
-            <p className="text-xs text-[#888888] leading-snug">
+            <p className="text-xs text-[#3D5A73] leading-snug">
               You were close between a couple of types — here&apos;s what else came up:
             </p>
             {result.runnerUpTypes.slice(0, 2).map((type) => {
@@ -296,7 +296,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               return (
                 <div key={type} className="border border-[#E8E8E8] rounded p-3">
                   <p className="text-sm font-semibold text-[#2C3E50]">{arch.name}</p>
-                  {info && <p className="text-xs text-[#888888] mt-0.5 leading-snug">{info.descriptor}</p>}
+                  {info && <p className="text-xs text-[#3D5A73] mt-0.5 leading-snug">{info.descriptor}</p>}
                   <button
                     className="mt-2 text-xs text-[#2C3E50] underline font-medium"
                     onClick={() => { setActiveType(type); setShowAlternativesInline(false); }}
@@ -307,7 +307,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
               );
             })}
             <button
-              className="text-xs text-[#888888] underline"
+              className="text-xs text-[#3D5A73] underline"
               onClick={() => setShowAlternativesInline(false)}
             >
               Stay with {getArchetypeForType(result.type).name} →
@@ -324,7 +324,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         </p>
 
         {/* Descriptor */}
-        <p className="text-sm text-[#888888] mb-5">
+        <p className="text-sm text-[#3D5A73] mb-5">
           {typeInfo?.descriptor ?? displayed.tagline}
         </p>
 
@@ -340,11 +340,11 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         {/* Name input (only if not pre-filled) */}
         {!prefilledName && (
           <div className="w-full mb-5 text-left" style={{ maxWidth: 360 }}>
-            <label className="block text-xs text-[#888888] uppercase tracking-wide mb-1.5">
+            <label className="block text-xs text-[#3D5A73] uppercase tracking-wide mb-1.5">
               What should we call you?
             </label>
             <input
-              className="w-full border border-[#E8E8E8] text-sm rounded px-3 py-2 text-[#1A1A1A] placeholder:text-[#888888] focus:outline-none focus:border-[#2C3E50] transition-colors"
+              className="w-full border border-[#E8E8E8] text-sm rounded px-3 py-2 text-[#1A1A1A] placeholder:text-[#3D5A73] focus:outline-none focus:border-[#2C3E50] transition-colors"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -387,7 +387,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
         {/* Secondary: see alternatives */}
         {result.runnerUpTypes.length > 0 && (
           <button
-            className="text-xs text-[#888888] mt-3 transition-opacity hover:opacity-70"
+            className="text-xs text-[#3D5A73] mt-3 transition-opacity hover:opacity-70"
             onClick={() => setShowAlternativesInline((v) => !v)}
           >
             {showAlternativesInline ? "Hide alternatives" : "See other types that came up →"}
@@ -420,7 +420,7 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       {/* Question */}
       <div className="flex-1 flex flex-col justify-center text-center">
         {ackMessage ? (
-          <p className="text-sm text-[#888888] font-medium">{ackMessage}</p>
+          <p className="text-sm text-[#3D5A73] font-medium">{ackMessage}</p>
         ) : (
           <div style={{ opacity: visible ? 1 : 0, transition: "opacity 0.18s ease" }}>
             <p
@@ -460,14 +460,14 @@ export default function TravelAssessment({ prefilledName, isSelf = true, onCompl
       {/* Back link */}
       <div className="flex justify-between items-center pt-6">
         <button
-          className="text-xs text-[#888888] transition-opacity disabled:opacity-0"
+          className="text-xs text-[#3D5A73] transition-opacity disabled:opacity-0"
           onClick={handleBack}
           disabled={idx === 0}
         >
           ← Back
         </button>
         <button
-          className="text-xs text-[#888888] underline"
+          className="text-xs text-[#3D5A73] underline"
           onClick={onSkip}
         >
           Skip

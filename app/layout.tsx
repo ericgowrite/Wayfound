@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Nunito_Sans, Noto_Serif, Nothing_You_Could_Do, Lexend_Giga } from "next/font/google";
+import { Karla, Geist_Mono, Nothing_You_Could_Do, Lexend_Giga } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 
@@ -19,19 +19,11 @@ const lexendGiga = Lexend_Giga({
   display: "swap",
 });
 
-// Sitewide UI — nav, body copy, labels, buttons, forms
-const nunitoSans = Nunito_Sans({
-  variable: "--font-nunito",
+// Headings + body — replaces Nunito Sans and Noto Serif
+const karla = Karla({
+  variable: "--font-karla",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
-// Editorial headings, judgment lines, card titles
-const notoSerif = Noto_Serif({
-  variable: "--font-noto-serif",
-  subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -58,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${nothingYouCouldDo.variable} ${lexendGiga.variable} ${nunitoSans.variable} ${notoSerif.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${nothingYouCouldDo.variable} ${lexendGiga.variable} ${karla.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script

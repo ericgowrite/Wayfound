@@ -76,7 +76,7 @@ export default function CategorySelect({ value, onChange, className = "" }: Prop
                   <span className={`text-sm font-medium leading-tight ${isActive ? "text-[#5B8BA0] dark:text-[#7DBAD4]" : "text-[#2C3E50] dark:text-[#B8D4E3]"}`}>
                     {meta.label}
                   </span>
-                  <span className="text-[11px] text-[#9BB0C1] dark:text-[#6B8299] leading-snug mt-0.5">
+                  <span className="text-xs text-[#9BB0C1] dark:text-[#6B8299] leading-snug mt-0.5">
                     {meta.hint}
                   </span>
                 </span>

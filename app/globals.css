@@ -10,7 +10,7 @@
   --color-slate-mid:    #3D5A73; /* Mid slate — secondary type, muted elements */
   --color-amber:        #C4956A; /* Warm amber — CTAs, accents, "way" split */
   --color-amber-light:  #E8C9A8; /* Light amber — tags, chips, subtle backgrounds */
-  --color-gray-muted:   #888888; /* Mid gray — metadata, timestamps, labels */
+  --color-gray-muted:   #3D5A73; /* Brand slate-mid — replaces former #888888 for all muted text */
   --color-gray-light:   #E8E8E8; /* Light gray — dividers only */
   --color-white:        #FFFFFF; /* Pure white — text over dark/image backgrounds */
   --color-dark-overlay: rgba(0,0,0,0.45); /* Hero image overlay */
@@ -29,20 +29,20 @@
   --color-fit:          #6E9C74;
 
   /* ── Type Scale ── */
-  --text-xs:   11px;   /* labels, section eyebrows */
-  --text-sm:   12px;   /* metadata, location, timestamps */
-  --text-base: 14px;   /* default body, descriptions */
-  --text-md:   15px;   /* body large */
-  --text-lg:   16px;   /* property names */
-  --text-xl:   18px;   /* judgment lines */
-  --text-2xl:  22px;   /* section headings */
-  --text-3xl:  28px;   /* editorial headings */
+  --text-xs:   12px;   /* labels, section eyebrows */
+  --text-sm:   13px;   /* metadata, location, timestamps */
+  --text-base: 15px;   /* default body, descriptions */
+  --text-md:   16px;   /* body large */
+  --text-lg:   17px;   /* property names */
+  --text-xl:   19px;   /* judgment lines */
+  --text-2xl:  23px;   /* section headings */
+  --text-3xl:  29px;   /* editorial headings */
 
   /* ── Line heights ── */
-  --leading-tight:   1.25;
-  --leading-snug:    1.4;
-  --leading-normal:  1.6;
-  --leading-relaxed: 1.75;
+  --leading-tight:   1.3;
+  --leading-snug:    1.45;
+  --leading-normal:  1.65;
+  --leading-relaxed: 1.8;
 
   /* ── Font weights ── */
   --weight-normal:   400;
@@ -75,11 +75,13 @@
   --background: var(--color-canvas);
   --foreground: var(--color-slate);
 
-  /* ── Migration aliases ── */
-  --font-lora:        var(--font-noto-serif);
-  --font-inter:       var(--font-nunito);
-  --font-encode:      var(--font-nunito);
-  --font-encode-semi: var(--font-nunito);
+  /* ── Migration aliases — all point to Karla ── */
+  --font-noto-serif:  var(--font-karla);
+  --font-nunito:      var(--font-karla);
+  --font-lora:        var(--font-karla);
+  --font-inter:       var(--font-karla);
+  --font-encode:      var(--font-karla);
+  --font-encode-semi: var(--font-karla);
 }
 
 .dark {
@@ -113,9 +115,9 @@
   --color-fit:          var(--color-fit);
 
   /* Fonts */
-  --font-sans:         var(--font-nunito);
-  --font-ui:           var(--font-nunito);
-  --font-serif:        var(--font-noto-serif);
+  --font-sans:         var(--font-karla);
+  --font-ui:           var(--font-karla);
+  --font-serif:        var(--font-karla);
   --font-display:      var(--font-permanent-marker);
   --font-mono:         var(--font-geist-mono);
 
@@ -139,16 +141,17 @@
 body {
   background: var(--color-canvas);
   color: var(--color-text-body);
-  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
 }
 
 /* Font family utility classes */
 .font-ui {
-  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-serif {
-  font-family: var(--font-noto-serif), "Georgia", ui-serif, serif;
+  font-family: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
 }
 
 .font-display {

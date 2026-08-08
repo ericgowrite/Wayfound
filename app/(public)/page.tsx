@@ -37,7 +37,7 @@ export default function LandingPage() {
             WAY<span style={{ color: "#C4956A" }}>FOUND</span>
           </div>
           <div className="flex items-center gap-5 md:gap-7">
-            <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#888888", textDecoration: "none" }}>
+            <Link href="/login" className="hidden sm:block" style={{ fontFamily: encodeSemi, fontSize: 14, fontWeight: 400, color: "#3D5A73", textDecoration: "none" }}>
               Log in
             </Link>
             <Link
@@ -98,7 +98,7 @@ export default function LandingPage() {
       {/* ── How it works ─────────────────────────────────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-5 md:px-10 py-12 md:py-20">
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p style={{ fontFamily: encodeSemi, fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#888888", margin: 0 }}>
+          <p style={{ fontFamily: encodeSemi, fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#3D5A73", margin: 0 }}>
             How it works
           </p>
           <h2 style={{ fontFamily: notoSerif, fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 600, color: "#2C3E50", lineHeight: 1.3, marginTop: 12, marginBottom: 0 }}>
@@ -124,7 +124,7 @@ export default function LandingPage() {
               <h3 style={{ fontFamily: notoSerif, fontSize: 16, fontWeight: 600, color: "#2C3E50", marginTop: 16, marginBottom: 0, lineHeight: 1.3 }}>
                 {title}
               </h3>
-              <p style={{ fontFamily: encode, fontSize: 14, color: "#888888", marginTop: 8, lineHeight: 1.6, marginBottom: 0 }}>
+              <p style={{ fontFamily: encode, fontSize: 14, color: "#3D5A73", marginTop: 8, lineHeight: 1.6, marginBottom: 0 }}>
                 {desc}
               </p>
             </div>
@@ -184,13 +184,13 @@ export default function LandingPage() {
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer className="border-t border-[#E8E8E8] px-5 md:px-10 py-6">
         <div className="max-w-[1200px] mx-auto flex justify-between items-center flex-wrap gap-3">
-          <span style={{ fontFamily: encodeSemi, fontSize: 12, color: "#888888", fontWeight: 400 }}>
+          <span style={{ fontFamily: encodeSemi, fontSize: 12, color: "#3D5A73", fontWeight: 400 }}>
             © 2026 Wayfound
           </span>
           <div style={{ display: "flex", gap: 16 }}>
-            <Link href="/privacy" style={{ fontFamily: encode, fontSize: 12, color: "#888888", textDecoration: "none" }}>Privacy</Link>
-            <Link href="/terms" style={{ fontFamily: encode, fontSize: 12, color: "#888888", textDecoration: "none" }}>Terms</Link>
-            <Link href="/affiliate-disclosure" style={{ fontFamily: encode, fontSize: 12, color: "#888888", textDecoration: "none" }}>Affiliate disclosure</Link>
+            <Link href="/privacy" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Privacy</Link>
+            <Link href="/terms" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Terms</Link>
+            <Link href="/affiliate-disclosure" style={{ fontFamily: encode, fontSize: 12, color: "#3D5A73", textDecoration: "none" }}>Affiliate disclosure</Link>
           </div>
         </div>
       </footer>

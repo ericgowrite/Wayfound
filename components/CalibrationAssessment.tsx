@@ -156,7 +156,7 @@ export default function CalibrationAssessment({
         </div>
         <div className="text-center">
           <button
-            className="text-xs text-[#888888] underline"
+            className="text-xs text-[#3D5A73] underline"
             onClick={onSkip}
           >
             Skip for now
@@ -170,7 +170,7 @@ export default function CalibrationAssessment({
   if (phase === "result" && result) {
     return (
       <div className="flex flex-col h-full justify-center px-6 py-10 text-center">
-        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10 }}>
+        <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#C4956A", marginBottom: 10 }}>
           {result.tagline}
         </p>
         {typeChanged ? (
@@ -178,10 +178,10 @@ export default function CalibrationAssessment({
             <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 26, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
               Actually, you&apos;re {result.name}.
             </p>
-            <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.6, marginBottom: 6 }}>
+            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
               {result.tagline}
             </p>
-            <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ fontSize: 13, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
               {originalResult.name} was close. Here&apos;s what this means for how Wayfound finds things for you.
             </p>
           </>
@@ -190,10 +190,10 @@ export default function CalibrationAssessment({
             <p style={{ fontFamily: 'var(--font-lora, "Lora", Georgia, serif)', fontSize: 26, fontWeight: 500, color: "#2C3E50", lineHeight: 1.3, marginBottom: 10 }}>
               Confirmed — you&apos;re {result.name}.
             </p>
-            <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.6, marginBottom: 6 }}>
+            <p style={{ fontSize: 14, color: "#3D5A73", lineHeight: 1.6, marginBottom: 6 }}>
               {result.tagline}
             </p>
-            <p style={{ fontSize: 13, color: "#888888", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ fontSize: 13, color: "#3D5A73", lineHeight: 1.6, marginBottom: 28 }}>
               Wayfound knows you a little better now.
             </p>
           </>
@@ -207,7 +207,7 @@ export default function CalibrationAssessment({
           {ctaLabel ?? (typeChanged ? "Start discovering →" : "Back to discovering →")}
         </button>
         <button
-          className="text-xs text-[#888888] underline"
+          className="text-xs text-[#3D5A73] underline"
           onClick={onSkip}
         >
           {typeChanged ? "Keep my original style" : "Done"}
@@ -243,7 +243,7 @@ export default function CalibrationAssessment({
       {/* Question */}
       <div className="flex-1 flex flex-col justify-center px-6 pb-2">
         {ackMessage ? (
-          <p className="text-sm text-center font-medium" style={{ color: "#888888" }}>
+          <p className="text-sm text-center font-medium" style={{ color: "#3D5A73" }}>
             {ackMessage}
           </p>
         ) : (
