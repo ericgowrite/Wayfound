@@ -42,9 +42,11 @@ interface AutoSearch {
 interface Props {
   workspace: TripWorkspace;
   travelers: Profile[];
+  allProfiles: Profile[];
   onChange: (w: TripWorkspace) => void;
   onProfileUpdate: (profile: Profile) => void;
   onOpenProfile?: () => void;
+  onNewTraveler?: () => void;
   activeSearchId: string | null;
   onSearchChange: (id: string) => void;
   autoSearch?: AutoSearch;
@@ -52,7 +54,7 @@ interface Props {
 
 type SortMode = "fit" | "group";
 
-export default function WorkspaceView({ workspace, travelers, onChange, onProfileUpdate, onOpenProfile, activeSearchId, onSearchChange, autoSearch }: Props) {
+export default function WorkspaceView({ workspace, travelers, allProfiles, onChange, onProfileUpdate, onOpenProfile, onNewTraveler, activeSearchId, onSearchChange, autoSearch }: Props) {
   const { isAnonymous } = useAuth();
   const primaryProfile = travelers[0];
   const profileWeights = primaryProfile?.axisWeights;
@@ -104,6 +106,8 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
   const [onboardingPromptDismissed, setOnboardingPromptDismissed] = useState(true);
   const [showCategoryPop, setShowCategoryPop] = useState(false);
   const categoryPopRef = useRef<HTMLDivElement>(null);
+  const [showTravelerPicker, setShowTravelerPicker] = useState(false);
+  const travelerPickerRef = useRef<HTMLDivElement>(null);
 
   // Auto-start workspace tour on first visit — 600ms delay so the DOM is painted
   useEffect(() => {
@@ -123,6 +127,18 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, [showCategoryPop]);
+
+  // Close traveler picker on outside click
+  useEffect(() => {
+    if (!showTravelerPicker) return;
+    function handleOutside(e: MouseEvent) {
+      if (travelerPickerRef.current && !travelerPickerRef.current.contains(e.target as Node)) {
+        setShowTravelerPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showTravelerPicker]);
 
   // Fire the first search when the workspace was just created from the intent screen.
   // The ref guard ensures it fires at most once per WorkspaceView mount.
@@ -359,6 +375,12 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     }).catch(() => {}); // best-effort — never block the UI
+  }
+
+  async function addTravelerToWorkspace(profileId: string) {
+    const updatedTravelers = [...new Set([...(workspace.travelers ?? []), profileId])];
+    await updateWorkspace({ ...workspace, travelers: updatedTravelers });
+    setShowTravelerPicker(false);
   }
 
   async function updateWorkspace(updated: TripWorkspace) {
@@ -678,6 +700,44 @@ export default function WorkspaceView({ workspace, travelers, onChange, onProfil
               {travelers.length > 0 && (
                 <span>· {travelers.map((t) => t.name).join(", ")}</span>
               )}
+              {/* Add traveler button + picker */}
+              <span className="relative" ref={travelerPickerRef}>
+                <button
+                  onClick={() => setShowTravelerPicker((v) => !v)}
+                  className="text-[#888888] hover:text-[#2C3E50] dark:hover:text-white transition-colors text-xs leading-none"
+                  title="Add traveler"
+                >
+                  + traveler
+                </button>
+                {showTravelerPicker && (
+                  <div className="absolute left-0 top-full mt-1.5 z-50 bg-white dark:bg-[#1e2d3d] border border-[#E0E8ED] dark:border-[#2a3f52] rounded-lg shadow-lg py-1 min-w-[160px]">
+                    {/* Profiles not already in this workspace */}
+                    {allProfiles.filter(p => !workspace.travelers?.includes(p.id)).map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => addTravelerToWorkspace(p.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#2C3E50] dark:text-white hover:bg-[#F5F8FA] dark:hover:bg-[#2a3f52] transition-colors"
+                      >
+                        <span className="w-5 h-5 rounded-full bg-[#2C3E50] dark:bg-[#4A7A8F] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                          {p.name[0]}
+                        </span>
+                        {p.name}
+                      </button>
+                    ))}
+                    {allProfiles.filter(p => !workspace.travelers?.includes(p.id)).length === 0 && (
+                      <p className="px-3 py-2 text-xs text-[#888888]">All travelers added.</p>
+                    )}
+                    <div className="border-t border-[#E0E8ED] dark:border-[#2a3f52] mt-1 pt-1">
+                      <button
+                        onClick={() => { setShowTravelerPicker(false); onNewTraveler?.(); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm text-[#888888] hover:text-[#2C3E50] dark:hover:text-white hover:bg-[#F5F8FA] dark:hover:bg-[#2a3f52] transition-colors"
+                      >
+                        + New traveler
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </span>
             </p>
           </div>
           {/* Search / Score mode toggle — top right of workspace header */}

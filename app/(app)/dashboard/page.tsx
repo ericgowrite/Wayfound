@@ -35,6 +35,7 @@ export default function Home() {
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
   const [showAddTraveler, setShowAddTraveler] = useState(false);
   const [addingTravelerForWorkspace, setAddingTravelerForWorkspace] = useState(false);
+  const [addingTravelerToExistingWorkspace, setAddingTravelerToExistingWorkspace] = useState(false);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
@@ -222,8 +223,23 @@ export default function Home() {
       return [...prev, updated];
     });
     if (addingTravelerForWorkspace) {
+      // New workspace creation flow — add to newTravelers
       setNewTravelers((prev) => prev.includes(updated.id) ? prev : [...prev, updated.id]);
       setAddingTravelerForWorkspace(false);
+    } else if (addingTravelerToExistingWorkspace && activeWorkspaceId) {
+      // Existing workspace flow — update workspace.travelers and save
+      setWorkspaces((prev) => prev.map((w) => {
+        if (w.id !== activeWorkspaceId) return w;
+        const travelers = [...new Set([...(w.travelers ?? []), updated.id])];
+        const updatedWs = { ...w, travelers };
+        fetchWithAuth(`/api/workspaces/${updatedWs.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedWs),
+        }).catch(() => {});
+        return updatedWs;
+      }));
+      setAddingTravelerToExistingWorkspace(false);
     }
     setEditingProfile(null);
     setShowAddProfile(false);
@@ -561,9 +577,11 @@ export default function Home() {
             key={activeWorkspace.id}
             workspace={activeWorkspace}
             travelers={effectiveTravelers}
+            allProfiles={profiles}
             onChange={handleWorkspaceChange}
             onProfileUpdate={handleProfileUpdate}
             onOpenProfile={effectiveTravelers[0] ? () => setEditingProfile(effectiveTravelers[0]) : undefined}
+            onNewTraveler={() => { setAddingTravelerToExistingWorkspace(true); setShowAddProfile(true); }}
             activeSearchId={activeSearchId}
             onSearchChange={(id) => { setActiveSearchId(id); setPendingAutoSearch(null); }}
             autoSearch={pendingAutoSearch?.workspaceId === activeWorkspace.id ? pendingAutoSearch : undefined}
