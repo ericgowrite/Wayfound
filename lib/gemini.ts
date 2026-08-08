@@ -137,7 +137,7 @@ async function withRetry<T>(fn: (model: string) => Promise<T>, primary = PRIMARY
 // ── Transport helpers ─────────────────────────────────────────────────────────
 
 
-const GEMINI_TIMEOUT_MS = 30_000;
+const GEMINI_TIMEOUT_MS = 55_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -154,7 +154,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 function thinkingConfig(budget: number): object {
   return { generationConfig: { thinkingConfig: { thinkingBudget: budget } } as any };
 }
-const THINKING_SEARCH = thinkingConfig(1024);  // search + deepdive: cap, don't eliminate
+const THINKING_SEARCH = thinkingConfig(0);  // 0 = fast; googleSearch grounding already adds 10-20s latency
 const THINKING_OFF    = thinkingConfig(0);     // loading content, chat, scoring: off
 
 async function callWithSearch(

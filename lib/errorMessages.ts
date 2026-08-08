@@ -20,7 +20,7 @@ export function friendlyError(error: unknown): string {
   if (msg.includes("fetch") || msg.includes("ECONNREFUSED") || msg.includes("network")) {
     return "Couldn't connect to our search service. Please check your connection and try again.";
   }
-  if (msg.includes("timeout") || msg.includes("ETIMEDOUT") || msg.includes("deadline")) {
+  if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("ETIMEDOUT") || msg.includes("deadline")) {
     return "The search took too long to respond. Please try again.";
   }
 
