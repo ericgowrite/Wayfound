@@ -34,6 +34,7 @@ export default function Home() {
   const [newDest, setNewDest] = useState("");
   const [newTravelers, setNewTravelers] = useState<string[]>([]);
   const [showAddTraveler, setShowAddTraveler] = useState(false);
+  const [addingTravelerForWorkspace, setAddingTravelerForWorkspace] = useState(false);
   const [activeSearchId, setActiveSearchId] = useState<string | null>(null);
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
   const [pendingAutoSearch, setPendingAutoSearch] = useState<{ workspaceId: string; query: string; category: import("@/types").SearchCategory; intent?: string } | null>(null);
@@ -220,6 +221,10 @@ export default function Home() {
       if (idx >= 0) { const next = [...prev]; next[idx] = updated; return next; }
       return [...prev, updated];
     });
+    if (addingTravelerForWorkspace) {
+      setNewTravelers((prev) => prev.includes(updated.id) ? prev : [...prev, updated.id]);
+      setAddingTravelerForWorkspace(false);
+    }
     setEditingProfile(null);
     setShowAddProfile(false);
   }
@@ -588,7 +593,7 @@ export default function Home() {
           <div style={{ background: '#FFFFFF', border: '1px solid #E8E8E8', borderRadius: 4, padding: '28px 32px', width: '100%', maxWidth: 480, fontFamily: "var(--font-encode), ui-sans-serif, system-ui, sans-serif" }}>
 
             <button
-              onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); }}
+              onClick={() => { setShowNewWorkspace(false); setWorkspaceError(""); setNewName(""); setNewDest(""); setNewTravelers([]); setShowAddTraveler(false); setAddingTravelerForWorkspace(false); }}
               style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
             >
               ← Back
@@ -654,33 +659,44 @@ export default function Home() {
                 );
               })}
 
-              {profiles.length > 1 && (
-                <div style={{ marginTop: 12 }}>
-                  {!showAddTraveler ? (
+              <div style={{ marginTop: 12 }}>
+                {/* Picker for existing profiles */}
+                {showAddTraveler && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                    {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { toggleTraveler(p.id); setShowAddTraveler(false); }}
+                        style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '6px 12px', fontSize: 12, color: '#2C3E50', background: '#fff', cursor: 'pointer' }}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                    {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length === 0 && (
+                      <span style={{ fontSize: 12, color: '#888888' }}>All travelers added.</span>
+                    )}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  {/* Add existing traveler — only show if there are unadded profiles */}
+                  {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length > 0 && !showAddTraveler && (
                     <button
                       onClick={() => setShowAddTraveler(true)}
                       style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       + Add someone
                     </button>
-                  ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).map(p => (
-                        <button
-                          key={p.id}
-                          onClick={() => { toggleTraveler(p.id); setShowAddTraveler(false); }}
-                          style={{ border: '1px solid #E8E8E8', borderRadius: 4, padding: '6px 12px', fontSize: 12, color: '#2C3E50', background: '#fff', cursor: 'pointer' }}
-                        >
-                          {p.name}
-                        </button>
-                      ))}
-                      {profiles.filter(p => p.id !== profiles[0]?.id && !newTravelers.includes(p.id)).length === 0 && (
-                        <span style={{ fontSize: 12, color: '#888888' }}>All travelers added.</span>
-                      )}
-                    </div>
                   )}
+                  {/* Create a brand-new traveler profile */}
+                  <button
+                    onClick={() => { setAddingTravelerForWorkspace(true); setShowAddProfile(true); }}
+                    style={{ fontSize: 13, color: '#888888', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  >
+                    + New traveler
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
 
             {workspaceError && (
