@@ -150,12 +150,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 // Thinking budget by call type. Search gets a moderate cap — reasoning helps
 // with nuanced personality-fit scoring. Short/utility calls get 0 (no thinking).
+// budget=0 → omit thinkingConfig entirely; Gemini rejects thinkingBudget:0 as invalid
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function thinkingConfig(budget: number): object {
+  if (budget === 0) return {};
   return { generationConfig: { thinkingConfig: { thinkingBudget: budget } } as any };
 }
-const THINKING_SEARCH = thinkingConfig(0);  // 0 = fast; googleSearch grounding already adds 10-20s latency
-const THINKING_OFF    = thinkingConfig(0);     // loading content, chat, scoring: off
+const THINKING_SEARCH = thinkingConfig(0);  // no thinking — googleSearch grounding adds 10-20s already
+const THINKING_OFF    = thinkingConfig(0);  // no thinking for utility/chat calls
 
 async function callWithSearch(
   systemPrompt: string,
