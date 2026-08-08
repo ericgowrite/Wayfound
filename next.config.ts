@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Proxy Firebase Auth callbacks through gowayfound.com so the Google sign-in
+  // dialog shows "continue to gowayfound.com" instead of firebaseapp.com.
+  async rewrites() {
+    return [
+      {
+        source: "/__/auth/:path*",
+        destination: "https://wayfound-prod-841dd.firebaseapp.com/__/auth/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {
